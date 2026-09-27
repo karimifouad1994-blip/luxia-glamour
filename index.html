@@ -2394,7 +2394,7 @@ body.luxia-store-home .product-card .product-photo{
 <style id="luxia-home-collection-sections">
 /* Homepage: keep every product visually attached to its own collection. */
 body.luxia-store-home #productGrid{display:block!important;}
-body.luxia-store-home .home-collection-section{margin:0 0 58px!important;}
+body.luxia-store-home .home-collection-section{margin:0 0 40px!important;}
 body.luxia-store-home .home-collection-section:last-child{margin-bottom:0!important;}
 body.luxia-store-home .home-collection-heading{
   position:relative!important;
@@ -2402,30 +2402,42 @@ body.luxia-store-home .home-collection-heading{
   flex-direction:column!important;
   align-items:center!important;
   justify-content:center!important;
-  gap:7px!important;
+  gap:6px!important;
   width:max-content!important;
   max-width:100%!important;
-  margin:0 auto 22px!important;
-  padding:10px 28px 11px!important;
+  margin:0 auto 18px!important;
+  padding:18px 32px 16px!important;
   text-align:center!important;
+  background:linear-gradient(180deg, rgba(185,154,98,.08), rgba(185,154,98,0) 85%)!important;
+  border-radius:3px!important;
+  border:0!important;
+  opacity:1!important;
 }
 body.luxia-store-home .home-collection-heading::before,
 body.luxia-store-home .home-collection-heading::after{
-  content:"✦"!important;
-  position:absolute!important;
-  top:50%!important;
-  transform:translateY(-50%)!important;
-  font-size:9px!important;
-  opacity:.38!important;
-  line-height:1!important;
+  content:none!important;
 }
-body.luxia-store-home .home-collection-heading::before{left:8px!important;}
-body.luxia-store-home .home-collection-heading::after{right:8px!important;}
-body.luxia-store-home .home-collection-heading{
-  border-top:1px solid currentColor!important;
-  border-bottom:1px solid currentColor!important;
-  border-radius:1px!important;
-  opacity:.92!important;
+body.luxia-store-home .home-collection-kicker{
+  font-size:10.5px!important;
+  letter-spacing:.32em!important;
+  text-transform:uppercase!important;
+  color:#b99a62!important;
+  font-weight:500!important;
+}
+body.luxia-store-home .home-collection-heading h3{
+  font-family:'Cormorant Garamond','Amiri',serif!important;
+  font-size:26px!important;
+  font-weight:500!important;
+  color:#2c2927!important;
+  letter-spacing:.01em!important;
+  margin:0!important;
+}
+body.luxia-store-home .home-collection-rule{
+  width:46px!important;
+  height:1px!important;
+  background:#b99a62!important;
+  opacity:.55!important;
+  margin-top:2px!important;
 }
 </style>
 
@@ -4044,11 +4056,11 @@ body.luxia-store-home .product-title-price-head .product-title-above-text,
   box-sizing: border-box !important;
   margin: 0 !important;
   padding: 7px 8px !important;
-  background: #d9c2a0 !important;
-  background-color: #d9c2a0 !important;
+  background: linear-gradient(135deg, #2c1620, #3a1e2b) !important;
+  background-color: #2c1620 !important;
   border: 0 !important;
   border-radius: 10px !important;
-  color: #2d2924 !important;
+  color: #e0c690 !important;
   text-align: center !important;
   font-weight: 600 !important;
   line-height: 1.18 !important;
@@ -5249,9 +5261,9 @@ body:not(.lp-pyjama-active) .lp-product-card:not(.lp-order-success) .lp-product-
 body:not(.lp-pyjama-active) .lp-product-card:not(.lp-order-success) .lp-product-title-price-frame b{
   display:inline-block !important;
   width:auto !important;
-  max-width:92% !important;
+  max-width:98% !important;
   margin:0 auto !important;
-  padding:13px 28px !important;
+  padding:12px 18px !important;
   background:linear-gradient(180deg,var(--bg-plum-2),var(--bg-deep)) !important;
   color:#fffdf8 !important;
   border:1px solid rgba(199,161,92,.5) !important;
@@ -5260,9 +5272,16 @@ body:not(.lp-pyjama-active) .lp-product-card:not(.lp-order-success) .lp-product-
   text-align:center !important;
   font-family:var(--font-display) !important;
   font-weight:600 !important;
-  font-size:calc(19px * var(--font-scale)) !important;
-  letter-spacing:.03em !important;
+  font-size:calc(16.5px * var(--font-scale)) !important;
+  letter-spacing:.015em !important;
   line-height:1.25 !important;
+}
+@media(max-width:380px){
+  body:not(.lp-pyjama-active) .lp-product-card:not(.lp-order-success) .lp-product-title-price-frame.lp-product-head-top b,
+  body:not(.lp-pyjama-active) .lp-product-card:not(.lp-order-success) .lp-product-title-price-frame b{
+    font-size:calc(14.5px * var(--font-scale)) !important;
+    padding:11px 12px !important;
+  }
 }
 </style>
 
@@ -5769,7 +5788,7 @@ const I18N = {
     "lp.imagesTitle":"Images","lp.imagesHint":"Les images déjà utilisées par LUXIA sont proposées automatiquement.","lp.imageChoiceDefault":"Ajouter une image LUXIA…",
     "lp.addImageBtn":"Ajouter","lp.imageUploadLabel":"Ou uploader une nouvelle image",
     "lp.sectionsTitle":"Sections","lp.benefitsLabel":"Benefits (une ligne = un benefit)","lp.reviewsLabel":"Reviews (une ligne = un avis)","lp.faqLabel":"FAQ (format Question | Réponse, une ligne)",
-    "lp.toggleOrderForm":"Formulaire commande","lp.toggleWhatsapp":"WhatsApp","lp.toggleGallery":"Galerie","lp.toggleBenefits":"Benefits","lp.toggleReviews":"Reviews","lp.toggleFaq":"FAQ","lp.toggleSiteLink":"Lien collection complète",
+    "lp.toggleOrderForm":"Formulaire commande","lp.toggleWhatsapp":"WhatsApp","lp.toggleGallery":"Galerie","lp.toggleBenefits":"Benefits","lp.toggleReviews":"Reviews","lp.toggleFaq":"FAQ","lp.toggleSiteLink":"Lien collection complète","lp.toggleMenuButton":"Bouton menu (☰) en haut de la page",
     "lp.siteLinkTitle":"Lien vers la collection complète","lp.siteLinkHint":"Affiche, juste sous le bouton « Ajouter au panier », un lien qui renvoie la cliente vers le site officiel — directement sur ce produit, pour qu'elle le retrouve tout de suite tout en pouvant continuer à parcourir le reste de la collection.","lp.siteLinkTextLabel":"Texte du lien (laisser vide pour le texte par défaut)","lp.siteLinkUrlLabel":"Lien personnalisé (optionnel — sinon généré automatiquement vers ce produit sur le site)",
     "lp.previewBtn":"Prévisualiser","lp.backBtn":"Retour","lp.diagTitle":"Diagnostic (Admin)",
     "lp.diagHint":"Affiche ici ce qui s'est passé lors de la dernière tentative d'enregistrement : authentification / jeton / méthode / URL / statut / réponse. Aucune donnée secrète n'est affichée.",
@@ -5860,7 +5879,7 @@ const I18N = {
     "lp.imagesTitle":"الصور","lp.imagesHint":"الصور المستعملة سابقاً في LUXIA تُقترح تلقائياً.","lp.imageChoiceDefault":"إضافة صورة من LUXIA…",
     "lp.addImageBtn":"إضافة","lp.imageUploadLabel":"أو تحميل صورة جديدة",
     "lp.sectionsTitle":"الأقسام","lp.benefitsLabel":"المميزات (سطر واحد لكل ميزة)","lp.reviewsLabel":"آراء العملاء (سطر واحد لكل رأي)","lp.faqLabel":"الأسئلة الشائعة (بصيغة: سؤال | جواب، سطر واحد لكل سؤال)",
-    "lp.toggleOrderForm":"نموذج الطلب","lp.toggleWhatsapp":"واتساب","lp.toggleGallery":"معرض الصور","lp.toggleBenefits":"المميزات","lp.toggleReviews":"آراء العملاء","lp.toggleFaq":"الأسئلة الشائعة","lp.toggleSiteLink":"رابط التشكيلة الكاملة",
+    "lp.toggleOrderForm":"نموذج الطلب","lp.toggleWhatsapp":"واتساب","lp.toggleGallery":"معرض الصور","lp.toggleBenefits":"المميزات","lp.toggleReviews":"آراء العملاء","lp.toggleFaq":"الأسئلة الشائعة","lp.toggleSiteLink":"رابط التشكيلة الكاملة","lp.toggleMenuButton":"زر القائمة (☰) أعلى الصفحة",
     "lp.siteLinkTitle":"رابط نحو التشكيلة الكاملة","lp.siteLinkHint":"كيبان تحت زر «أضيفي إلى السلة» رابط كيدّي الزبونة مباشرة للموقع الرسمي — تهبط مباشرة فوق هاد المنتج بالضبط، وتقدر من بعد تتفرج على باقي التشكيلة كاملة.","lp.siteLinkTextLabel":"نص الرابط (خليه خاوي باش يبان النص الافتراضي)","lp.siteLinkUrlLabel":"رابط خاص (اختياري — إلا خليتيه خاوي، غادي يتصاوب أوتوماتيك نحو هاد المنتج فالموقع)",
     "lp.previewBtn":"معاينة","lp.backBtn":"رجوع","lp.diagTitle":"تشخيص (للإدارة)",
     "lp.diagHint":"يظهر هنا ما حدث في آخر محاولة حفظ: المصادقة / الرمز / الطريقة / الرابط / الحالة / الاستجابة. لا تُعرض أي بيانات سرّية.",
@@ -7911,7 +7930,7 @@ function landingDefaults(){ return {
   price:"", oldPrice:"", whatsapp:"", heroImage:"", video:"", video2:"",
   gallery:[], showOrderForm:true,
   showReviews:true, showFaq:true, showGallery:true, showBenefits:true, showWhatsapp:true,
-  showSiteLink:true, siteLinkText:"", siteLinkUrl:"",
+  showSiteLink:true, siteLinkText:"", siteLinkUrl:"", showMenuButton:true,
   product2Id:"", product2Price:"", product2Image:"", product2Gallery:[],
   /* Pyjama theme only — purely additive/optional. Each is hidden on the
      public page unless the admin actually fills it in, per product spec:
@@ -8121,7 +8140,7 @@ function landingEditorHTML(p){
       <div><label>${t("lp.reviewsLabel")} (AR)</label><textarea id="lp-reviews-ar" rows="5">${escHtml(landingArrayText(p.reviewsAr))}</textarea></div>
       <div><label>${t("lp.faqLabel")} (AR)</label><textarea id="lp-faq-ar" rows="5">${escHtml((p.faqsAr||[]).map(x=>`${x.q||x.question||''} | ${x.a||x.answer||''}`).join('\n'))}</textarea></div>
     </div><div style="display:flex;gap:18px;flex-wrap:wrap;margin-top:14px">
-      ${[['lp-show-form','showOrderForm','lp.toggleOrderForm'],['lp-show-wa','showWhatsapp','lp.toggleWhatsapp'],['lp-show-gallery','showGallery','lp.toggleGallery'],['lp-show-benefits','showBenefits','lp.toggleBenefits'],['lp-show-reviews','showReviews','lp.toggleReviews'],['lp-show-faq','showFaq','lp.toggleFaq']].map(([id,k,labelKey])=>`<label style="display:flex;align-items:center;gap:8px;color:var(--ivory)"><input type="checkbox" id="${id}" ${p[k]!==false?'checked':''} style="width:auto"> ${t(labelKey)}</label>`).join('')}
+      ${[['lp-show-form','showOrderForm','lp.toggleOrderForm'],['lp-show-wa','showWhatsapp','lp.toggleWhatsapp'],['lp-show-gallery','showGallery','lp.toggleGallery'],['lp-show-benefits','showBenefits','lp.toggleBenefits'],['lp-show-reviews','showReviews','lp.toggleReviews'],['lp-show-faq','showFaq','lp.toggleFaq'],['lp-show-menu','showMenuButton','lp.toggleMenuButton']].map(([id,k,labelKey])=>`<label style="display:flex;align-items:center;gap:8px;color:var(--ivory)"><input type="checkbox" id="${id}" ${p[k]!==false?'checked':''} style="width:auto"> ${t(labelKey)}</label>`).join('')}
     </div></div>
     <div class="admin-card"><h3 style="margin-bottom:6px">🔗 ${t("lp.siteLinkTitle")}</h3>
       <small>${t("lp.siteLinkHint")}</small>
@@ -8172,7 +8191,7 @@ function collectLandingForm(){
   p.product2Image=document.getElementById('lp-product2-image')?.value.trim()||'';
   /* Persist the complete gallery of a ready-made second LUXIA product, not only its primary image. */
   p.product2Gallery = p.product2Id ? (PRODUCT_IMAGE_GALLERY[p.product2Id]||[]).filter(Boolean).slice() : [];
-  [['showOrderForm','lp-show-form'],['showWhatsapp','lp-show-wa'],['showGallery','lp-show-gallery'],['showBenefits','lp-show-benefits'],['showReviews','lp-show-reviews'],['showFaq','lp-show-faq']].forEach(([k,id])=>p[k]=document.getElementById(id).checked);
+  [['showOrderForm','lp-show-form'],['showWhatsapp','lp-show-wa'],['showGallery','lp-show-gallery'],['showBenefits','lp-show-benefits'],['showReviews','lp-show-reviews'],['showFaq','lp-show-faq'],['showMenuButton','lp-show-menu']].forEach(([k,id])=>p[k]=document.getElementById(id).checked);
   p.showSiteLink=!!document.getElementById('lp-show-sitelink')?.checked;
   p.siteLinkText=document.getElementById('lp-sitelink-text')?.value.trim()||'';
   p.siteLinkUrl=document.getElementById('lp-sitelink-url')?.value.trim()||'';
@@ -8507,7 +8526,7 @@ function renderLandingPublic(p, isPreview){
     const LP_PROMO_TEXT = lang==='ar' ? '🚚 التوصيل إلى جميع أنحاء المغرب' : '🚚 Livraison partout au Maroc';
     const lpPromoBarHTML = `<div class="lp-promo-bar" style="position:fixed;top:0;left:0;right:0;z-index:981;height:${LP_PROMO_H}px;display:flex;align-items:center;justify-content:center;background:#292622;color:#f8f5ef;font-size:10px;letter-spacing:.18em;text-transform:uppercase;font-weight:500;padding:0 12px;text-align:center;box-sizing:border-box;">${escHtml(LP_PROMO_TEXT)}</div>`;
     const collectionHeaderHTML = `<div class="lp-collection-header" style="top:${LP_PROMO_H}px;">
-      <button type="button" id="lp-collection-menu-btn" class="lp-collection-menu-btn" aria-label="Menu" aria-controls="lp-collection-drawer" aria-expanded="false"><span></span><span></span><span></span></button>
+      ${p.showMenuButton!==false ? `<button type="button" id="lp-collection-menu-btn" class="lp-collection-menu-btn" aria-label="Menu" aria-controls="lp-collection-drawer" aria-expanded="false"><span></span><span></span><span></span></button>` : ''}
       <span class="lp-collection-logo">LUXIA<span class="lp-collection-logo-heart">✦</span></span>
       <div class="lp-collection-actions">
         ${lpHeaderLangSwitchHTML}
@@ -8570,7 +8589,7 @@ function renderLandingPublic(p, isPreview){
       <p class="lp-success-text">${lang==='ar'?'شكراً لك! غادي نتاصلو بيك قريباً باش نأكدو معاك الطلب.':'Merci ! Nous vous contacterons bientôt pour confirmer votre commande.'}</p>
     </div>` : `<div id="lp-main-product" class="lp-card lp-product-card" style="text-align:${dir==='rtl'?'right':'left'};padding:18px;margin-bottom:14px;">
       <div class="lp-product-title-price-frame lp-product-head-top"><b>${escHtml(mainProductName)}</b></div>
-      <div class="lp-product-price-below">${mainPrice}dh</div>
+      <div class="lp-product-price-below">${mainPrice} DH</div>
       ${mainImageURL?`<div class="lp-main-gallery-wrap">
         <img id="lp-main-gallery-img" src="${escAttr(mainImageURL)}" alt="${escAttr(mainProductName)}" class="lp-product-card-img">
         ${mainGalleryImages.length>1 ? `<div class="lp-main-image-dots" id="lp-main-image-dots">${mainGalleryImages.map((u,i)=>`<button type="button" class="lp-main-image-dot ${i===0?'active':''}" data-lp-main-image="${i}" aria-label="${lang==='ar'?'الصورة':'Image'} ${i+1}"></button>`).join('')}</div>` : ''}
@@ -8603,7 +8622,7 @@ function renderLandingPublic(p, isPreview){
     const p2RequiredNotice = (p2Added && !mainAdded) ? `<p class="lp-main-required">${lang==='ar'?'أضيفي المنتج الرئيسي إلى السلة لإكمال الطلب':'Ajoutez le produit principal au panier pour finaliser la commande'}</p>` : '';
     const p2CardHTML = orderPlaced ? '' : ((product2Name && p2price) ? `<div class="lp-card lp-product-card" style="text-align:${dir==='rtl'?'right':'left'};padding:18px;margin-bottom:14px;">
       <div class="lp-product-title-price-frame lp-product-head-top"><b>${escHtml(product2Name)}</b></div>
-      <div class="lp-product-price-below">${p2price}dh</div>
+      <div class="lp-product-price-below">${p2price} DH</div>
       ${p2ImageURL?`<div class="lp-p2-gallery-wrap"><img id="lp-p2-gallery-img" src="${escAttr(p2ImageURL)}" alt="${escAttr(product2Name)}" class="lp-product-card-img">
         ${p.showGallery && p2AdditionalImages.length ? `<div class="lp-landing-gallery" data-lp-gallery="p2">
           <div class="lp-landing-thumbs" id="lp-p2-thumbs">
