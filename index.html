@@ -7963,6 +7963,23 @@ function landingNormalize(x){
   });
   return {...merged, id:x?.id||null, slug:x?.slug||c.slug||"", status:x?.status||c.status||"draft"};
 }
+
+/* ===== LUXIA — clean landing slug (no accents, no symbols, no Arabic %-codes) ===== */
+const LUXIA_AR_MAP={'ا':'a','أ':'a','إ':'i','آ':'a','ب':'b','ت':'t','ث':'th','ج':'j','ح':'h','خ':'kh','د':'d','ذ':'d','ر':'r','ز':'z','س':'s','ش':'ch','ص':'s','ض':'d','ط':'t','ظ':'z','ع':'a','غ':'gh','ف':'f','ق':'q','ك':'k','ل':'l','م':'m','ن':'n','ه':'h','ة':'a','و':'o','ي':'i','ى':'a','ئ':'i','ؤ':'o','ء':''};
+function luxiaSlugify(s){
+  return String(s||'').trim().toLowerCase()
+    .replace(/[\u0600-\u06FF]/g,c=>LUXIA_AR_MAP[c]!==undefined?LUXIA_AR_MAP[c]:'')
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .replace(/&/g,' et ').replace(/[^a-z0-9]+/g,'-')
+    .replace(/-+/g,'-').replace(/^-+|-+$/g,'').slice(0,60).replace(/-+$/,'');
+}
+function luxiaUniqueSlug(base, ownId){
+  if(!base || ['offre','oneshop','pyjamastyle','preview'].includes(base)) return base;
+  const taken=new Set((typeof LANDING_PAGES!=='undefined'?LANDING_PAGES:[]).filter(x=>x.id!==ownId).map(x=>x.slug));
+  if(!taken.has(base)) return base;
+  let n=2; while(taken.has(base+'-'+n)) n++;
+  return base+'-'+n;
+}
 async function fetchLandingPages(){
   const rows=await supabaseRequest(`${SUPABASE_LANDING_URL}?select=*&order=created_at.desc`,{token:getAdminToken()});
   LANDING_PAGES=Array.isArray(rows)?rows.map(landingNormalize):[]; return LANDING_PAGES;
@@ -8163,7 +8180,7 @@ function collectLandingForm(){
   /* Slug: keep letters (Arabic, French accents, etc.) and numbers, turn everything
      else into "-". The old ASCII-only regex silently wiped out any Arabic slug,
      leaving an empty string and triggering a false "slug required" error. */
-  const slugify = s => (s||"").trim().toLowerCase().replace(/[^\p{L}\p{N}-]+/gu,'-').replace(/^-+|-+$/g,'');
+  const slugify = luxiaSlugify;
   { const tv=document.getElementById('lp-type')?.value; p.type=(tv==="oneshop"||tv==="pyjama")?tv:"luxia"; }
   p.slug = slugify(document.getElementById('lp-slug').value);
   p.status=document.getElementById('lp-status').value; p.language=document.getElementById('lp-language').value;
@@ -8172,7 +8189,8 @@ function collectLandingForm(){
   p.subtitleFr=document.getElementById('lp-subtitle-fr').value.trim(); p.subtitleAr=document.getElementById('lp-subtitle-ar').value.trim();
   p.ctaFr=document.getElementById('lp-cta-fr').value.trim(); p.ctaAr=document.getElementById('lp-cta-ar').value.trim();
   p.descriptionFr=document.getElementById('lp-description-fr').value.trim(); p.descriptionAr=document.getElementById('lp-description-ar').value.trim();
-  if(!p.slug) p.slug = slugify(p.titleFr||p.titleAr) || ('lp'+Date.now().toString(36));
+  if(!p.slug) p.slug = slugify(p.titleFr) || 'produit';
+  p.slug = luxiaUniqueSlug(p.slug, p.id);
   p.benefitsFr=parseLines(document.getElementById('lp-benefits-fr').value); p.benefitsAr=parseLines(document.getElementById('lp-benefits-ar').value);
   p.reviewsFr=parseLines(document.getElementById('lp-reviews-fr').value); p.reviewsAr=parseLines(document.getElementById('lp-reviews-ar').value);
   p.faqsFr=parseLines(document.getElementById('lp-faq-fr').value).map(x=>{const [q,...a]=x.split('|');return {q:(q||'').trim(),a:a.join('|').trim()};});
@@ -8238,7 +8256,7 @@ function bindLandingEditor(){
   const titleFrEl=document.getElementById('lp-title-fr');
   const titleArEl=document.getElementById('lp-title-ar');
   let slugAutoSync = (LANDING_EDIT_ID === '__new__');
-  const slugifyLive = s => (s||"").trim().toLowerCase().replace(/[^\p{L}\p{N}-]+/gu,'-').replace(/^-+|-+$/g,'');
+  const slugifyLive = luxiaSlugify;
   const refreshLandingPublicUrl=()=>{
     const slug=(document.getElementById('lp-slug')?.value||'').trim();
     const url=slug ? `${location.origin}/p/${encodeURIComponent(slug)}` : '';
@@ -8247,11 +8265,10 @@ function bindLandingEditor(){
   };
   const syncSlugFromTitle=()=>{
     if(!slugAutoSync || !slugEl) return;
-    const auto=slugifyLive(titleFrEl?.value || titleArEl?.value || '');
+    const auto=slugifyLive(titleFrEl?.value);
     if(auto){ slugEl.value=auto; refreshLandingPublicUrl(); }
   };
   titleFrEl?.addEventListener('input', syncSlugFromTitle);
-  titleArEl?.addEventListener('input', syncSlugFromTitle);
   slugEl?.addEventListener('input', ()=>{ slugAutoSync=false; refreshLandingPublicUrl(); });
   document.getElementById('lp-type')?.addEventListener('change',()=>{
     const type=document.getElementById('lp-type').value;
@@ -8277,7 +8294,7 @@ function bindLandingEditor(){
     if(list && gallery.length){ list.innerHTML=gallery.map((u,i)=>`<div class="lp-image-row"><img src="${escAttr(u)}"><input value="${escAttr(u)}" data-lpimg="${i}"><button class="btn btn-ghost" data-remove-lpimg="${i}">🗑️</button></div>`).join(''); bindLandingImageRemove(); }
     /* Programmatic .value= doesn't fire "input", so sync the slug explicitly. */
     syncSlugFromTitle();
-    if(!document.getElementById('lp-slug').value) set('lp-slug','landing-'+prod.id);
+    if(!document.getElementById('lp-slug').value) set('lp-slug',luxiaSlugify(nameFr)||('landing-'+prod.id));
   });
   document.getElementById('lp-product2-source')?.addEventListener('change',()=>{
     const id=document.getElementById('lp-product2-source').value;
