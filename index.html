@@ -1633,17 +1633,7 @@ body.luxia-store-home .footer-badge{
 </style>
 
 
-<style id="luxia-local-admin-preview">
-#localAdminPreviewBtn{
-  position:fixed;right:14px;bottom:14px;z-index:99990;
-  border:1px solid #c9ad79;border-radius:999px;
-  background:#292622;color:#fffdf8;padding:11px 16px;
-  font:600 11px/1 'Jost',sans-serif;letter-spacing:.12em;
-  box-shadow:0 10px 28px rgba(41,38,34,.22);cursor:pointer;
-}
-#localAdminPreviewBtn:hover{background:#403a34}
-html[dir="rtl"] #localAdminPreviewBtn{right:auto;left:14px}
-</style>
+
 
 
 <style id="luxia-v10-final-card-frame">
@@ -5616,7 +5606,6 @@ body .lp-preview.lp-preview .lp-picker .lp-picker-pills .pill.selected{backgroun
 <!-- ADMIN OVERLAY -->
 <div class="admin-overlay" id="adminOverlay">
   <button class="modal-close admin-close" id="adminClose" aria-label="Fermer"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
-  <button type="button" id="adminHideLauncherBtn" class="admin-hide-launcher-btn">Masquer ADMIN</button>
   <div class="admin-wrap" id="adminWrap"></div>
 </div>
 
@@ -7553,7 +7542,6 @@ document.getElementById("submitOrder").addEventListener("click", async ()=>{
    ============================================================ */
 const adminOverlay = document.getElementById("adminOverlay");
 document.getElementById("adminClose").addEventListener("click", ()=>{ adminOverlay.classList.remove("open"); });
-document.getElementById("adminHideLauncherBtn")?.addEventListener("click", ()=>{ window.setAdminLauncherVisible?.(false); adminOverlay.classList.remove("open"); });
 
 /* Handle Supabase "reset password" email links: Supabase redirects back to the
    site with #access_token=...&type=recovery in the URL hash. We detect that,
@@ -7577,7 +7565,6 @@ document.getElementById("adminHideLauncherBtn")?.addEventListener("click", ()=>{
 })();
 
 function openAdmin(){
-  window.setAdminLauncherVisible?.(true);
   adminOverlay.classList.add("open");
   if(isAdminAuthenticated()) renderAdminOrders();
   else renderAdminLogin();
@@ -10316,53 +10303,7 @@ function highlightProductFromUrl(){
 </script>
 
 
-<script id="luxia-local-admin-preview-script">
-(function(){
-  const STORAGE_KEY='luxia_admin_launcher_visible';
-  function isVisible(){
-    const raw=localStorage.getItem(STORAGE_KEY);
-    return raw===null ? true : raw==='1';
-  }
-  function findAdminLauncher(){
-    const selectors=['[data-admin]','#adminBtn','#openAdmin','.admin-open','[onclick*="admin"]','[onclick*="Admin"]'];
-    for(const sel of selectors){const el=document.querySelector(sel);if(el) return el;}
-    return null;
-  }
-  function openAdmin(){
-    localStorage.setItem(STORAGE_KEY,'1');
-    const launcher=findAdminLauncher();
-    if(launcher){launcher.click();return;}
-    const names=['openAdmin','showAdmin','openAdminPanel','toggleAdmin'];
-    for(const n of names){if(typeof window[n]==='function'){try{window[n]();return;}catch(e){}}}
-    location.hash='#admin';
-  }
-  function applyVisibility(){
-    const visible=isVisible();
-    const b=document.getElementById('localAdminPreviewBtn');
-    if(b){b.style.display=visible?'inline-flex':'none';b.setAttribute('aria-hidden',visible?'false':'true');}
-    document.querySelectorAll('a[href="#admin"],a[href$="#admin"],[data-admin-link],[data-admin-entry]').forEach(el=>{
-      if(el.id==='localAdminPreviewBtn') return;
-      el.style.display=visible?'':'none';
-      el.style.visibility=visible?'':'hidden';
-      el.style.pointerEvents=visible?'':'none';
-    });
-  }
-  window.setAdminLauncherVisible=function(visible){
-    localStorage.setItem(STORAGE_KEY,visible?'1':'0');
-    applyVisibility();
-  };
-  function addLauncher(){
-    let b=document.getElementById('localAdminPreviewBtn');
-    if(!b){
-      b=document.createElement('button');b.id='localAdminPreviewBtn';b.type='button';b.textContent='ADMIN';b.title='Ouvrir la gestion';
-      b.addEventListener('click',openAdmin);document.body.appendChild(b);
-    }
-    applyVisibility();
-  }
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',addLauncher,{once:true});else addLauncher();
-  new MutationObserver(applyVisibility).observe(document.documentElement,{childList:true,subtree:true});
-})();
-</script>
+
 
 
 <script id="luxia-v14-image-ratio-script">
