@@ -5396,6 +5396,42 @@ body .lp-preview.lp-preview .lp-picker .lp-picker-pills .pill.selected{backgroun
 .lp-pack-banner{animation:lxPackGlow 1.8s ease-out infinite,lxPackWiggle 4.5s ease-in-out infinite;}
 @media (prefers-reduced-motion:reduce){.lx-pack-banner-detail,.lp-pack-banner,.lx-pack-banner-detail .lx-pack-badge,.lp-pack-banner .lp-pack-badge{animation:none!important;}}
 </style>
+<style id="luxia-admin-collection-groups">
+.admin-collection-group{margin:0 0 26px;}
+.admin-collection-group-title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:22px 0 12px;padding:10px 14px;border-radius:12px;background:#292622;color:#fff;font-size:15px;letter-spacing:.04em;}
+.admin-collection-group-title b{min-width:26px;height:26px;padding:0 8px;display:inline-flex;align-items:center;justify-content:center;border-radius:999px;background:#b99a62;color:#fff;font-size:12px;}
+.admin-collection-group.is-none .admin-collection-group-title{background:#b99a62;}
+.admin-collection-group.is-none .admin-collection-group-title b{background:#292622;}
+</style>
+<style id="luxia-offer-banner">
+.lx-offer-wrap{margin:0 0 18px;}
+.lx-offer-wrap:empty{display:none;}
+@keyframes lxOfferGlow{0%,100%{box-shadow:0 0 0 0 rgba(185,154,98,.55),0 16px 34px -18px rgba(0,0,0,.55)}60%{box-shadow:0 0 0 14px rgba(185,154,98,0),0 16px 34px -18px rgba(0,0,0,.55)}}
+@keyframes lxOfferShine{0%{transform:translateX(-130%) skewX(-18deg)}60%,100%{transform:translateX(230%) skewX(-18deg)}}
+@keyframes lxOfferPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.13)}}
+@keyframes lxOfferBlink{0%,100%{opacity:1}50%{opacity:.15}}
+@keyframes lxOfferNudge{0%,80%,100%{transform:none}86%{transform:translateX(-4px)}92%{transform:translateX(4px)}96%{transform:translateX(-2px)}}
+.lx-offer{position:relative;display:flex;align-items:center;gap:14px;overflow:hidden;box-sizing:border-box;width:100%;padding:14px 16px;border-radius:20px;text-decoration:none!important;color:#fff!important;cursor:pointer;
+  background:linear-gradient(115deg,#211d1a 0%,#3a2732 50%,#211d1a 100%);border:1.5px solid #b99a62;animation:lxOfferGlow 1.9s ease-out infinite,lxOfferNudge 5s ease-in-out infinite;}
+.lx-offer::after{content:"";position:absolute;top:0;bottom:0;width:38%;left:0;background:linear-gradient(100deg,transparent,rgba(255,236,190,.28),transparent);animation:lxOfferShine 3.4s ease-in-out infinite;pointer-events:none;}
+.lx-offer-badge{flex:none;width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 30% 25%,#e9cf98,#b99a62 65%,#8f7345);color:#241d17;box-shadow:0 6px 16px -6px rgba(0,0,0,.6);animation:lxOfferPulse 1.3s ease-in-out infinite;}
+.lx-offer-badge b{font-family:'Cormorant Garamond','Amiri',serif;font-size:24px;line-height:1;font-weight:800;letter-spacing:-.02em;}
+.lx-offer-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;}
+.lx-offer-kicker{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:800;letter-spacing:.18em;color:#e9cf98;}
+.lx-offer-dot{width:8px;height:8px;border-radius:50%;background:#ff4d63;display:inline-block;animation:lxOfferBlink 1s ease-in-out infinite;}
+.lx-offer-main{font-family:'Cormorant Garamond','Amiri',serif;font-size:20px;line-height:1.15;font-weight:700;color:#fff;}
+.lx-offer-sub{font-size:12px;line-height:1.35;color:#e8dfd2;opacity:.9;}
+.lx-offer-cta{flex:none;align-self:center;display:inline-flex;align-items:center;gap:6px;padding:9px 14px;border-radius:999px;background:#fff;color:#241d17;font-size:12px;font-weight:800;white-space:nowrap;}
+.lx-offer-cta em{font-style:normal;font-size:16px;line-height:1;}
+.lp-offer-section{padding:14px 16px 0;max-width:1100px;margin:0 auto;}
+@media(max-width:520px){
+  .lx-offer{flex-wrap:wrap;gap:10px 12px;padding:13px 14px;}
+  .lx-offer-badge{width:56px;height:56px;}.lx-offer-badge b{font-size:21px;}
+  .lx-offer-main{font-size:18px;}
+  .lx-offer-cta{width:100%;justify-content:center;padding:10px 14px;font-size:13px;}
+}
+@media (prefers-reduced-motion:reduce){.lx-offer,.lx-offer::after,.lx-offer-badge,.lx-offer-dot{animation:none!important;}}
+</style>
 </head>
 <body class="luxia-store-home">
 
@@ -5452,6 +5488,7 @@ body .lp-preview.lp-preview .lp-picker .lp-picker-pills .pill.selected{backgroun
       <p data-i18n="collection.storeSubtitle">Toute la collection — pyjamas, lingerie et nuit.</p>
       <div class="store-meta"><span>ÉLÉGANCE</span><span class="store-meta-dot">✦</span><span>LIVRAISON 24–48H</span><span class="store-meta-dot">✦</span></div>
     </div>
+    <div id="luxiaOfferBanner" class="lx-offer-wrap"></div>
     <div class="store-toolbar">
       <span class="store-count" id="storeProductCount">0 PRODUITS</span>
       <div class="store-filter-pills" id="storeCategoryPills" role="tablist" aria-label="Catégories"></div>
@@ -5786,7 +5823,88 @@ async function persistVariantsOrShowError(productId){
   return true;
 }
 function getProductColors(id){ return (PRODUCT_VARIANTS[id] && PRODUCT_VARIANTS[id].colors) || []; }
-function getProductOldPrice(id){ const v=PRODUCT_VARIANTS[id], p=PRODUCTS.find(x=>x.id===id); const o=Number(v&&v.oldPrice), pr=Number(p&&p.price); return (Number.isFinite(o)&&o>0&&o>pr)?o:0; }
+/* ===== OFFRE LIMITÉE : réglages (admin) + ancien prix automatique ===== */
+const OFFER_DEFAULTS={enabled:true,percent:25,
+  textFr:"-{pct}% sur toute la collection LUXIA",textAr:"خصم {pct}% على كل تشكيلة LUXIA",
+  subFr:"Profitez-en avant la fin de l'offre — livraison partout au Maroc",subAr:"استفيدي قبل انتهاء العرض — التوصيل لكل مدن المغرب"};
+function getOfferSettings(){
+  let raw=(SITE_CONTENT&&SITE_CONTENT.fr&&SITE_CONTENT.fr.__offer)||(SITE_CONTENT&&SITE_CONTENT.ar&&SITE_CONTENT.ar.__offer)||'';
+  let o={}; try{ o=typeof raw==='string'&&raw?JSON.parse(raw):(raw&&typeof raw==='object'?raw:{}); }catch(e){ o={}; }
+  const pc=Number(o.percent);
+  return {
+    enabled:o.enabled===undefined?OFFER_DEFAULTS.enabled:!!o.enabled,
+    percent:(Number.isFinite(pc)&&pc>=1&&pc<=90)?Math.round(pc):OFFER_DEFAULTS.percent,
+    textFr:o.textFr||OFFER_DEFAULTS.textFr, textAr:o.textAr||OFFER_DEFAULTS.textAr,
+    subFr:o.subFr===undefined?OFFER_DEFAULTS.subFr:o.subFr, subAr:o.subAr===undefined?OFFER_DEFAULTS.subAr:o.subAr
+  };
+}
+/* Ancien prix automatique : prix / (1 - remise) — ex. 149 DH avec -25% => 199 DH. Vide si l'offre est masquée. */
+function autoOldPrice(price){
+  const o=getOfferSettings(); const pr=Number(price);
+  if(!o.enabled||!Number.isFinite(pr)||pr<=0) return 0;
+  return Math.round(pr/(1-o.percent/100));
+}
+function getManualOldPrice(id){ const v=PRODUCT_VARIANTS[id], p=PRODUCTS.find(x=>x.id===id); const o=Number(v&&v.oldPrice), pr=Number(p&&p.price); return (Number.isFinite(o)&&o>0&&o>pr)?o:0; }
+function getProductOldPrice(id){ const p=PRODUCTS.find(x=>x.id===id); if(!p) return 0; return getManualOldPrice(id)||autoOldPrice(p.price); }
+function offerBannerHTML(lang,ctx){
+  const o=getOfferSettings(); if(!o.enabled) return '';
+  const ar=lang==='ar';
+  const fill=x=>String(x||'').replace(/\{pct\}/g,o.percent);
+  const main=fill(ar?o.textAr:o.textFr), sub=fill(ar?o.subAr:o.subFr);
+  const target=ctx==='lp'?'#lp-main-product':'#productGrid';
+  const esc=v=>String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  return `<a class="lx-offer lx-offer-${ctx}" href="${target}" data-lx-offer>
+    <span class="lx-offer-badge"><b>-${o.percent}%</b></span>
+    <span class="lx-offer-body">
+      <span class="lx-offer-kicker"><i class="lx-offer-dot"></i>${ar?'عرض محدود':'OFFRE LIMITÉE'}</span>
+      <span class="lx-offer-main">${esc(main)}</span>
+      ${sub?`<span class="lx-offer-sub">${esc(sub)}</span>`:''}
+    </span>
+    <span class="lx-offer-cta">${ar?'استفيدي الآن':'J\'en profite'} <em>${ar?'‹':'›'}</em></span>
+  </a>`;
+}
+function renderOfferBanner(){
+  const box=document.getElementById('luxiaOfferBanner'); if(!box) return;
+  box.innerHTML=offerBannerHTML(currentLang==='ar'?'ar':'fr','home');
+  const a=box.querySelector('[data-lx-offer]');
+  if(a) a.addEventListener('click',e=>{ e.preventDefault(); document.getElementById('productGrid')?.scrollIntoView({behavior:'smooth',block:'start'}); });
+}
+function adminOfferCardHTML(){
+  const o=getOfferSettings(); const eA=v=>String(v==null?'':v).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
+  return `<section class="admin-section-card admin-offer-card">
+    <div class="admin-section-title"><span>%</span><div><h3>Offre limitée — بانر العرض المحدود</h3><p>Bannière affichée juste avant les produits (site + landing pages). Elle remplit aussi l'ancien prix automatiquement de chaque produit et pack (prix ÷ (1 − remise)). Ex. : 149 DH avec ${o.percent}% ⇒ ${Math.round(149/(1-o.percent/100))} DH.</p></div></div>
+    <div class="admin-toggle-row"><label><input type="checkbox" id="offer-enabled" ${o.enabled?'checked':''}> <span>Afficher la bannière (décocher = masquer la bannière et l'ancien prix automatique)</span></label></div>
+    <div class="admin-two-col">
+      <div class="field"><label>Remise en % — نسبة الخصم</label><input type="number" min="1" max="90" step="1" id="offer-percent" value="${o.percent}"></div>
+      <div class="field"><label>&nbsp;</label><small class="admin-help">Utilisez {pct} dans les textes pour insérer le pourcentage.</small></div>
+    </div>
+    <div class="admin-two-col">
+      <div class="field"><label>Texte principal (FR)</label><input type="text" id="offer-text-fr" value="${eA(o.textFr)}"></div>
+      <div class="field"><label>النص الرئيسي (AR)</label><input type="text" id="offer-text-ar" value="${eA(o.textAr)}"></div>
+    </div>
+    <div class="admin-two-col">
+      <div class="field"><label>Sous-texte (FR)</label><input type="text" id="offer-sub-fr" value="${eA(o.subFr)}"></div>
+      <div class="field"><label>النص الفرعي (AR)</label><input type="text" id="offer-sub-ar" value="${eA(o.subAr)}"></div>
+    </div>
+    <div class="admin-save-row"><button type="button" class="btn btn-primary" id="offerSaveBtn">Enregistrer l'offre</button></div>
+  </section>`;
+}
+function bindAdminOfferCard(){
+  const btn=document.getElementById('offerSaveBtn'); if(!btn) return;
+  btn.addEventListener('click',async()=>{
+    const pct=Number(document.getElementById('offer-percent').value);
+    if(!Number.isFinite(pct)||pct<1||pct>90){ showToast('Remise : entre 1 et 90'); return; }
+    const val=id=>(document.getElementById(id)?.value||'').trim();
+    const data={enabled:!!document.getElementById('offer-enabled')?.checked,percent:Math.round(pct),textFr:val('offer-text-fr'),textAr:val('offer-text-ar'),subFr:val('offer-sub-fr'),subAr:val('offer-sub-ar')};
+    btn.disabled=true;
+    try{
+      const json=JSON.stringify(data);
+      const content={fr:{...(SITE_CONTENT.fr||{}),__offer:json},ar:{...(SITE_CONTENT.ar||{}),__offer:json}};
+      await saveSiteContent(content);
+      renderProducts(); openProductId=openProductId; renderAdminProducts(); showToast('Offre enregistrée');
+    }catch(err){ console.error(err); showToast(err?.message||t('admin.backendWriteError')); btn.disabled=false; }
+  });
+}
 function oldPriceHTML(id){ const o=getProductOldPrice(id); return o?` <s class="lx-old-price">${o} ${t('unit.dh')}</s>`:''; }
 function getProductSizes(id){ return (PRODUCT_VARIANTS[id] && PRODUCT_VARIANTS[id].sizes) || []; }
 function colorLabel(id, colorId){
@@ -6163,8 +6281,9 @@ async function loadSiteSettings(){
 function applySiteContent(){
   ['fr','ar'].forEach(lang=>{
     const content=SITE_CONTENT[lang]||{};
-    Object.keys(content).forEach(key=>{ if(content[key]!==null && content[key]!==undefined && String(content[key]).trim()!=='') I18N[lang][key]=String(content[key]); });
+    Object.keys(content).forEach(key=>{ if(key==='__offer') return; if(content[key]!==null && content[key]!==undefined && String(content[key]).trim()!=='') I18N[lang][key]=String(content[key]); });
   });
+  try{ renderOfferBanner(); }catch(e){}
 }
 async function saveSiteContent(content, onDiag){
   /* onDiag is OPTIONAL (used only by the settings diagnostic panel).
@@ -6516,6 +6635,7 @@ function clearProductGalleryTimers(){
 
 function renderProducts(){
   clearProductGalleryTimers();
+  try{ renderOfferBanner(); }catch(e){}
   const products = getStoreFilteredProducts();
   updateStoreCount(products.length);
 
@@ -6967,7 +7087,7 @@ function getPackBannerData(id){
   const L=currentLang==='ar'?'ar':'fr';
   const single=Number(p.price)||0, price=Number(cfg.price)||0, pieces=Math.floor(Number(cfg.pieces))||0;
   const oldManual=Number(cfg.oldPrice);
-  const old=(Number.isFinite(oldManual)&&oldManual>price)?oldManual:(single*pieces>price?single*pieces:0);
+  const old=(Number.isFinite(oldManual)&&oldManual>price)?oldManual:autoOldPrice(price);
   const badge=(cfg.badge&&cfg.badge[L])||(L==='ar'?'عرض خاص':'Offre spéciale');
   const label=(cfg.label&&cfg.label[L])||(cfg.name&&cfg.name[L])||(L==='ar'?('اشتري '+pieces+' قطع واستفيدي من تخفيض مميز'):('Achetez '+pieces+' pièces et profitez d’une remise spéciale'));
   const gal=PRODUCT_IMAGE_GALLERY[id]&&PRODUCT_IMAGE_GALLERY[id].length?PRODUCT_IMAGE_GALLERY[id]:[PRODUCT_IMAGES[id]];
@@ -7708,7 +7828,7 @@ async function renderAdminSettings(){
   if(!isAdminAuthenticated()){ renderAdminLogin(); return; }
   let current=SITE_DEFAULT_LANGUAGE;
   try{ current=await loadSiteSettings(); }catch(e){}
-  const keys=Object.keys(I18N.fr).filter(k=>(!k.startsWith("admin.") || k==="admin.link") && !k.startsWith("status.") && k!=="__background_url" && k!=="__whatsapp_number").map(k=>[k,k]);
+  const keys=Object.keys(I18N.fr).filter(k=>(!k.startsWith("admin.") || k==="admin.link") && !k.startsWith("status.") && k!=="__background_url" && k!=="__whatsapp_number" && k!=="__offer").map(k=>[k,k]);
   let html=adminLanguageSwitcherHTML();
   html+=adminTabsHTML("settings");
   html+=`<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; gap:16px; flex-wrap:wrap;">
@@ -8641,7 +8761,9 @@ function renderLandingPublic(p, isPreview){
        new admin fields, nothing shown unless the admin actually filled it. */
     const pyPriceNum = Number(String(p.price||'0').replace(/[^0-9.]/g,''))||0;
     const lpSrcOld = p.sourceProductId ? getProductOldPrice(p.sourceProductId) : 0;
-    const lpOldEff = p.oldPrice || ((lpSrcOld>pyPriceNum && pyPriceNum>0) ? (lpSrcOld+'dh') : '');
+    const lpManualSrcOld = p.sourceProductId ? getManualOldPrice(p.sourceProductId) : 0;
+    const lpAutoOld = autoOldPrice(pyPriceNum);
+    const lpOldEff = p.oldPrice || ((lpManualSrcOld>pyPriceNum && pyPriceNum>0) ? (lpManualSrcOld+'dh') : (lpAutoOld?(lpAutoOld+'dh'):''));
     const pyOldPriceNum = Number(String(lpOldEff||'0').replace(/[^0-9.]/g,''))||0;
     const pyDiscountPct = (pyOldPriceNum>pyPriceNum && pyPriceNum>0) ? Math.round((1-pyPriceNum/pyOldPriceNum)*100) : 0;
     const pyDiscountBadgeHTML = (isPyjama && pyDiscountPct>0) ? `<span class="lp-discount-badge">-${pyDiscountPct}%</span>` : '';
@@ -8669,7 +8791,7 @@ function renderLandingPublic(p, isPreview){
     const lpSingleForBanner = Number(String(p.price||'0').replace(/[^0-9.]/g,''))||0;
     const lpBadgeTxt = p.packBadge || (mainPackCfg&&mainPackCfg.badge&&mainPackCfg.badge[lang]) || (lang==='ar'?'عرض خاص':'Offre spéciale');
     const lpLabelTxt = p.packLabel || (mainPackCfg&&mainPackCfg.label&&mainPackCfg.label[lang]) || (mainPackCfg&&mainPackCfg.name&&mainPackCfg.name[lang]) || (lang==='ar'?('اشتري '+mainPack+' قطع واستفيدي من تخفيض مميز'):('Achetez '+mainPack+' pièces et profitez d’une remise spéciale'));
-    const lpOldTxt = p.packOldPrice || ((mainPackCfg&&Number(mainPackCfg.oldPrice)>Number(lpPackPriceRaw))?(String(mainPackCfg.oldPrice)+'dh'):((lpSingleForBanner*mainPack>Number(lpPackPriceRaw))?(String(lpSingleForBanner*mainPack)+'dh'):''));
+    const lpOldTxt = p.packOldPrice || ((mainPackCfg&&Number(mainPackCfg.oldPrice)>Number(lpPackPriceRaw))?(String(mainPackCfg.oldPrice)+'dh'):(autoOldPrice(Number(lpPackPriceRaw))?(String(autoOldPrice(Number(lpPackPriceRaw)))+'dh'):''));
     const packBannerHTML = mainPackEnabled ? `<section class="lp-section lp-pack-banner-section"><a href="#lp-main-product" data-lp-pack-cta class="lp-pack-banner">
       ${mainImageURL?`<img class="lp-pack-banner-img" src="${escAttr(mainImageURL)}" alt="">`:''}
       ${lpBadgeTxt?`<span class="lp-pack-badge">${escHtml(lpBadgeTxt)}</span>`:''}
@@ -8864,7 +8986,7 @@ function renderLandingPublic(p, isPreview){
         ${p.price?`<div class="lp-price">${escHtml(p.price)}dh ${lpOldEff?`<span class="lp-old-price">${escHtml(lpOldEff)}</span>`:''}${pyDiscountBadgeHTML}</div>`:''}
       </div>
     </section>` : `<section class="lp-hero lp-hero-clean"><div class="lp-hero-content"><h1 class="lp-hero-lux-title">LUXIA</h1><p class="hero-tagline lp-hero-lux-tagline">${lang==='ar'?'مجموعة فاخرة':'Luxury Collection'}</p>${description?`<p class="lp-hero-description">${escHtml(description)}</p>`:''}<a class="lp-cta" href="#lp-main-product">${lang==='ar'?'إكتشفي':'Découvrir'}</a></div></section>`;
-    document.body.innerHTML=`${lpPromoBarHTML}${collectionHeaderHTML}${collectionDrawerHTML}${cartFabHTML}${closeBtnHTML}${langSwitchHTML}${lightboxHTML}${p2LightboxHTML}<main class="lp-preview ${isPyjama?'lp-theme-pyjama':''}" style="padding-top:${LP_PROMO_H}px;">${heroHTML}${colorShowcaseHTML}${packBannerHTML}<div class="lp-wrap">${p.video2?`<section class="lp-section lp-video-section lp-video2-section"><div class="lunea-video-wrap"><video class="lp-video lp-video2" src="${escAttr(p.video2)}" autoplay loop preload="auto" playsinline disablepictureinpicture disableremoteplayback controlslist="nodownload noplaybackrate noremoteplayback"></video><button type="button" class="lunea-sound-btn" aria-label="إيقاف الصوت" title="إيقاف الصوت">🔊</button></div></section>`:''}${p.showOrderForm?`<section class="lp-section" id="order">${mainCardHTML.replace('__LP_FORM_HERE__',formHTML)}${p2CardHTML}</section>`:''}${p.showBenefits&&benefits?`<section class="lp-section"><h2>${lang==='ar'?'المميزات':'Les avantages'}</h2><div class="lp-benefits">${benefits}</div></section>`:''}${p.showReviews&&reviews?`<section class="lp-section"><h2>${lang==='ar'?'آراء الزبناء':'Avis clientes'}</h2><div class="lp-reviews-grid">${reviews}</div></section>`:''}${p.showFaq&&faqs?`<section class="lp-section lp-faq"><h2>FAQ</h2>${faqs}</section>`:''}${p.video?`<section class="lp-section"><div class="lunea-video-wrap"><video class="lp-video" src="${escAttr(p.video)}" autoplay loop preload="auto" playsinline disablepictureinpicture disableremoteplayback controlslist="nodownload noplaybackrate noremoteplayback"></video><button type="button" class="lunea-sound-btn" aria-label="إيقاف الصوت" title="إيقاف الصوت">🔊</button></div></section>`:''}
+    document.body.innerHTML=`${lpPromoBarHTML}${collectionHeaderHTML}${collectionDrawerHTML}${cartFabHTML}${closeBtnHTML}${langSwitchHTML}${lightboxHTML}${p2LightboxHTML}<main class="lp-preview ${isPyjama?'lp-theme-pyjama':''}" style="padding-top:${LP_PROMO_H}px;">${heroHTML}${offerBannerHTML(lang,'lp')?`<section class="lp-section lp-offer-section">${offerBannerHTML(lang,'lp')}</section>`:''}${colorShowcaseHTML}${packBannerHTML}<div class="lp-wrap">${p.video2?`<section class="lp-section lp-video-section lp-video2-section"><div class="lunea-video-wrap"><video class="lp-video lp-video2" src="${escAttr(p.video2)}" autoplay loop preload="auto" playsinline disablepictureinpicture disableremoteplayback controlslist="nodownload noplaybackrate noremoteplayback"></video><button type="button" class="lunea-sound-btn" aria-label="إيقاف الصوت" title="إيقاف الصوت">🔊</button></div></section>`:''}${p.showOrderForm?`<section class="lp-section" id="order">${mainCardHTML.replace('__LP_FORM_HERE__',formHTML)}${p2CardHTML}</section>`:''}${p.showBenefits&&benefits?`<section class="lp-section"><h2>${lang==='ar'?'المميزات':'Les avantages'}</h2><div class="lp-benefits">${benefits}</div></section>`:''}${p.showReviews&&reviews?`<section class="lp-section"><h2>${lang==='ar'?'آراء الزبناء':'Avis clientes'}</h2><div class="lp-reviews-grid">${reviews}</div></section>`:''}${p.showFaq&&faqs?`<section class="lp-section lp-faq"><h2>FAQ</h2>${faqs}</section>`:''}${p.video?`<section class="lp-section"><div class="lunea-video-wrap"><video class="lp-video" src="${escAttr(p.video)}" autoplay loop preload="auto" playsinline disablepictureinpicture disableremoteplayback controlslist="nodownload noplaybackrate noremoteplayback"></video><button type="button" class="lunea-sound-btn" aria-label="إيقاف الصوت" title="إيقاف الصوت">🔊</button></div></section>`:''}
 <section class="lp-section lp-experience-section">
   <div class="lp-experience-kicker">${lang==='ar'?'التجربة':'L’EXPÉRIENCE'}</div>
   <h2>${lang==='ar'?'لماذا LUXIA':'Pourquoi LUXIA'}</h2>
@@ -9375,9 +9497,11 @@ function renderAdminProducts(){
   let html=adminLanguageSwitcherHTML();
   html+=adminTabsHTML('products');
   html+=`<div class="admin-page-head"><div><div class="admin-kicker">${t('admin.productsTab')}</div><h2>${t('admin.productsTitle')}</h2><p>${t('admin.productsHint')}</p></div><div class="admin-head-actions"><button class="btn btn-primary" id="addProductBtn">+ ${t('admin.newProduct')}</button><button class="btn btn-ghost" id="adminLogoutBtn">${t('admin.logout')}</button></div></div>`;
-  html+=PRODUCTS.map(p=>{
+  html+=adminOfferCardHTML();
+  const __adminColOf=p=>{const v=PRODUCT_VARIANTS[p.id]||{};return v.unassigned?'':(v.collectionId||getStoreProductCollection(p));};
+  const __adminCardHTML=p=>{
     const enabled=p.enabled!==false,isOpen=openProductId===p.id,v=PRODUCT_VARIANTS[p.id]||{colors:[],sizes:[],stock:null,pack:null};
-    const pack=v.pack||{}; const collectionId=v.collectionId||getStoreProductCollection(p); const collections=getLuxiaCollections();
+    const pack=v.pack||{}; const collectionId=__adminColOf(p); const collections=getLuxiaCollections();
     const packEnabled=pack.enabled===true;
     return `<div class="admin-product-card">
       <button type="button" class="admin-product-summary" data-prod="${escAttr(p.id)}">
@@ -9393,7 +9517,7 @@ function renderAdminProducts(){
             <div class="admin-two-col"><div class="field"><label>${t('admin.field.nameFr')}</label><input type="text" id="pf-name-fr-${p.id}" value="${escAttr(I18N.fr[p.nameKey]||'')}"></div><div class="field"><label>${t('admin.field.nameAr')}</label><input type="text" id="pf-name-ar-${p.id}" value="${escAttr(I18N.ar[p.nameKey]||'')}"></div></div>
             <div class="admin-three-col">
               <div class="field"><label>${t('admin.field.price')}</label><input type="number" min="0" step="0.01" id="pf-price-${p.id}" value="${p.price??0}"></div>
-              <div class="field"><label>Ancien prix (barré, optionnel) — السعر القديم</label><input type="number" min="0" step="0.01" id="pf-oldprice-${p.id}" value="${(PRODUCT_VARIANTS[p.id]&&PRODUCT_VARIANTS[p.id].oldPrice)??''}" placeholder="ex : 199"></div>
+              <div class="field"><label>Ancien prix — automatique (optionnel : écrire pour forcer une valeur) — السعر القديم تلقائي</label><input type="number" min="0" step="0.01" id="pf-oldprice-${p.id}" value="${(PRODUCT_VARIANTS[p.id]&&PRODUCT_VARIANTS[p.id].oldPrice)??''}" placeholder="Auto"></div>
               <div class="field">
                 <label>${t('admin.catalogTypeLabel')}</label>
                 <select id="pf-catalog-type-${p.id}">
@@ -9434,7 +9558,7 @@ function renderAdminProducts(){
           <div class="admin-pack-variants"><div class="admin-block-head"><strong>Bannière offre spéciale · بانر العرض الخاص</strong><small>Affichée dans la fiche produit (pas sur les cartes de l'accueil) et sur les landing pages quand le pack est activé.</small></div>
             <div class="admin-two-col"><div class="field"><label>Badge (FR) — ex : Offre spéciale</label><input type="text" id="pf-pack-badge-fr-${p.id}" value="${escAttr(pack.badge?.fr||'')}"></div><div class="field"><label>باج البانر (AR) — مثلا: عرض خاص</label><input type="text" id="pf-pack-badge-ar-${p.id}" value="${escAttr(pack.badge?.ar||'')}"></div></div>
             <div class="admin-two-col"><div class="field"><label>Texte de l’offre (FR) — ex : Achetez 2 pyjamas et profitez d’une remise</label><input type="text" id="pf-pack-label-fr-${p.id}" value="${escAttr(pack.label?.fr||'')}"></div><div class="field"><label>نص العرض (AR) — مثلا: إشتري 2 بيجاما و إستفيدي من تخفيض مميز</label><input type="text" id="pf-pack-label-ar-${p.id}" value="${escAttr(pack.label?.ar||'')}"></div></div>
-            <div class="field"><label>Ancien prix du Pack (barré, optionnel) · الثمن القديم ديال الباك</label><input type="number" min="0" step="0.01" id="pf-pack-oldprice-${p.id}" value="${pack.oldPrice??''}"></div>
+            <div class="field"><label>Ancien prix du Pack — automatique (optionnel) · الثمن القديم ديال الباك</label><input type="number" min="0" step="0.01" id="pf-pack-oldprice-${p.id}" value="${pack.oldPrice??''}"></div>
           </div>
           <div class="admin-pack-variants"><div class="admin-block-head"><strong>Couleurs & tailles du Pack — الألوان والمقاسات</strong><small>Le Pack reprend automatiquement les couleurs et les tailles du produit principal (section 02), avec le même affichage. Rien à configurer ici.</small></div></div>
         </section>
@@ -9442,7 +9566,16 @@ function renderAdminProducts(){
         <div class="admin-save-row"><button type="button" class="btn btn-primary" data-save="${p.id}">${t('admin.save')}</button><button type="button" class="btn btn-ghost" data-deleteproduct="${p.id}">🗑 ${t('admin.deleteProduct')}</button></div>
       </div>
     </div>`;
-  }).join('');
+  };
+  {
+    const __cols=getLuxiaCollections(), __groups=[], __known=new Set(__cols.map(c=>c.id));
+    const __none=PRODUCTS.filter(p=>!__adminColOf(p));
+    if(__none.length) __groups.push({title:t('admin.noCollection'),items:__none,none:true});
+    __cols.forEach(c=>{const items=PRODUCTS.filter(p=>__adminColOf(p)===c.id); if(items.length) __groups.push({title:c[currentLang]||c.fr||c.ar||c.id,items});});
+    const __other=PRODUCTS.filter(p=>{const c=__adminColOf(p);return c&&!__known.has(c);});
+    if(__other.length) __groups.push({title:'Autres',items:__other});
+    html+=__groups.map(g=>`<section class="admin-collection-group${g.none?' is-none':''}"><h3 class="admin-collection-group-title"><span>${escHtml(g.title)}</span><b>${g.items.length}</b></h3>${g.items.map(__adminCardHTML).join('')}</section>`).join('');
+  }
   document.getElementById('adminWrap').innerHTML=html;
   bindAdminTabs();
   document.querySelectorAll('.admin-product-summary[data-prod]').forEach(h=>h.addEventListener('click',()=>{const body=document.getElementById('prodbody-'+h.dataset.prod),open=!body.classList.contains('open');document.querySelectorAll('.admin-product-body.open').forEach(x=>{if(x!==body)x.classList.remove('open')});body.classList.toggle('open',open);openProductId=open?h.dataset.prod:null;}));
@@ -9450,7 +9583,7 @@ function renderAdminProducts(){
   document.querySelectorAll('[data-deleteproduct]').forEach(btn=>btn.addEventListener('click',async e=>{e.preventDefault();e.stopPropagation();await deleteProductAdmin(String(btn.dataset.deleteproduct));}));
   document.getElementById('addProductBtn')?.addEventListener('click',addNewProductAdmin);
   document.getElementById('adminLogoutBtn')?.addEventListener('click',()=>signOutAdmin());
-  bindProductImageEvents(); bindProductVariantEvents(); bindAdminPackEvents(); bindAdminCatalogTypeEvents();
+  bindProductImageEvents(); bindProductVariantEvents(); bindAdminPackEvents(); bindAdminCatalogTypeEvents(); bindAdminOfferCard();
 }
 
 
@@ -9619,7 +9752,7 @@ async function saveProductEdits(id){
   const v=PRODUCT_VARIANTS[id]||(PRODUCT_VARIANTS[id]={colors:[],sizes:[],stock:null,pack:null});
   if(nameFr)I18N.fr[p.nameKey]=nameFr;if(nameAr)I18N.ar[p.nameKey]=nameAr;
   const price=parseFloat(priceRaw);if(!Number.isNaN(price)&&price>=0)p.price=price;
-  I18N.fr[p.descKey]=descFr;I18N.ar[p.descKey]=descAr;I18N.fr[p.badgeKey]=badgeFr;I18N.ar[p.badgeKey]=badgeAr;p.video=video;p.enabled=enabled;v.stock=stock;v.collectionId=collectionId||null;v.oldPrice=(__oldRaw===''||!Number.isFinite(parseFloat(__oldRaw)))?null:parseFloat(__oldRaw);
+  I18N.fr[p.descKey]=descFr;I18N.ar[p.descKey]=descAr;I18N.fr[p.badgeKey]=badgeFr;I18N.ar[p.badgeKey]=badgeAr;p.video=video;p.enabled=enabled;v.stock=stock;v.collectionId=collectionId||null;v.unassigned=false;v.oldPrice=(__oldRaw===''||!Number.isFinite(parseFloat(__oldRaw)))?null:parseFloat(__oldRaw);
   const packEnabled=!!document.getElementById(`pf-pack-enabled-${id}`)?.checked;
   const packPiecesRaw=val('pack-pieces'),packPieces=packPiecesRaw===''?null:Math.max(2,parseInt(packPiecesRaw,10));
   const packPriceRaw=val('pack-price'),packPrice=packPriceRaw===''?null:parseFloat(packPriceRaw);
@@ -9662,7 +9795,7 @@ async function addNewProductAdmin(){
   I18N.fr[descKey] = ""; I18N.ar[descKey] = "";
   I18N.fr[badgeKey] = ""; I18N.ar[badgeKey] = "";
   const p = { id, nameKey, descKey, badgeKey, price:0, enabled:false, video:"" };
-  PRODUCT_VARIANTS[id] = { colors: [], sizes: [], stock:null, pack:null, collectionId:null };
+  PRODUCT_VARIANTS[id] = { colors: [], sizes: [], stock:null, pack:null, collectionId:null, unassigned:true };
   PRODUCT_IMAGE_GALLERY[id] = [];
   PRODUCT_IMAGES[id] = "";
   const row = {
@@ -10049,7 +10182,7 @@ function highlightProductFromUrl(){
   function normalizeLuxiaVariants(){
     PRODUCTS.forEach(p=>{
       const v=PRODUCT_VARIANTS[p.id]||(PRODUCT_VARIANTS[p.id]={colors:[],sizes:[],stock:null,pack:null});
-      if(v.collectionId===undefined||v.collectionId===null||v.collectionId===''){
+      if(!v.unassigned&&(v.collectionId===undefined||v.collectionId===null||v.collectionId==='')){
         const explicit=String(PRODUCT_BACKEND_ROWS[p.id]?.category||p.category||'').toLowerCase();
         const id=String(p.id||'').toLowerCase(), name=String(I18N.fr[p.nameKey]||'').toLowerCase();
         v.collectionId=explicit.includes('access')||explicit.includes('accessoire')||id.includes('access')||/accessoire|accessories|accessoires/.test(name)?'accessoires':(explicit.includes('pyjama')||explicit.includes('sleep')||explicit.includes('nuit')||id.includes('pyjama')||id.includes('chemise')||id.includes('nuisette')||/pyjama|chemise de nuit|nuisette|robe de nuit|sleep/.test(name)?'pyjama':'lingerie');
