@@ -5329,6 +5329,73 @@ body:not(.lp-pyjama-active) .lp-preview .lp-product-card:not(.lp-order-success) 
   box-shadow:0 10px 22px -12px rgba(40,28,20,.35) !important;
 }
 </style>
+<style id="luxia-pack-banner-css">
+.lx-pack-banner{position:relative;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;background:linear-gradient(135deg,#fffdf9,#f1ede5);border:1px solid #ddd6cc;border-radius:18px;box-shadow:0 14px 38px -24px rgba(42,36,30,.28);padding:12px 14px;margin:16px 0 12px;cursor:pointer;color:#292622;text-align:start;}
+.lx-pack-banner-img{width:46px;height:46px;border-radius:12px;object-fit:cover;flex:none;box-shadow:0 6px 14px rgba(0,0,0,.15);}
+.lx-pack-badge{position:absolute;top:-10px;inset-inline-start:16px;background:#b99a62;color:#fff;font-size:11px;font-weight:700;padding:3px 11px;border-radius:999px;}
+.lx-pack-banner-text{flex:1;min-width:120px;}
+.lx-pack-label{font-family:'Cormorant Garamond','Amiri',serif;font-size:16px;color:#292622;font-weight:600;line-height:1.25;}
+.lx-pack-heart{color:#d6536b;font-style:normal;}
+.lx-pack-price-block{text-align:center;flex:none;}
+.lx-pack-price{font-family:'Cormorant Garamond','Amiri',serif;font-size:21px;color:#9f8059;font-weight:700;}
+.lx-pack-oldprice{text-decoration:line-through;color:#6f6962;font-size:12px;opacity:.85;}
+.lx-pack-banner-card{margin:14px 0 8px;padding:10px 12px;}
+.lx-pack-banner-card .lx-pack-label{font-size:14px;}
+.lx-pack-banner-card .lx-pack-price{font-size:18px;}
+.lx-pack-banner-card .lx-pack-banner-img{width:36px;height:36px;border-radius:10px;}
+.purchase-choice-modal .pc-options{display:grid;gap:14px;margin-top:8px;}
+.pc-option{position:relative;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 10px;width:100%;text-align:start;padding:16px;border-radius:16px;border:1.5px solid var(--line,#ddd6cc);background:#ffffff0d;color:var(--ivory,#292622);cursor:pointer;}
+.pc-option-pack{background:linear-gradient(135deg,#fffdf9,#f1ede5);border-color:#b99a62;color:#292622;}
+.pc-name{font-family:var(--font-display,serif);font-size:16px;}
+.pc-price{font-size:19px;color:#9f8059;}
+.pc-tag{position:absolute;top:-10px;inset-inline-start:14px;background:#b99a62;color:#fff;font-size:11px;font-weight:700;padding:3px 11px;border-radius:999px;}
+.pc-old{opacity:.7;font-size:13px;}
+.pc-save{flex-basis:100%;color:#2f7d4b;font-weight:600;font-size:12px;}
+</style>
+
+<style id="luxia-unified-variants-and-pack-signal">
+/* ===== Prix barré (ancien prix) ===== */
+.variant-mode.active .lx-old-price,.variant-mode.active s{color:#e6dccd!important;opacity:.85!important;}
+.lx-old-price{text-decoration:line-through!important;opacity:.55;font-weight:400!important;font-size:.72em!important;margin-inline-start:7px;color:inherit;white-space:nowrap;}
+
+/* ===== 1) Montage (fenêtre d'ajout au panier) : couleurs + tailles = même style que la fiche produit ===== */
+#variantOverlay .select-pill-row{display:flex!important;flex-wrap:wrap!important;align-items:flex-start!important;gap:8px 12px!important;}
+#variantOverlay .pill.color-pill.variant-color-option{
+  width:auto!important;height:auto!important;min-width:48px!important;min-height:0!important;padding:2px 4px!important;gap:4px!important;
+  display:inline-flex!important;flex-direction:column!important;align-items:center!important;justify-content:flex-start!important;
+  background:transparent!important;border:1px solid transparent!important;border-radius:12px!important;box-shadow:none!important;color:#292622!important;}
+#variantOverlay .pill.color-pill.variant-color-option .variant-color-name{order:0!important;display:block!important;font-size:10px!important;line-height:1.1!important;white-space:nowrap!important;color:inherit!important;}
+#variantOverlay .pill.color-pill.variant-color-option .variant-color-circle{order:1!important;display:block!important;width:28px!important;height:28px!important;border-radius:50%!important;border:2px solid #d0c7bc!important;box-shadow:inset 0 0 0 2px #faf8f3!important;}
+#variantOverlay .pill.color-pill.variant-color-option.selected{background:#292622!important;border-color:#292622!important;color:#fff!important;box-shadow:none!important;}
+#variantOverlay .pill.color-pill.variant-color-option.selected .variant-color-circle{border-color:#fff!important;box-shadow:0 0 0 2px #292622,0 0 0 4px #292622!important;}
+#variantOverlay #sizePills{display:flex!important;flex-wrap:wrap!important;align-items:center!important;gap:7px!important;}
+#variantOverlay #sizePills .pill{min-width:38px!important;height:38px!important;padding:7px 10px!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;border:1px solid #d8cfc3!important;border-radius:999px!important;background:#fffdf9!important;color:#292622!important;font-size:12px!important;box-shadow:none!important;}
+#variantOverlay #sizePills .pill.selected{background:#292622!important;color:#fff!important;border-color:#292622!important;}
+
+/* ===== Landing pages : même style ===== */
+body .lp-preview.lp-preview .lp-picker .lp-picker-color-options{display:flex!important;flex-wrap:wrap!important;align-items:flex-start!important;gap:8px 12px!important;}
+body .lp-preview.lp-preview .lp-picker .lp-picker-color-option{min-width:48px!important;padding:2px 4px!important;gap:4px!important;display:flex!important;flex-direction:column!important;align-items:center!important;background:transparent!important;border:1px solid transparent!important;border-radius:12px!important;box-shadow:none!important;color:#292622!important;}
+body .lp-preview.lp-preview .lp-picker .lp-picker-color-option .color-name{order:0!important;font-size:10px!important;line-height:1.1!important;color:inherit!important;}
+body .lp-preview.lp-preview .lp-picker .lp-picker-color-option .variant-color-circle{order:1!important;width:28px!important;height:28px!important;border-radius:50%!important;border:2px solid #d0c7bc!important;box-shadow:inset 0 0 0 2px #faf8f3!important;}
+body .lp-preview.lp-preview .lp-picker .lp-picker-color-option.selected{background:#292622!important;border-color:#292622!important;color:#fff!important;}
+body .lp-preview.lp-preview .lp-picker .lp-picker-color-option.selected .variant-color-circle{border-color:#fff!important;box-shadow:0 0 0 2px #292622,0 0 0 4px #292622!important;}
+body .lp-preview.lp-preview .lp-picker .lp-picker-pills{display:flex!important;flex-wrap:wrap!important;align-items:center!important;gap:7px!important;}
+body .lp-preview.lp-preview .lp-picker .lp-picker-pills .pill{min-width:38px!important;height:38px!important;padding:7px 10px!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;border:1px solid #d8cfc3!important;border-radius:999px!important;background:#fffdf9!important;color:#292622!important;font-size:12px!important;box-shadow:none!important;}
+body .lp-preview.lp-preview .lp-picker .lp-picker-pills .pill.selected{background:#292622!important;color:#fff!important;border-color:#292622!important;}
+
+/* ===== 3) Bannière "offre spéciale" : signal attirant (fiche produit + landing) ===== */
+@keyframes lxPackGlow{0%,100%{box-shadow:0 0 0 0 rgba(185,154,98,.55),0 10px 26px -14px rgba(159,128,89,.6)}60%{box-shadow:0 0 0 12px rgba(185,154,98,0),0 10px 26px -14px rgba(159,128,89,.6)}}
+@keyframes lxPackShimmer{0%{background-position:130% 0}100%{background-position:-130% 0}}
+@keyframes lxPackWiggle{0%,84%,100%{transform:none}87%{transform:translateX(-4px) rotate(-.6deg)}90%{transform:translateX(4px) rotate(.6deg)}93%{transform:translateX(-3px)}96%{transform:translateX(2px)}}
+@keyframes lxBadgePulse{0%,100%{transform:scale(1)}50%{transform:scale(1.14)}}
+.lx-pack-banner-detail{cursor:pointer;border-color:#b99a62!important;
+  background:linear-gradient(110deg,#fffdf9 0%,#fffdf9 35%,#f6e4bd 50%,#fffdf9 65%,#fffdf9 100%)!important;background-size:250% 100%!important;
+  animation:lxPackGlow 1.8s ease-out infinite,lxPackShimmer 3.2s linear infinite,lxPackWiggle 4.5s ease-in-out infinite;}
+.lx-pack-banner-detail .lx-pack-badge,.lp-pack-banner .lp-pack-badge{animation:lxBadgePulse 1.3s ease-in-out infinite;}
+.lx-pack-banner-detail .lx-pack-price{color:#b8324f!important;}
+.lp-pack-banner{animation:lxPackGlow 1.8s ease-out infinite,lxPackWiggle 4.5s ease-in-out infinite;}
+@media (prefers-reduced-motion:reduce){.lx-pack-banner-detail,.lp-pack-banner,.lx-pack-banner-detail .lx-pack-badge,.lp-pack-banner .lp-pack-badge{animation:none!important;}}
+</style>
 </head>
 <body class="luxia-store-home">
 
@@ -5706,7 +5773,8 @@ function buildProductVariants(){
       colors: (Array.isArray(s.colors) ? s.colors : []).slice(),
       sizes:  (Array.isArray(s.sizes) ? s.sizes : []).slice(),
       stock:  (typeof s.stock === "number" && !isNaN(s.stock)) ? s.stock : null,
-      pack:   s.pack || null
+      pack:   s.pack || null,
+      oldPrice: (s.oldPrice!=null && s.oldPrice!=='' && !isNaN(Number(s.oldPrice))) ? Number(s.oldPrice) : null
     };
   });
   return result;
@@ -5718,6 +5786,8 @@ async function persistVariantsOrShowError(productId){
   return true;
 }
 function getProductColors(id){ return (PRODUCT_VARIANTS[id] && PRODUCT_VARIANTS[id].colors) || []; }
+function getProductOldPrice(id){ const v=PRODUCT_VARIANTS[id], p=PRODUCTS.find(x=>x.id===id); const o=Number(v&&v.oldPrice), pr=Number(p&&p.price); return (Number.isFinite(o)&&o>0&&o>pr)?o:0; }
+function oldPriceHTML(id){ const o=getProductOldPrice(id); return o?` <s class="lx-old-price">${o} ${t('unit.dh')}</s>`:''; }
 function getProductSizes(id){ return (PRODUCT_VARIANTS[id] && PRODUCT_VARIANTS[id].sizes) || []; }
 function colorLabel(id, colorId){
   const c = getProductColors(id).find(c=>c.id===colorId);
@@ -6468,7 +6538,7 @@ function renderProducts(){
       <div class="product-info">
         ${colors.length?`<div class="swatch-row"><span class="swatch-label">${t("product.colors")}</span>${colors.map(c=>`<span class="swatch" style="background:${c.hex||'#c9a877'}" title="${escAttr(currentLang==='ar'?c.ar:c.fr)}"></span>`).join('')}</div>`:''}
         ${sizes.length?`<div class="product-sizes-row"><span class="product-variants-label">${currentLang==='ar'?'المقاسات':'Tailles'}</span>${sizes.map(sz=>`<span class="product-size-chip">${escHtml(sz)}</span>`).join('')}</div>`:''}
-        <div class="product-price-only product-price-bottom">${Number(p.price||0)} ${t("unit.dh")}</div>
+        <div class="product-price-only product-price-bottom">${Number(p.price||0)} ${t("unit.dh")}${oldPriceHTML(p.id)}</div>
         <button class="btn-order" data-product="${escAttr(p.id)}">${t("product.order")}</button>
       </div>
     </article>`;
@@ -6590,6 +6660,7 @@ function openProductDetailModal(id){
   const gallery=PRODUCT_IMAGE_GALLERY[id]&&PRODUCT_IMAGE_GALLERY[id].length?PRODUCT_IMAGE_GALLERY[id]:[PRODUCT_IMAGES[id]];
   const colors=getProductColors(id), sizes=getProductSizes(id);
   const title=t(p.nameKey), desc=getProductDescription(p,lang), benefits=getProductBenefits(p,lang);
+  const hasPack=!!getPackConfig(id);
   m.querySelector('#productDetailTitle').textContent=title;
   m.querySelector('#productDetailBody').innerHTML=`
     <div class="product-detail-gallery">
@@ -6599,11 +6670,12 @@ function openProductDetailModal(id){
     <div class="product-detail-content">
       ${desc?`<section class="product-detail-section"><h4>${lang==='ar'?'الوصف':'Description'}</h4><p>${escHtml(desc)}</p></section>`:''}
       ${benefits.length?`<section class="product-detail-section"><h4>${lang==='ar'?'المميزات':'Les avantages'}</h4><ul>${benefits.map(x=>`<li>${escHtml(String(x))}</li>`).join('')}</ul></section>`:''}
-      ${(colors.length||sizes.length)?`<div class="product-detail-variant-picker">
+      ${(!hasPack&&(colors.length||sizes.length))?`<div class="product-detail-variant-picker">
         ${colors.length?`<section class="product-detail-variant-group" id="detailColorGroup"><h4>${lang==='ar'?'اللون':'Couleur'}</h4><div class="product-detail-color-options">${colors.map(c=>`<button type="button" class="product-detail-color-option" data-detail-color="${escAttr(c.id)}"><span class="color-name">${escHtml(lang==='ar'?c.ar:c.fr)}</span><span class="variant-color-circle" style="background:${escAttr(c.hex||'#c9a877')}"></span></button>`).join('')}</div></section>`:''}
         ${sizes.length?`<section class="product-detail-variant-group" id="detailSizeGroup"><h4>${lang==='ar'?'المقاس':'Taille'}</h4><div class="product-detail-size-options">${sizes.map(sz=>`<button type="button" class="product-detail-size-option" data-detail-size="${escAttr(sz)}">${escHtml(sz)}</button>`).join('')}</div></section>`:''}
       </div>`:''}
-      <div class="product-detail-price">${Number(p.price||0)} ${t('unit.dh')}</div>
+      ${hasPack?packBannerHTML(id,'detail'):''}
+      <div class="product-detail-price">${Number(p.price||0)} ${t('unit.dh')}${oldPriceHTML(id)}</div>
       <button type="button" class="btn btn-primary btn-block product-detail-add" data-detail-add="${escAttr(id)}">${t('product.order')}</button>
     </div>`;
   m.querySelectorAll('[data-detail-image]').forEach(btn=>btn.addEventListener('click',()=>{
@@ -6642,7 +6714,9 @@ function openProductDetailModal(id){
     detailSize=btn.dataset.detailSize;
     m.querySelectorAll('[data-detail-size]').forEach(b=>b.classList.toggle('selected',b===btn));
   }));
+  m.querySelectorAll('[data-lx-pack-banner]').forEach(b=>b.addEventListener('click',()=>openPurchaseChoiceModal(id)));
   m.querySelector('[data-detail-add]')?.addEventListener('click',()=>{
+    if(hasPack){ openPurchaseChoiceModal(id); return; }
     const needsColor=colors.length>0, needsSize=sizes.length>0;
     const missingColor=needsColor&&!detailColor, missingSize=needsSize&&!detailSize;
     if(missingColor||missingSize){
@@ -6873,15 +6947,72 @@ function itemColorText(item){
 function variantColorsForMode(){
   if(!currentVariantProduct) return [];
   const v=PRODUCT_VARIANTS[currentVariantProduct.id]||{};
-  if(isPackVariant()) return Array.isArray(v.pack?.colors)?v.pack.colors:[];
+  /* Pack = mêmes couleurs que le produit principal */
   return Array.isArray(v.colors)?v.colors:[];
 }
 function variantSizesForMode(){
   if(!currentVariantProduct) return [];
   const v=PRODUCT_VARIANTS[currentVariantProduct.id]||{};
-  if(isPackVariant()) return Array.isArray(v.pack?.sizes)?v.pack.sizes:[];
+  /* Pack = mêmes tailles que le produit principal */
   return Array.isArray(v.sizes)?v.sizes:[];
 }
+/* ============================================================
+   PACK OFFER BANNER (site) + PURCHASE CHOICE (1 pièce / Pack)
+   - Banner content comes from the product's pack config (admin).
+   - Cart logic is untouched: piece = product price, pack = pack price.
+   ============================================================ */
+function getPackBannerData(id){
+  const p=PRODUCTS.find(x=>x.id===id), cfg=getPackConfig(id);
+  if(!p||!cfg) return null;
+  const L=currentLang==='ar'?'ar':'fr';
+  const single=Number(p.price)||0, price=Number(cfg.price)||0, pieces=Math.floor(Number(cfg.pieces))||0;
+  const oldManual=Number(cfg.oldPrice);
+  const old=(Number.isFinite(oldManual)&&oldManual>price)?oldManual:(single*pieces>price?single*pieces:0);
+  const badge=(cfg.badge&&cfg.badge[L])||(L==='ar'?'عرض خاص':'Offre spéciale');
+  const label=(cfg.label&&cfg.label[L])||(cfg.name&&cfg.name[L])||(L==='ar'?('اشتري '+pieces+' قطع واستفيدي من تخفيض مميز'):('Achetez '+pieces+' pièces et profitez d’une remise spéciale'));
+  const gal=PRODUCT_IMAGE_GALLERY[id]&&PRODUCT_IMAGE_GALLERY[id].length?PRODUCT_IMAGE_GALLERY[id]:[PRODUCT_IMAGES[id]];
+  return {p,cfg,L,single,price,pieces,old,badge,label,img:gal[0]||''};
+}
+function packBannerHTML(id,ctx){
+  const d=getPackBannerData(id); if(!d) return '';
+  const dh=t('unit.dh');
+  return `<div class="lx-pack-banner lx-pack-banner-${ctx}" data-lx-pack-banner="${escAttr(id)}"${ctx==='card'?` data-detail-product="${escAttr(id)}"`:''} role="button" tabindex="0">
+    ${d.img?`<img class="lx-pack-banner-img" src="${escAttr(d.img)}" alt="" loading="lazy">`:''}
+    <span class="lx-pack-badge">${escHtml(d.badge)}</span>
+    <div class="lx-pack-banner-text"><div class="lx-pack-label">${escHtml(d.label)} <span class="lx-pack-heart">♡</span></div></div>
+    <div class="lx-pack-price-block"><div class="lx-pack-price">${d.price} ${dh}</div>${d.old?`<div class="lx-pack-oldprice">${d.old} ${dh}</div>`:''}</div>
+  </div>`;
+}
+function closeProductDetailForPack(){
+  const ov=document.getElementById('productDetailOverlay');
+  clearProductDetailGalleryTimer();
+  if(ov){ ov.classList.remove('open'); ov.setAttribute('aria-hidden','true'); }
+  document.body.style.overflow='';
+}
+function openPurchaseChoiceModal(id){
+  const d=getPackBannerData(id);
+  if(!d){ openVariantModal(id,'piece'); return; }
+  closeProductDetailForPack();
+  const L=d.L, dh=t('unit.dh'), saving=Math.max(0,d.single*d.pieces-d.price);
+  let ov=document.getElementById('purchaseChoiceOverlay');
+  if(!ov){
+    ov=document.createElement('div'); ov.id='purchaseChoiceOverlay'; ov.className='modal-overlay';
+    ov.innerHTML=`<div class="modal purchase-choice-modal" role="dialog" aria-modal="true"><div class="modal-head"><h3 id="pcTitle"></h3><button class="modal-close" id="pcClose" aria-label="Fermer">×</button></div><p class="modal-sub" id="pcSub"></p><div id="pcBody"></div></div>`;
+    document.body.appendChild(ov);
+  }
+  ov.querySelector('#pcTitle').textContent = L==='ar' ? 'كيفاش بغيتي تشري؟' : 'Comment souhaitez-vous commander ?';
+  ov.querySelector('#pcSub').textContent = L==='ar' ? 'اختاري قطعة وحدة ولا الباك بثمن خاص.' : 'Choisissez une pièce ou profitez du Pack au prix spécial.';
+  ov.querySelector('#pcBody').innerHTML=`<div class="pc-options">
+    <button type="button" class="pc-option" data-pc="piece"><span class="pc-name">${t('variant.onePiece')}</span><strong class="pc-price">${d.single} ${dh}</strong>${getProductOldPrice(id)?`<s class="pc-old">${getProductOldPrice(id)} ${dh}</s>`:''}</button>
+    <button type="button" class="pc-option pc-option-pack" data-pc="pack"><span class="pc-tag">${escHtml(d.badge)}</span><span class="pc-name">${escHtml((d.cfg.name&&d.cfg.name[L])||t('variant.pack'))} · ${d.pieces} ${t('pack.pieces')}</span><strong class="pc-price">${d.price} ${dh}</strong>${d.old?`<s class="pc-old">${d.old} ${dh}</s>`:''}${saving>0?`<small class="pc-save">${t('variant.save')} ${saving} ${dh}</small>`:''}</button>
+  </div>`;
+  const close=(reopenDetail)=>{ ov.classList.remove('open'); document.body.style.overflow=''; if(reopenDetail) setTimeout(()=>openProductDetailModal(id),60); };
+  ov.querySelector('#pcClose').onclick=()=>close(true);
+  ov.onclick=e=>{ if(e.target===ov) close(true); };
+  ov.querySelectorAll('[data-pc]').forEach(b=>b.onclick=()=>{ const mode=b.dataset.pc; close(false); setTimeout(()=>openVariantModal(id,mode),80); });
+  openModal(ov);
+}
+
 function openVariantModal(productId, mode='piece'){
   currentVariantProduct=PRODUCTS.find(p=>p.id===productId);
   if(!currentVariantProduct) return;
@@ -6910,9 +7041,10 @@ function renderVariantModeSwitch(){
   const v=PRODUCT_VARIANTS[currentVariantProduct.id]||{};
   const single=Number(currentVariantProduct.price)||0, packPrice=Number(pack.price)||0, pieces=Number(pack.pieces)||0;
   const saving=Math.max(0,single*pieces-packPrice);
+  const __so=getProductOldPrice(currentVariantProduct.id), __po=(getPackBannerData(currentVariantProduct.id)||{}).old||0;
   box.innerHTML=`<div class="variant-mode-card">
-    <button type="button" class="variant-mode ${variantState.purchaseMode==='piece'?'active':''}" data-mode="piece"><span>${t('variant.onePiece')}</span><strong>${single} ${t('unit.dh')}</strong></button>
-    <button type="button" class="variant-mode ${variantState.purchaseMode==='pack'?'active':''}" data-mode="pack"><span>${escHtml(pack.name?.[currentLang]||t('variant.pack'))}</span><strong>${packPrice} ${t('unit.dh')}</strong>${saving>0?`<small>${t('variant.save')} ${saving} ${t('unit.dh')}</small>`:''}</button>
+    <button type="button" class="variant-mode ${variantState.purchaseMode==='piece'?'active':''}" data-mode="piece"><span>${t('variant.onePiece')}</span><strong>${single} ${t('unit.dh')}</strong>${__so?`<s class="lx-old-price">${__so} ${t('unit.dh')}</s>`:''}</button>
+    <button type="button" class="variant-mode ${variantState.purchaseMode==='pack'?'active':''}" data-mode="pack"><span>${escHtml(pack.name?.[currentLang]||t('variant.pack'))}</span><strong>${packPrice} ${t('unit.dh')}</strong>${__po?`<s class="lx-old-price">${__po} ${t('unit.dh')}</s>`:''}${saving>0?`<small>${t('variant.save')} ${saving} ${t('unit.dh')}</small>`:''}</button>
   </div>`;
   box.querySelectorAll('[data-mode]').forEach(btn=>btn.addEventListener('click',()=>{
     const mode=btn.dataset.mode==='pack' && pack?'pack':'piece';
@@ -6978,8 +7110,8 @@ document.getElementById('addToCartBtn').addEventListener('click',()=>{
   if(!currentVariantProduct) return;
   const pack=isPackVariant(), cfg=getPackConfig(currentVariantProduct.id), v=PRODUCT_VARIANTS[currentVariantProduct.id]||{};
   const colors=pack?selectedPackColors():[];
-  const colorsConfigured=pack?Array.isArray(cfg.colors)&&cfg.colors.length>0:Array.isArray(v.colors)&&v.colors.length>0;
-  const sizesConfigured=pack?Array.isArray(cfg.sizes)&&cfg.sizes.length>0:Array.isArray(v.sizes)&&v.sizes.length>0;
+  const colorsConfigured=pack?variantColorsForMode().length>0:Array.isArray(v.colors)&&v.colors.length>0;
+  const sizesConfigured=pack?variantSizesForMode().length>0:Array.isArray(v.sizes)&&v.sizes.length>0;
   if(colorsConfigured && (pack?(colors.length!==getPackPieces(currentVariantProduct.id)||colors.some(c=>!c)):!variantState.color)){showToast(t('modal.error.color'));return;}
   if(sizesConfigured && !variantState.size){showToast(t('modal.error.size'));return;}
   if(typeof v.stock==='number' && v.stock<=0){showToast(t('variant.outOfStock'));return;}
@@ -8397,7 +8529,11 @@ function renderLandingPublic(p, isPreview){
   const mainHasVariants = mainHasColors || mainHasSizes;
   const mainState = { color:null, colors:Array(mainPack).fill(null), size:null, purchaseMode:'piece' };
   const mainCartItems = [];
-  const mainPackEnabled = !!(isPyjama && p.packEnabled && mainPack>1 && p.packPrice);
+  /* Pack is inherited from the product's pack config (admin). The landing fields
+     (badge / label / price / old price) only OVERRIDE the product values when filled. */
+  const mainPackCfg = p.sourceProductId ? getPackConfig(p.sourceProductId) : null;
+  const lpPackPriceRaw = (p.packPrice!=null && String(p.packPrice).trim()!=='') ? String(p.packPrice) : (mainPackCfg ? String(mainPackCfg.price) : '');
+  const mainPackEnabled = !!(mainPack>1 && lpPackPriceRaw);
   let mainOpen=false;
 
   const p2Variants = p.product2Id ? PRODUCT_VARIANTS[p.product2Id] : null;
@@ -8503,8 +8639,10 @@ function renderLandingPublic(p, isPreview){
     /* ---- Pyjama theme only: cosmetic fragments built from data that already
        exists (price/oldPrice, benefits list, main product's own sizes) — no
        new admin fields, nothing shown unless the admin actually filled it. */
-    const pyOldPriceNum = Number(String(p.oldPrice||'0').replace(/[^0-9.]/g,''))||0;
     const pyPriceNum = Number(String(p.price||'0').replace(/[^0-9.]/g,''))||0;
+    const lpSrcOld = p.sourceProductId ? getProductOldPrice(p.sourceProductId) : 0;
+    const lpOldEff = p.oldPrice || ((lpSrcOld>pyPriceNum && pyPriceNum>0) ? (lpSrcOld+'dh') : '');
+    const pyOldPriceNum = Number(String(lpOldEff||'0').replace(/[^0-9.]/g,''))||0;
     const pyDiscountPct = (pyOldPriceNum>pyPriceNum && pyPriceNum>0) ? Math.round((1-pyPriceNum/pyOldPriceNum)*100) : 0;
     const pyDiscountBadgeHTML = (isPyjama && pyDiscountPct>0) ? `<span class="lp-discount-badge">-${pyDiscountPct}%</span>` : '';
     const pyFeatureIcons = ['✧','☁','♡','⌂'];
@@ -8528,11 +8666,15 @@ function renderLandingPublic(p, isPreview){
     /* Pack banner: pure promo visual, CTA scrolls to the existing order form —
        it never touches cart/order logic, so nothing about how an order is
        placed changes. */
-    const packBannerHTML = (isPyjama && p.packEnabled && p.packPrice) ? `<section class="lp-section lp-pack-banner-section"><a href="#order" class="lp-pack-banner">
+    const lpSingleForBanner = Number(String(p.price||'0').replace(/[^0-9.]/g,''))||0;
+    const lpBadgeTxt = p.packBadge || (mainPackCfg&&mainPackCfg.badge&&mainPackCfg.badge[lang]) || (lang==='ar'?'عرض خاص':'Offre spéciale');
+    const lpLabelTxt = p.packLabel || (mainPackCfg&&mainPackCfg.label&&mainPackCfg.label[lang]) || (mainPackCfg&&mainPackCfg.name&&mainPackCfg.name[lang]) || (lang==='ar'?('اشتري '+mainPack+' قطع واستفيدي من تخفيض مميز'):('Achetez '+mainPack+' pièces et profitez d’une remise spéciale'));
+    const lpOldTxt = p.packOldPrice || ((mainPackCfg&&Number(mainPackCfg.oldPrice)>Number(lpPackPriceRaw))?(String(mainPackCfg.oldPrice)+'dh'):((lpSingleForBanner*mainPack>Number(lpPackPriceRaw))?(String(lpSingleForBanner*mainPack)+'dh'):''));
+    const packBannerHTML = mainPackEnabled ? `<section class="lp-section lp-pack-banner-section"><a href="#lp-main-product" data-lp-pack-cta class="lp-pack-banner">
       ${mainImageURL?`<img class="lp-pack-banner-img" src="${escAttr(mainImageURL)}" alt="">`:''}
-      ${p.packBadge?`<span class="lp-pack-badge">${escHtml(p.packBadge)}</span>`:''}
-      <div class="lp-pack-banner-text">${p.packLabel?`<div class="lp-pack-label">${escHtml(p.packLabel)} <span class="lp-caption-heart">♡</span></div>`:''}</div>
-      <div class="lp-pack-price-block"><div class="lp-pack-price">${escHtml(p.packPrice)}dh</div>${p.packOldPrice?`<div class="lp-pack-oldprice">${escHtml(p.packOldPrice)}</div>`:''}</div>
+      ${lpBadgeTxt?`<span class="lp-pack-badge">${escHtml(lpBadgeTxt)}</span>`:''}
+      <div class="lp-pack-banner-text">${lpLabelTxt?`<div class="lp-pack-label">${escHtml(lpLabelTxt)} <span class="lp-caption-heart">♡</span></div>`:''}</div>
+      <div class="lp-pack-price-block"><div class="lp-pack-price">${escHtml(lpPackPriceRaw)}dh</div>${lpOldTxt?`<div class="lp-pack-oldprice">${escHtml(lpOldTxt)}</div>`:''}</div>
     </a></section>` : '';
     const pyDeliveryText = I18N[lang] && I18N[lang]['promo.text'] ? I18N[lang]['promo.text'].replace(/^[^\p{L}]*/u,'') : '';
     const sizesSectionHTML = (isPyjama && mainHasSizes) ? `<section class="lp-section lp-sizes-section"><h2>${lang==='ar'?'المقاسات المتوفرة':'Tailles disponibles'}</h2><div class="lp-size-row">${mainVariants.sizes.map(s=>`<span class="lp-size-chip">${escHtml(s)}</span>`).join('')}</div>${pyDeliveryText?`<p class="lp-sizes-delivery">${escHtml(pyDeliveryText)}</p>`:''}</section>` : '';
@@ -8572,7 +8714,7 @@ function renderLandingPublic(p, isPreview){
     const cartFabHTML = cartDrawerHTML;
     const pyHeaderHTML = '';
     const mainPrice=Number(String(p.price||'0').replace(/[^0-9.]/g,''))||0;
-    const mainPackPrice=Number(String(p.packPrice||'0').replace(/[^0-9.]/g,''))||0;
+    const mainPackPrice=Number(String(lpPackPriceRaw||'0').replace(/[^0-9.]/g,''))||0;
     const mainEffectivePack=mainPackEnabled && mainState.purchaseMode==='pack' ? mainPack : 0;
     const mainVariantReady=!mainHasVariants || isReady(mainHasColors,mainEffectivePack,mainHasSizes,mainState);
     const p2VariantReady=!p2HasVariants || isReady(p2HasColors,p2Pack,p2HasSizes,p2State);
@@ -8719,7 +8861,7 @@ function renderLandingPublic(p, isPreview){
         <h1 class="lp-title">${escHtml(title)}</h1>
         ${subtitle?`<p class="lp-subtitle">${escHtml(subtitle)}</p>`:''}
         ${pyFeatureRowHTML}
-        ${p.price?`<div class="lp-price">${escHtml(p.price)}dh ${p.oldPrice?`<span class="lp-old-price">${escHtml(p.oldPrice)}</span>`:''}${pyDiscountBadgeHTML}</div>`:''}
+        ${p.price?`<div class="lp-price">${escHtml(p.price)}dh ${lpOldEff?`<span class="lp-old-price">${escHtml(lpOldEff)}</span>`:''}${pyDiscountBadgeHTML}</div>`:''}
       </div>
     </section>` : `<section class="lp-hero lp-hero-clean"><div class="lp-hero-content"><h1 class="lp-hero-lux-title">LUXIA</h1><p class="hero-tagline lp-hero-lux-tagline">${lang==='ar'?'مجموعة فاخرة':'Luxury Collection'}</p>${description?`<p class="lp-hero-description">${escHtml(description)}</p>`:''}<a class="lp-cta" href="#lp-main-product">${lang==='ar'?'إكتشفي':'Découvrir'}</a></div></section>`;
     document.body.innerHTML=`${lpPromoBarHTML}${collectionHeaderHTML}${collectionDrawerHTML}${cartFabHTML}${closeBtnHTML}${langSwitchHTML}${lightboxHTML}${p2LightboxHTML}<main class="lp-preview ${isPyjama?'lp-theme-pyjama':''}" style="padding-top:${LP_PROMO_H}px;">${heroHTML}${colorShowcaseHTML}${packBannerHTML}<div class="lp-wrap">${p.video2?`<section class="lp-section lp-video-section lp-video2-section"><div class="lunea-video-wrap"><video class="lp-video lp-video2" src="${escAttr(p.video2)}" autoplay loop preload="auto" playsinline disablepictureinpicture disableremoteplayback controlslist="nodownload noplaybackrate noremoteplayback"></video><button type="button" class="lunea-sound-btn" aria-label="إيقاف الصوت" title="إيقاف الصوت">🔊</button></div></section>`:''}${p.showOrderForm?`<section class="lp-section" id="order">${mainCardHTML.replace('__LP_FORM_HERE__',formHTML)}${p2CardHTML}</section>`:''}${p.showBenefits&&benefits?`<section class="lp-section"><h2>${lang==='ar'?'المميزات':'Les avantages'}</h2><div class="lp-benefits">${benefits}</div></section>`:''}${p.showReviews&&reviews?`<section class="lp-section"><h2>${lang==='ar'?'آراء الزبناء':'Avis clientes'}</h2><div class="lp-reviews-grid">${reviews}</div></section>`:''}${p.showFaq&&faqs?`<section class="lp-section lp-faq"><h2>FAQ</h2>${faqs}</section>`:''}${p.video?`<section class="lp-section"><div class="lunea-video-wrap"><video class="lp-video" src="${escAttr(p.video)}" autoplay loop preload="auto" playsinline disablepictureinpicture disableremoteplayback controlslist="nodownload noplaybackrate noremoteplayback"></video><button type="button" class="lunea-sound-btn" aria-label="إيقاف الصوت" title="إيقاف الصوت">🔊</button></div></section>`:''}
@@ -9028,6 +9170,11 @@ document.getElementById('lp-cart-drawer')?.addEventListener('click',e=>{if(e.tar
       setTimeout(()=>{ if(!window.closed){ history.length>1?history.back():location.href='/'; } },150);
     });
     document.getElementById('lp-main-toggle')?.addEventListener('click',()=>{ mainOpen=true; paint(); });
+    document.querySelectorAll('[data-lp-pack-cta]').forEach(a=>a.addEventListener('click',e=>{
+      e.preventDefault();
+      if(mainPackEnabled && !orderPlaced){ mainState.purchaseMode='pack'; mainState.color=null; mainState.colors=Array(mainPack).fill(null); mainOpen=true; paint(); }
+      setTimeout(()=>document.getElementById('lp-main-product')?.scrollIntoView({behavior:'smooth',block:'center'}),80);
+    }));
     document.getElementById('lp-p2-toggle')?.addEventListener('click',()=>{ p2Open=true; paint(); });
     document.querySelectorAll('[data-main-remove]').forEach(btn=>btn.addEventListener('click',()=>{const i=Number(btn.dataset.mainRemove);if(Number.isInteger(i))mainCartItems.splice(i,1);showForm=false;paint();}));
     document.getElementById('lp-main-add')?.addEventListener('click',()=>{
@@ -9244,8 +9391,9 @@ function renderAdminProducts(){
           <section class="admin-section-card"><div class="admin-section-title"><span>01</span><div><h3>${t('admin.productIdentity')}</h3><p>${t('admin.productIdentityHint')}</p></div></div>
             ${renderProductImagesHTML(p)}
             <div class="admin-two-col"><div class="field"><label>${t('admin.field.nameFr')}</label><input type="text" id="pf-name-fr-${p.id}" value="${escAttr(I18N.fr[p.nameKey]||'')}"></div><div class="field"><label>${t('admin.field.nameAr')}</label><input type="text" id="pf-name-ar-${p.id}" value="${escAttr(I18N.ar[p.nameKey]||'')}"></div></div>
-            <div class="admin-two-col">
+            <div class="admin-three-col">
               <div class="field"><label>${t('admin.field.price')}</label><input type="number" min="0" step="0.01" id="pf-price-${p.id}" value="${p.price??0}"></div>
+              <div class="field"><label>Ancien prix (barré, optionnel) — السعر القديم</label><input type="number" min="0" step="0.01" id="pf-oldprice-${p.id}" value="${(PRODUCT_VARIANTS[p.id]&&PRODUCT_VARIANTS[p.id].oldPrice)??''}" placeholder="ex : 199"></div>
               <div class="field">
                 <label>${t('admin.catalogTypeLabel')}</label>
                 <select id="pf-catalog-type-${p.id}">
@@ -9283,8 +9431,12 @@ function renderAdminProducts(){
           <div class="admin-two-col"><div class="field"><label>${t('admin.field.packName')}</label><input type="text" id="pf-pack-name-fr-${p.id}" value="${escAttr(pack.name?.fr||'')}"></div><div class="field"><label>${t('admin.field.packNameAr')}</label><input type="text" id="pf-pack-name-ar-${p.id}" value="${escAttr(pack.name?.ar||'')}"></div></div>
           <div class="admin-three-col"><div class="field"><label>${t('admin.field.packPieces')}</label><input type="number" min="2" step="1" id="pf-pack-pieces-${p.id}" value="${pack.pieces??''}"></div><div class="field"><label>${t('admin.packPrice')}</label><input type="number" min="0" step="0.01" id="pf-pack-price-${p.id}" value="${pack.price??''}"></div><div class="field"><label>${t('admin.field.packContentsFr')}</label><input type="text" id="pf-pack-contents-fr-${p.id}" value="${escAttr(pack.contents?.fr||'')}"></div></div>
           <div class="field"><label>${t('admin.field.packContentsAr')}</label><input type="text" id="pf-pack-contents-ar-${p.id}" value="${escAttr(pack.contents?.ar||'')}"></div>
-          <div class="admin-pack-variants"><div class="admin-block-head"><strong>${t('admin.packColors')}</strong><small>${t('admin.packVariantsHint')}</small></div><div id="pack-color-list-${p.id}" class="admin-variant-list">${(Array.isArray(pack.colors)?pack.colors:[]).map(c=>`<div class="admin-variant-pill"><input type="text" class="admin-pack-color-fr" data-pid="${p.id}" data-pcid="${c.id}" value="${escAttr(c.fr)}"><input type="text" class="admin-pack-color-ar" data-pid="${p.id}" data-pcid="${c.id}" value="${escAttr(c.ar)}"><input type="color" class="admin-pack-color-hex" data-pid="${p.id}" data-pcid="${c.id}" value="${c.hex||'#c9a877'}"><button type="button" class="admin-variant-remove" data-removepackcolor="${p.id}:${c.id}">🗑️</button></div>`).join('')}</div><div class="admin-variant-add"><input type="text" id="newpackcolor-fr-${p.id}" placeholder="${t('admin.colorFr')}"><input type="text" id="newpackcolor-ar-${p.id}" placeholder="${t('admin.colorAr')}"><input type="color" id="newpackcolor-hex-${p.id}" value="#c9a877"><button type="button" class="btn btn-ghost" data-addpackcolor="${p.id}">${t('admin.addColor')}</button></div></div>
-          <div class="admin-pack-variants"><div class="admin-block-head"><strong>${t('admin.packSizes')}</strong><small>${t('admin.packVariantsHint')}</small></div><div id="pack-size-list-${p.id}" class="admin-variant-list">${(Array.isArray(pack.sizes)?pack.sizes:[]).map(sz=>`<div class="admin-variant-pill"><input type="text" class="admin-variant-input admin-pack-size" data-pid="${p.id}" data-oldpacksize="${escAttr(sz)}" value="${escAttr(sz)}"><button type="button" class="admin-variant-remove" data-removepacksize="${p.id}:${escAttr(sz)}">🗑️</button></div>`).join('')}</div><div class="admin-variant-add"><input type="text" id="newpacksize-${p.id}" placeholder="${t('admin.newSize')}"><button type="button" class="btn btn-ghost" data-addpacksize="${p.id}">${t('admin.addSize')}</button></div></div>
+          <div class="admin-pack-variants"><div class="admin-block-head"><strong>Bannière offre spéciale · بانر العرض الخاص</strong><small>Affichée dans la fiche produit (pas sur les cartes de l'accueil) et sur les landing pages quand le pack est activé.</small></div>
+            <div class="admin-two-col"><div class="field"><label>Badge (FR) — ex : Offre spéciale</label><input type="text" id="pf-pack-badge-fr-${p.id}" value="${escAttr(pack.badge?.fr||'')}"></div><div class="field"><label>باج البانر (AR) — مثلا: عرض خاص</label><input type="text" id="pf-pack-badge-ar-${p.id}" value="${escAttr(pack.badge?.ar||'')}"></div></div>
+            <div class="admin-two-col"><div class="field"><label>Texte de l’offre (FR) — ex : Achetez 2 pyjamas et profitez d’une remise</label><input type="text" id="pf-pack-label-fr-${p.id}" value="${escAttr(pack.label?.fr||'')}"></div><div class="field"><label>نص العرض (AR) — مثلا: إشتري 2 بيجاما و إستفيدي من تخفيض مميز</label><input type="text" id="pf-pack-label-ar-${p.id}" value="${escAttr(pack.label?.ar||'')}"></div></div>
+            <div class="field"><label>Ancien prix du Pack (barré, optionnel) · الثمن القديم ديال الباك</label><input type="number" min="0" step="0.01" id="pf-pack-oldprice-${p.id}" value="${pack.oldPrice??''}"></div>
+          </div>
+          <div class="admin-pack-variants"><div class="admin-block-head"><strong>Couleurs & tailles du Pack — الألوان والمقاسات</strong><small>Le Pack reprend automatiquement les couleurs et les tailles du produit principal (section 02), avec le même affichage. Rien à configurer ici.</small></div></div>
         </section>
 
         <div class="admin-save-row"><button type="button" class="btn btn-primary" data-save="${p.id}">${t('admin.save')}</button><button type="button" class="btn btn-ghost" data-deleteproduct="${p.id}">🗑 ${t('admin.deleteProduct')}</button></div>
@@ -9458,12 +9610,16 @@ async function saveProductEdits(id){
   const catalogType=val('catalog-type');
   const customCollectionId=val('custom-collection');
   const collectionId=catalogType==='custom'?(customCollectionId||null):catalogType||null;
+  const __oldRaw=val('oldprice'), __priceChk=parseFloat(priceRaw);
+  if(__oldRaw!=='' && (!Number.isFinite(parseFloat(__oldRaw)) || (Number.isFinite(__priceChk) && parseFloat(__oldRaw)<=__priceChk))){ showToast('Ancien prix : il doit être supérieur au prix actuel'); return; }
+  const __packOldRaw=val('pack-oldprice'), __packPriceChk=parseFloat(val('pack-price'));
+  if(!!document.getElementById(`pf-pack-enabled-${id}`)?.checked && __packOldRaw!=='' && (!Number.isFinite(parseFloat(__packOldRaw)) || (Number.isFinite(__packPriceChk) && parseFloat(__packOldRaw)<=__packPriceChk))){ showToast('Ancien prix du Pack : il doit être supérieur au prix du Pack'); return; }
   if(!collectionId){ showToast('خاصك تختار المجموعة ديال المنتج قبل الحفظ'); return; }
   const prev=JSON.parse(JSON.stringify({p:{price:p.price,enabled:p.enabled,video:p.video},i18n:{nameFr:I18N.fr[p.nameKey],nameAr:I18N.ar[p.nameKey],descFr:I18N.fr[p.descKey],descAr:I18N.ar[p.descKey],badgeFr:I18N.fr[p.badgeKey],badgeAr:I18N.ar[p.badgeKey]},v:PRODUCT_VARIANTS[id]}));
   const v=PRODUCT_VARIANTS[id]||(PRODUCT_VARIANTS[id]={colors:[],sizes:[],stock:null,pack:null});
   if(nameFr)I18N.fr[p.nameKey]=nameFr;if(nameAr)I18N.ar[p.nameKey]=nameAr;
   const price=parseFloat(priceRaw);if(!Number.isNaN(price)&&price>=0)p.price=price;
-  I18N.fr[p.descKey]=descFr;I18N.ar[p.descKey]=descAr;I18N.fr[p.badgeKey]=badgeFr;I18N.ar[p.badgeKey]=badgeAr;p.video=video;p.enabled=enabled;v.stock=stock;v.collectionId=collectionId||null;
+  I18N.fr[p.descKey]=descFr;I18N.ar[p.descKey]=descAr;I18N.fr[p.badgeKey]=badgeFr;I18N.ar[p.badgeKey]=badgeAr;p.video=video;p.enabled=enabled;v.stock=stock;v.collectionId=collectionId||null;v.oldPrice=(__oldRaw===''||!Number.isFinite(parseFloat(__oldRaw)))?null:parseFloat(__oldRaw);
   const packEnabled=!!document.getElementById(`pf-pack-enabled-${id}`)?.checked;
   const packPiecesRaw=val('pack-pieces'),packPieces=packPiecesRaw===''?null:Math.max(2,parseInt(packPiecesRaw,10));
   const packPriceRaw=val('pack-price'),packPrice=packPriceRaw===''?null:parseFloat(packPriceRaw);
@@ -9477,10 +9633,12 @@ async function saveProductEdits(id){
     return acc;
   },[]).filter(c=>c.fr||c.ar);
   const packSizes=Array.from(document.querySelectorAll(`.admin-pack-size[data-pid=\"${CSS.escape(id)}\"]`)).map(x=>x.value.trim()).filter(Boolean);
+  const packOldPriceRaw=val('pack-oldprice');
+  const packExtra={badge:{fr:val('pack-badge-fr'),ar:val('pack-badge-ar')},label:{fr:val('pack-label-fr'),ar:val('pack-label-ar')},oldPrice:(packOldPriceRaw===''||!Number.isFinite(parseFloat(packOldPriceRaw)))?null:parseFloat(packOldPriceRaw)};
   if(packEnabled){
-    v.pack={...oldPack,enabled:true,pieces:packPieces,price:packPrice,name:{fr:packNameFr,ar:packNameAr},contents:{fr:packContentsFr,ar:packContentsAr},colors:packColors,sizes:packSizes};
+    v.pack={...oldPack,enabled:true,pieces:packPieces,price:packPrice,name:{fr:packNameFr,ar:packNameAr},contents:{fr:packContentsFr,ar:packContentsAr},colors:packColors,sizes:packSizes,...packExtra};
   }else{
-    v.pack={...oldPack,enabled:false,pieces:packPieces,price:packPrice,name:{fr:packNameFr,ar:packNameAr},contents:{fr:packContentsFr,ar:packContentsAr},colors:packColors,sizes:packSizes};
+    v.pack={...oldPack,enabled:false,pieces:packPieces,price:packPrice,name:{fr:packNameFr,ar:packNameAr},contents:{fr:packContentsFr,ar:packContentsAr},colors:packColors,sizes:packSizes,...packExtra};
   }
   if(packEnabled && (!packPieces || !Number.isFinite(packPrice) || packPrice<=0)){showToast(t('admin.packInvalid'));Object.assign(p,prev.p);I18N.fr[p.nameKey]=prev.i18n.nameFr;I18N.ar[p.nameKey]=prev.i18n.nameAr;I18N.fr[p.descKey]=prev.i18n.descFr;I18N.ar[p.descKey]=prev.i18n.descAr;I18N.fr[p.badgeKey]=prev.i18n.badgeFr;I18N.ar[p.badgeKey]=prev.i18n.badgeAr;PRODUCT_VARIANTS[id]=prev.v;renderAdminProducts();return;}
   saveProductVariants(PRODUCT_VARIANTS);
