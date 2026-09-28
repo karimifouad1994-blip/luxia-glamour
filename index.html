@@ -2448,12 +2448,14 @@ body.luxia-store-home .home-collection-rule{
 .product-detail-variant-group>h4{margin:0 0 8px;font-size:13px;font-weight:700;}
 .product-detail-color-options{display:flex;flex-wrap:wrap;gap:12px 14px;}
 .product-detail-color-option{display:flex;flex-direction:column;align-items:center;gap:5px;min-width:48px;padding:3px 4px;border:1px solid transparent;background:transparent;border-radius:12px;cursor:pointer;color:inherit;}
+.product-detail-color-option:disabled,.product-detail-size-option:disabled{cursor:default!important;pointer-events:none!important;opacity:.72!important;}
 .product-detail-color-option .variant-color-circle{width:28px;height:28px;border-radius:50%;border:2px solid #d0c7bc;box-shadow:inset 0 0 0 2px #faf8f3;display:block;}
 .product-detail-color-option.selected{border-color:#b99a62;background:rgba(185,154,98,.10);}
 .product-detail-color-option.selected .variant-color-circle{border-color:#967644;box-shadow:0 0 0 2px #fffdf9,0 0 0 4px #b99a62;}
 .product-detail-color-option .color-name{font-size:10px;line-height:1.1;text-align:center;}
 .product-detail-size-options{display:flex;flex-wrap:wrap;gap:8px;}
 .product-detail-size-option{padding:8px 13px;border:1px solid #d8cfc3;border-radius:999px;background:#fffdf9;cursor:pointer;font-size:12px;}
+.product-detail-color-option:disabled,.product-detail-size-option:disabled{cursor:default!important;pointer-events:none!important;opacity:.72!important;}
 .product-detail-size-option.selected{background:#292622;color:#fff;border-color:#292622;}
 .variant-color-option{display:inline-flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:4px!important;min-width:48px!important;padding:5px 4px!important;background:transparent!important;border:1px solid transparent!important;border-radius:12px!important;}
 .variant-color-option.selected{background:rgba(185,154,98,.10)!important;border-color:#b99a62!important;color:inherit!important;}
@@ -5586,7 +5588,7 @@ body .lp-preview.lp-preview .lp-picker .lp-picker-pills .pill.selected{backgroun
     <div class="order-summary" id="variantPackInfo" style="display:none;"></div>
     <div class="field" id="colorField"><label data-i18n="modal.field.color">Couleur</label><div class="select-pill-row" id="colorPills"></div></div>
     <div class="field" id="packColorField" style="display:none;"></div>
-    <div class="field"><label data-i18n="modal.field.size">Taille</label><div class="select-pill-row" id="sizePills"></div></div>
+    <div class="field" id="sizeField"><label data-i18n="modal.field.size">Taille</label><div class="select-pill-row" id="sizePills"></div></div>
     <div class="field">
       <label data-i18n="modal.field.qty">Quantité</label>
       <div class="qty-control"><button type="button" class="qty-btn" id="qtyMinus">−</button><span class="qty-value" id="qtyValue">1</span><button type="button" class="qty-btn" id="qtyPlus">+</button></div>
@@ -6395,6 +6397,10 @@ async function loadProductsFromSupabase(){
       });
       rows.forEach(r=>{
         if(r.variants && typeof r.variants === "object") PRODUCT_VARIANTS[r.id]=r.variants;
+        if(r.category && PRODUCT_VARIANTS[r.id] && !PRODUCT_VARIANTS[r.id].collectionId){
+          PRODUCT_VARIANTS[r.id].collectionId=String(r.category);
+          PRODUCT_VARIANTS[r.id].unassigned=false;
+        }
         if(Array.isArray(r.images) && r.images.length){ PRODUCT_IMAGE_GALLERY[r.id]=r.images.slice(); PRODUCT_IMAGES[r.id]=r.images[0]; }
       });
       return true;
@@ -6417,9 +6423,12 @@ async function ensureProductsInSupabase(){
 async function saveProductToSupabase(id){
   if(!isAdminAuthenticated()) throw new Error("Admin authentication required");
   const p=PRODUCTS.find(x=>x.id===id); if(!p) throw new Error("Product not found");
-  const row={name_fr:I18N.fr[p.nameKey],name_ar:I18N.ar[p.nameKey],desc_fr:I18N.fr[p.descKey],desc_ar:I18N.ar[p.descKey],badge_fr:I18N.fr[p.badgeKey],badge_ar:I18N.ar[p.badgeKey],price:p.price,enabled:p.enabled!==false,variants:PRODUCT_VARIANTS[id]||null,images:PRODUCT_IMAGE_GALLERY[id]||null,video:p.video||""};
+  const __variants=PRODUCT_VARIANTS[id]||{};
+  const __collectionId=__variants.unassigned ? null : (__variants.collectionId || null);
+  const row={name_fr:I18N.fr[p.nameKey],name_ar:I18N.ar[p.nameKey],desc_fr:I18N.fr[p.descKey],desc_ar:I18N.ar[p.descKey],badge_fr:I18N.fr[p.badgeKey],badge_ar:I18N.ar[p.badgeKey],price:p.price,enabled:p.enabled!==false,category:__collectionId,variants:JSON.parse(JSON.stringify(__variants)),images:PRODUCT_IMAGE_GALLERY[id]||null,video:p.video||""};
   const result=await supabaseRequest(`${SUPABASE_PRODUCTS_URL}?id=eq.${encodeURIComponent(id)}&select=id`,{method:"PATCH",headers:{"Prefer":"return=representation"},body:JSON.stringify(row),token:getAdminToken()});
   if(!Array.isArray(result) || !result.length) throw new Error("Product update returned no row");
+  PRODUCT_BACKEND_ROWS[id]={...(PRODUCT_BACKEND_ROWS[id]||{}),...row};
   return result[0];
 }
 
@@ -6796,8 +6805,8 @@ function openProductDetailModal(id){
       ${desc?`<section class="product-detail-section"><h4>${lang==='ar'?'الوصف':'Description'}</h4><p>${escHtml(desc)}</p></section>`:''}
       ${benefits.length?`<section class="product-detail-section"><h4>${lang==='ar'?'المميزات':'Les avantages'}</h4><ul>${benefits.map(x=>`<li>${escHtml(String(x))}</li>`).join('')}</ul></section>`:''}
       ${(!hasPack&&(colors.length||sizes.length))?`<div class="product-detail-variant-picker">
-        ${colors.length?`<section class="product-detail-variant-group" id="detailColorGroup"><h4>${lang==='ar'?'اللون':'Couleur'}</h4><div class="product-detail-color-options">${colors.map(c=>`<button type="button" class="product-detail-color-option" data-detail-color="${escAttr(c.id)}"><span class="color-name">${escHtml(lang==='ar'?c.ar:c.fr)}</span><span class="variant-color-circle" style="background:${escAttr(c.hex||'#c9a877')}"></span></button>`).join('')}</div></section>`:''}
-        ${sizes.length?`<section class="product-detail-variant-group" id="detailSizeGroup"><h4>${lang==='ar'?'المقاس':'Taille'}</h4><div class="product-detail-size-options">${sizes.map(sz=>`<button type="button" class="product-detail-size-option" data-detail-size="${escAttr(sz)}">${escHtml(sz)}</button>`).join('')}</div></section>`:''}
+        ${colors.length?`<section class="product-detail-variant-group" id="detailColorGroup"><h4>${lang==='ar'?'اللون':'Couleur'}</h4><div class="product-detail-color-options">${colors.map(c=>`<button type="button" class="product-detail-color-option" data-detail-color="${escAttr(c.id)}" disabled aria-disabled="true"><span class="color-name">${escHtml(lang==='ar'?c.ar:c.fr)}</span><span class="variant-color-circle" style="background:${escAttr(c.hex||'#c9a877')}"></span></button>`).join('')}</div></section>`:''}
+        ${sizes.length?`<section class="product-detail-variant-group" id="detailSizeGroup"><h4>${lang==='ar'?'المقاس':'Taille'}</h4><div class="product-detail-size-options">${sizes.map(sz=>`<button type="button" class="product-detail-size-option" data-detail-size="${escAttr(sz)}" disabled aria-disabled="true">${escHtml(sz)}</button>`).join('')}</div></section>`:''}
       </div>`:''}
       ${hasPack?packBannerHTML(id,'detail'):''}
       <div class="product-detail-price">${Number(p.price||0)} ${t('unit.dh')}${oldPriceHTML(id)}</div>
@@ -7244,8 +7253,23 @@ document.getElementById('addToCartBtn').addEventListener('click',()=>{
   const colors=pack?selectedPackColors():[];
   const colorsConfigured=pack?variantColorsForMode().length>0:Array.isArray(v.colors)&&v.colors.length>0;
   const sizesConfigured=pack?variantSizesForMode().length>0:Array.isArray(v.sizes)&&v.sizes.length>0;
-  if(colorsConfigured && (pack?(colors.length!==getPackPieces(currentVariantProduct.id)||colors.some(c=>!c)):!variantState.color)){showToast(t('modal.error.color'));return;}
-  if(sizesConfigured && !variantState.size){showToast(t('modal.error.size'));return;}
+  const attention=(el)=>{
+    if(!el) return;
+    el.classList.remove("luxia-color-attention");
+    void el.offsetWidth;
+    el.classList.add("luxia-color-attention");
+    setTimeout(()=>el.classList.remove("luxia-color-attention"),550);
+  };
+  const missingColor=colorsConfigured && (pack?(colors.length!==getPackPieces(currentVariantProduct.id)||colors.some(c=>!c)):!variantState.color);
+  const missingSize=sizesConfigured && !variantState.size;
+  if(missingColor){
+    if(pack){
+      document.getElementById("packColorField")?.querySelectorAll(".pack-color-choice").forEach((el,i)=>{ if(!colors[i]) attention(el); });
+    }else attention(document.getElementById("colorField"));
+  }
+  if(missingSize) attention(document.getElementById("sizeField"));
+  if(missingColor){ showToast(t("modal.error.color")); return; }
+  if(missingSize){ showToast(t("modal.error.size")); return; }
   if(typeof v.stock==='number' && v.stock<=0){showToast(t('variant.outOfStock'));return;}
   const price=pack?Number(cfg.price):Number(currentVariantProduct.price)||0;
   const colorKey=pack?JSON.stringify(colors):(variantState.color||'');
@@ -7263,8 +7287,9 @@ document.getElementById('addToCartBtn').addEventListener('click',()=>{
     productDetailOverlay.setAttribute('aria-hidden','true');
   }
   document.body.style.overflow='';
-  showCartSuccessToast(currentLang==='ar'?'ar':'fr');
-  if(!pack && cfg && Number(cfg.price)>0 && Number(currentVariantProduct.price)>0 && Number(cfg.price)<Number(currentVariantProduct.price)*Number(cfg.pieces)) setTimeout(()=>openPackOfferModal(currentVariantProduct.id),180);
+  /* After a successful add, open the cart immediately so the customer can
+     review the selected colour/size and continue to checkout. */
+  openCartPanel();
 });
 
 /* ============================================================
@@ -8712,7 +8737,7 @@ function renderLandingPublic(p, isPreview){
     }else if(hasColors){
       colorHTML=`<div class="lp-picker-group luxia-required"><label>${lang==='ar'?'اللون':'Couleur'}</label><div class="lp-picker-color-options">${variants.colors.map(c=>`<button type="button" class="lp-picker-color-option ${state.color===c.id?'selected':''}" data-ns="${ns}" data-color="${c.id}"><span class="color-name">${escHtml(lang==='ar'?c.ar:c.fr)}</span><span class="variant-color-circle" style="background:${escAttr(c.hex||'#c9a877')}"></span></button>`).join('')}</div></div>`;
     }
-    const sizeHTML=hasSizes?`<div class="lp-picker-group"><label>${lang==='ar'?'المقاس':'Taille'}</label><div class="lp-picker-pills">${variants.sizes.map(s=>`<button type="button" class="pill ${state.size===s?'selected':''}" data-ns="${ns}" data-size="${escAttr(s)}">${escHtml(s)}</button>`).join('')}</div></div>`:'';
+    const sizeHTML=hasSizes?`<div class="lp-picker-group luxia-required luxia-required-size"><label>${lang==='ar'?'المقاس':'Taille'}</label><div class="lp-picker-pills">${variants.sizes.map(s=>`<button type="button" class="pill ${state.size===s?'selected':''}" data-ns="${ns}" data-size="${escAttr(s)}">${escHtml(s)}</button>`).join('')}</div></div>`:'';
     return `${modeHTML}${colorHTML}${sizeHTML}`;
   }
 
@@ -9316,10 +9341,24 @@ document.getElementById('lp-cart-drawer')?.addEventListener('click',e=>{if(e.tar
       const effectivePack=mainPackEnabled && mainState.purchaseMode==='pack' ? mainPack : 0;
       if(!isReady(mainHasColors,effectivePack,mainHasSizes,mainState)){
         const picker=document.getElementById('lp-main-picker');
-        picker?.classList.add('luxia-variant-attention');
-        setTimeout(()=>picker?.classList.remove('luxia-variant-attention'),1600);
+        const missing=[];
+        if(mainHasColors){
+          if(effectivePack>1){
+            const groups=picker?.querySelectorAll('.luxia-required:not(.luxia-required-size)')||[];
+            mainState.colors.forEach((c,i)=>{if(!c && groups[i]){groups[i].classList.remove('luxia-color-attention');void groups[i].offsetWidth;groups[i].classList.add('luxia-color-attention');setTimeout(()=>groups[i].classList.remove('luxia-color-attention'),550);}});
+          }else if(!mainState.color){
+            const field=picker?.querySelector('.luxia-required:not(.luxia-required-size)');
+            if(field){field.classList.remove('luxia-color-attention');void field.offsetWidth;field.classList.add('luxia-color-attention');setTimeout(()=>field.classList.remove('luxia-color-attention'),550);}
+          }
+          if(effectivePack>1 ? mainState.colors.some(c=>!c) : !mainState.color) missing.push('color');
+        }
+        if(mainHasSizes && !mainState.size){
+          const field=picker?.querySelector('.luxia-required-size');
+          if(field){field.classList.remove('luxia-color-attention');void field.offsetWidth;field.classList.add('luxia-color-attention');setTimeout(()=>field.classList.remove('luxia-color-attention'),550);}
+          missing.push('size');
+        }
         picker?.scrollIntoView({behavior:'smooth',block:'center'});
-        showToast(lang==='ar' ? 'اختاري اللون والمقاس أولاً' : 'Choisissez la couleur et la taille');
+        showToast(lang==='ar' ? 'اختاري المعلومات المطلوبة أولاً' : 'Choisissez les informations requises');
         return;
       }
       const colorText=effectivePack>1 ? mainState.colors.map(id=>labelFor(mainVariants,id)).filter(Boolean).join(' + ') : (mainState.color?labelFor(mainVariants,mainState.color):'');
@@ -9341,7 +9380,7 @@ document.getElementById('lp-cart-drawer')?.addEventListener('click',e=>{if(e.tar
         }
       },80);
     });
-    document.getElementById('lp-p2-add')?.addEventListener('click',()=>{ if(!isReady(p2HasColors,p2Pack,p2HasSizes,p2State)){ const picker=document.getElementById('lp-p2-picker'); picker?.classList.add('luxia-variant-attention'); setTimeout(()=>picker?.classList.remove('luxia-variant-attention'),1600); picker?.scrollIntoView({behavior:'smooth',block:'center'}); showToast(lang==='ar'?'اختاري اللون والمقاس أولاً':'Choisissez la couleur et la taille'); return; } p2Added=true; p2Open=false; showForm=false; paint(); setTimeout(()=>{ window.scrollTo({top:0,behavior:'smooth'}); showCartSuccessToast(lang==='ar'?'ar':'fr'); const d=document.getElementById('lp-cart-drawer'); if(d){ d.classList.add('open'); d.setAttribute('aria-hidden','false'); refreshCartUI(); } },80); });
+    document.getElementById('lp-p2-add')?.addEventListener('click',()=>{ if(!isReady(p2HasColors,p2Pack,p2HasSizes,p2State)){ const picker=document.getElementById('lp-p2-picker'); if(p2HasColors){ if(p2Pack>1){ const groups=picker?.querySelectorAll('.luxia-required:not(.luxia-required-size)')||[]; p2State.colors.forEach((c,i)=>{if(!c&&groups[i]){groups[i].classList.remove('luxia-color-attention');void groups[i].offsetWidth;groups[i].classList.add('luxia-color-attention');setTimeout(()=>groups[i].classList.remove('luxia-color-attention'),550);}}); } else if(!p2State.color){ const field=picker?.querySelector('.luxia-required:not(.luxia-required-size)'); if(field){field.classList.remove('luxia-color-attention');void field.offsetWidth;field.classList.add('luxia-color-attention');setTimeout(()=>field.classList.remove('luxia-color-attention'),550);} } } if(p2HasSizes&&!p2State.size){ const field=picker?.querySelector('.luxia-required-size'); if(field){field.classList.remove('luxia-color-attention');void field.offsetWidth;field.classList.add('luxia-color-attention');setTimeout(()=>field.classList.remove('luxia-color-attention'),550);} } picker?.scrollIntoView({behavior:'smooth',block:'center'}); showToast(lang==='ar'?'اختاري المعلومات المطلوبة أولاً':'Choisissez les informations requises'); return; } p2Added=true; p2Open=false; showForm=false; paint(); setTimeout(()=>{ window.scrollTo({top:0,behavior:'smooth'}); showCartSuccessToast(lang==='ar'?'ar':'fr'); const d=document.getElementById('lp-cart-drawer'); if(d){ d.classList.add('open'); d.setAttribute('aria-hidden','false'); refreshCartUI(); } },80); });
     document.getElementById('lp-p2-edit')?.addEventListener('click',()=>{ p2Added=false; p2Open=true; paint(); });
     document.getElementById('lp-p2-remove')?.addEventListener('click',()=>{ p2Added=false; paint(); });
     bindLandingPickerButtons();
@@ -10273,6 +10312,11 @@ function highlightProductFromUrl(){
   };
 
   /* ---------------- Admin CSS ---------------- */
+  const colorAttentionStyle=document.createElement("style");
+  colorAttentionStyle.id="luxia-color-attention-css";
+  colorAttentionStyle.textContent=`@keyframes luxiaColorAttentionShake{0%,100%{transform:translateX(0)}20%{transform:translateX(-7px)}40%{transform:translateX(7px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}#colorField.luxia-color-attention,#sizeField.luxia-color-attention,#packColorField.luxia-color-attention,.luxia-required.luxia-color-attention{animation:luxiaColorAttentionShake .45s ease-in-out;border-radius:10px;box-shadow:0 0 0 2px rgba(199,161,92,.5),0 0 18px rgba(199,161,92,.25)}@media(prefers-reduced-motion:reduce){#colorField.luxia-color-attention,#sizeField.luxia-color-attention,#packColorField.luxia-color-attention,.luxia-required.luxia-color-attention{animation:none;box-shadow:0 0 0 2px rgba(199,161,92,.7)}}`;
+  document.head.appendChild(colorAttentionStyle);
+
   const css=document.createElement('style');css.id='luxia-v5-admin-pack-css';css.textContent=`
   .admin-page-head{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;margin:0 0 24px}.admin-page-head h2{margin:3px 0 5px;font-size:34px}.admin-page-head p{margin:0;color:#756e66;max-width:620px}.admin-kicker{font-size:11px;letter-spacing:.18em;color:#9a7847;text-transform:uppercase}.admin-head-actions{display:flex;gap:9px;flex-wrap:wrap}.admin-product-card{background:#fffdf9;border:1px solid #ddd5ca;border-radius:16px;overflow:hidden;margin-bottom:14px;box-shadow:0 8px 24px -22px rgba(42,36,30,.45)}.admin-product-summary{width:100%;display:grid;grid-template-columns:56px 1fr auto 20px;gap:13px;align-items:center;padding:12px 14px;border:0;background:transparent;text-align:start;cursor:pointer;color:#302b27}.admin-product-thumb{width:56px;height:56px;border-radius:10px;overflow:hidden;background:#eee8df;display:block}.admin-product-thumb img{width:100%;height:100%;object-fit:contain}.admin-product-summary-main{display:flex;flex-direction:column;gap:3px;min-width:0}.admin-product-summary-main b{font-family:var(--font-display);font-size:19px;font-weight:500}.admin-product-summary-main small{color:#817970;font-size:12px}.admin-status.is-on{background:#f2eee5;color:#8c6e40;border-color:#d8c7aa}.admin-status.is-off{background:#f5eeee;color:#8c5f58;border-color:#e2cdca}.admin-product-chevron{color:#9b938a;font-size:17px}.admin-product-body{display:none;padding:0 14px 16px;border-top:1px solid #e4ddd4}.admin-product-body.open{display:block}.admin-section-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.admin-section-card,.admin-collection-create{background:#faf8f3;border:1px solid #e0d8ce;border-radius:14px;padding:16px;margin-top:14px}.admin-section-title{display:flex;gap:11px;align-items:flex-start;margin-bottom:16px}.admin-section-title>span{font-size:11px;color:#9a7847;letter-spacing:.14em;padding-top:4px}.admin-section-title h3{margin:0 0 2px;font-size:21px;font-weight:500}.admin-section-title p{margin:0;color:#817970;font-size:12px}.admin-two-col{display:grid;grid-template-columns:1fr 1fr;gap:11px}.admin-three-col{display:grid;grid-template-columns:110px 150px 1fr;gap:11px}.admin-toggle-row{display:flex;justify-content:space-between;gap:12px;align-items:end}.admin-toggle-row>label,.admin-pack-enable label{display:flex;align-items:center;gap:8px;min-height:44px}.admin-stock{width:180px}.admin-variant-block{padding:13px 0;border-top:1px solid #e3dcd3}.admin-block-head{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:9px}.admin-block-head strong{font-size:14px;color:#423b35}.admin-block-head small{font-size:11px;color:#8a8279}.admin-variant-list{display:flex;flex-direction:column;gap:7px}.admin-variant-pill{display:flex;gap:7px;align-items:center;padding:7px;background:#fffdf9;border:1px solid #ddd5ca;border-radius:10px}.admin-variant-pill input[type=text]{min-width:0;flex:1}.admin-variant-pill input[type=color]{width:34px;height:34px;padding:2px}.admin-variant-add{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin-top:9px}.admin-variant-add input[type=text]{flex:1;min-width:90px}.admin-pack-card{margin-top:14px}.admin-pack-enable{display:flex;justify-content:space-between;align-items:center;gap:15px;padding:11px 13px;margin-bottom:13px;background:#f3eee5;border:1px solid #ded3c4;border-radius:11px}.admin-pack-note{font-size:11px;color:#83796e}.admin-pack-variants{margin-top:15px;padding-top:13px;border-top:1px solid #e3dcd3}.admin-save-row{display:flex;gap:9px;justify-content:flex-end;margin-top:14px}.admin-upload-status{font-size:12px;color:#967644}.admin-collections-list{margin-top:14px;background:#fffdf9;border:1px solid #ddd5ca;border-radius:14px;padding:16px}.admin-collections-order-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:8px}.admin-collections-order-head h3{margin:0 0 4px}.admin-collections-order-head p{margin:0;color:#8b837b;font-size:11px;line-height:1.45}.admin-order-hint{font-size:14px;letter-spacing:.18em;color:#9a7847;padding-top:2px}.admin-collection-sort-row{grid-template-columns:34px 1fr auto;display:grid!important;align-items:center}.admin-collection-position{width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center;border:1px solid #d9d1c6;border-radius:50%;font-size:11px;color:#8f6f3f;background:#faf6ef}.admin-collection-name{display:flex;flex-direction:column;min-width:0}.admin-collection-name b{font-size:14px}.admin-collection-sort-actions{display:flex;align-items:center;justify-content:flex-end;gap:6px;flex-wrap:wrap}.admin-collection-move{min-width:38px!important;padding:7px 10px!important;font-size:16px!important;line-height:1!important}.admin-collection-move:disabled{opacity:.28;cursor:not-allowed}.admin-collection-move:not(:disabled):hover{border-color:#b99a62!important;color:#8f6f3f!important}.admin-collections-list h3{margin:0 0 10px}.admin-collection-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 0;border-top:1px solid #e5ded5}.admin-collection-row div{display:flex;flex-direction:column}.admin-collection-row small{color:#8b837b;margin-top:2px}.variant-mode-card{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 18px}.variant-mode{border:1px solid #d9d1c6;background:#fffdf9;border-radius:12px;padding:11px 12px;text-align:start;color:#5e574f}.variant-mode strong,.variant-mode small{display:block;margin-top:3px}.variant-mode small{color:#8f6f3f;font-size:11px}.variant-mode.active{background:#292622;border-color:#292622;color:#fffdf8}.pack-offer-modal .order-summary{margin:10px 0 16px}.pack-offer-modal .modal-actions{display:grid;gap:9px}.pack-offer-modal .btn-primary{background:#292622!important;color:#fffdf8!important}.pack-offer-modal .btn-ghost{background:#fffdf9!important}
   @media(max-width:720px){.admin-collections-order-head{flex-direction:column}.admin-collection-sort-row{grid-template-columns:30px 1fr}.admin-collection-sort-actions{grid-column:2;justify-content:flex-start;margin-top:7px}.admin-page-head{flex-direction:column}.admin-section-grid,.admin-two-col{grid-template-columns:1fr}.admin-three-col{grid-template-columns:1fr 1fr}.admin-toggle-row{flex-direction:column;align-items:stretch}.admin-stock{width:auto}.admin-product-summary{grid-template-columns:48px 1fr auto 16px}.admin-product-thumb{width:48px;height:48px}.admin-head-actions{width:100%}.admin-head-actions .btn{flex:1}.variant-mode-card{grid-template-columns:1fr 1fr}}
