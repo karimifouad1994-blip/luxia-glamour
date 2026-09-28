@@ -5255,6 +5255,19 @@ html[dir="rtl"] .lp-preview .lp-hero-clean .lp-hero-description{
 }
 </style>
 
+<style id="luxia-pyjama-title-contrast">
+/* Pyjama Style: hero product title must always be dark and readable on the light page.
+   The generic "soft white" hero-title rule (meant for the LUXIA dark hero) was also hitting
+   .lp-hero-body on Pyjama pages (white text on a cream background). Higher specificity fixes it. */
+.lp-preview.lp-theme-pyjama .lp-hero-pyjama .lp-hero-body .lp-title{
+  color:#241820 !important;
+  -webkit-text-fill-color:#241820 !important;
+  text-shadow:none !important;
+  font-weight:700 !important;
+  opacity:1 !important;
+}
+</style>
+
 <style id="luxia-landing-product-title-frame-premium">
 /* Cadre du titre produit (landing page) — visuel uniquement, plus élégant et harmonisé avec la charte du site. */
 body:not(.lp-pyjama-active) .lp-product-card:not(.lp-order-success) .lp-product-title-price-frame.lp-product-head-top b,
