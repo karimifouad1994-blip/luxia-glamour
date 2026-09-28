@@ -6425,11 +6425,26 @@ async function saveProductToSupabase(id){
   const p=PRODUCTS.find(x=>x.id===id); if(!p) throw new Error("Product not found");
   const __variants=PRODUCT_VARIANTS[id]||{};
   const __collectionId=__variants.unassigned ? null : (__variants.collectionId || null);
-  const row={name_fr:I18N.fr[p.nameKey],name_ar:I18N.ar[p.nameKey],desc_fr:I18N.fr[p.descKey],desc_ar:I18N.ar[p.descKey],badge_fr:I18N.fr[p.badgeKey],badge_ar:I18N.ar[p.badgeKey],price:p.price,enabled:p.enabled!==false,category:__collectionId,variants:JSON.parse(JSON.stringify(__variants)),images:PRODUCT_IMAGE_GALLERY[id]||null,video:p.video||""};
-  const result=await supabaseRequest(`${SUPABASE_PRODUCTS_URL}?id=eq.${encodeURIComponent(id)}&select=id`,{method:"PATCH",headers:{"Prefer":"return=representation"},body:JSON.stringify(row),token:getAdminToken()});
+  /* Collection is persisted inside variants.collectionId. Do not depend on a
+     separate category column: that field may not exist on older products/tables. */
+  const row={name_fr:I18N.fr[p.nameKey],name_ar:I18N.ar[p.nameKey],desc_fr:I18N.fr[p.descKey],desc_ar:I18N.ar[p.descKey],badge_fr:I18N.fr[p.badgeKey],badge_ar:I18N.ar[p.badgeKey],price:p.price,enabled:p.enabled!==false,variants:JSON.parse(JSON.stringify(__variants)),images:PRODUCT_IMAGE_GALLERY[id]||null,video:p.video||""};
+  const result=await supabaseRequest(`${SUPABASE_PRODUCTS_URL}?id=eq.${encodeURIComponent(id)}&select=id,variants,category`,{method:"PATCH",headers:{"Prefer":"return=representation"},body:JSON.stringify(row),token:getAdminToken()});
   if(!Array.isArray(result) || !result.length) throw new Error("Product update returned no row");
-  PRODUCT_BACKEND_ROWS[id]={...(PRODUCT_BACKEND_ROWS[id]||{}),...row};
-  return result[0];
+
+  /* Do not trust a successful HTTP PATCH alone: read the row back and verify
+     that the selected collection really reached the database. */
+  const verify=await supabaseRequest(`${SUPABASE_PRODUCTS_URL}?id=eq.${encodeURIComponent(id)}&select=id,variants,category`,{token:getAdminToken()});
+  if(!Array.isArray(verify) || !verify.length) throw new Error("Product verification returned no row");
+  const saved=verify[0];
+  const savedVariants=saved.variants && typeof saved.variants === "object" ? saved.variants : {};
+  const savedCollection=savedVariants.unassigned ? null : (savedVariants.collectionId || saved.category || null);
+  if(savedCollection !== __collectionId){
+    throw new Error("La collection n'a pas été persistée dans la base de données.");
+  }
+  PRODUCT_VARIANTS[id]=JSON.parse(JSON.stringify(savedVariants));
+  if(__collectionId){ PRODUCT_VARIANTS[id].collectionId=String(__collectionId); PRODUCT_VARIANTS[id].unassigned=false; }
+  PRODUCT_BACKEND_ROWS[id]={...(PRODUCT_BACKEND_ROWS[id]||{}),...saved};
+  return saved;
 }
 
 function loadProductOverrides(){ try{ return JSON.parse(localStorage.getItem(PRODUCT_OVERRIDES_KEY)||'{}'); }catch(e){ return {}; } }
@@ -9833,9 +9848,22 @@ async function saveProductEdits(id){
   if(packEnabled && (!packPieces || !Number.isFinite(packPrice) || packPrice<=0)){showToast(t('admin.packInvalid'));Object.assign(p,prev.p);I18N.fr[p.nameKey]=prev.i18n.nameFr;I18N.ar[p.nameKey]=prev.i18n.nameAr;I18N.fr[p.descKey]=prev.i18n.descFr;I18N.ar[p.descKey]=prev.i18n.descAr;I18N.fr[p.badgeKey]=prev.i18n.badgeFr;I18N.ar[p.badgeKey]=prev.i18n.badgeAr;PRODUCT_VARIANTS[id]=prev.v;renderAdminProducts();return;}
   saveProductVariants(PRODUCT_VARIANTS);
   const overrides=loadProductOverrides();overrides[id]={price:p.price,enabled:p.enabled,video:p.video,name:{fr:I18N.fr[p.nameKey],ar:I18N.ar[p.nameKey]},desc:{fr:I18N.fr[p.descKey],ar:I18N.ar[p.descKey]},badge:{fr:I18N.fr[p.badgeKey],ar:I18N.ar[p.badgeKey]}};saveProductOverrides(overrides);
-  try{if(isAdminAuthenticated())await saveProductToSupabase(id);normalizeLuxiaVariants();renderStoreCategoriesUI();renderProducts();showToast(enabled?t('admin.productSaved'):'تسجل، لكن المنتج غير مفعّل — ما غاديش يبان فالموقع حتى تفعّلو — Enregistré, mais désactivé : invisible sur le site');}
-  catch(err){Object.assign(p,prev.p);I18N.fr[p.nameKey]=prev.i18n.nameFr;I18N.ar[p.nameKey]=prev.i18n.nameAr;I18N.fr[p.descKey]=prev.i18n.descFr;I18N.ar[p.descKey]=prev.i18n.descAr;I18N.fr[p.badgeKey]=prev.i18n.badgeFr;I18N.ar[p.badgeKey]=prev.i18n.badgeAr;PRODUCT_VARIANTS[id]=prev.v;saveProductVariants(PRODUCT_VARIANTS);console.error(err);showToast(err?.message||t('admin.backendWriteError'));}
-  openProductId=id;renderAdminProducts();
+  try{
+    if(isAdminAuthenticated()) await saveProductToSupabase(id);
+    normalizeLuxiaVariants();
+    renderStoreCategoriesUI();
+    renderProducts();
+    showToast(enabled?t('admin.productSaved'):'تسجل، لكن المنتج غير مفعّل — ما غاديش يبان فالموقع حتى تفعّلو — Enregistré, mais désactivé : invisible sur le site');
+    /* Saving is complete: close the product editor instead of reopening it. */
+    openProductId=null;
+    renderAdminProducts();
+  }catch(err){
+    Object.assign(p,prev.p);I18N.fr[p.nameKey]=prev.i18n.nameFr;I18N.ar[p.nameKey]=prev.i18n.nameAr;I18N.fr[p.descKey]=prev.i18n.descFr;I18N.ar[p.descKey]=prev.i18n.descAr;I18N.fr[p.badgeKey]=prev.i18n.badgeFr;I18N.ar[p.badgeKey]=prev.i18n.badgeAr;PRODUCT_VARIANTS[id]=prev.v;saveProductVariants(PRODUCT_VARIANTS);
+    console.error(err);
+    showToast(err?.message||t('admin.backendWriteError'));
+    openProductId=id;
+    renderAdminProducts();
+  }
 }
 
 /* ============================================================
