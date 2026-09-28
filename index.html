@@ -9810,21 +9810,17 @@ async function saveProductEdits(id){
   const catalogType=val('catalog-type');
   const customCollectionId=val('custom-collection');
   const collectionId=catalogType==='custom'?(customCollectionId||null):catalogType||null;
-  const __oldRaw=val('oldprice'), __priceChk=parseFloat(priceRaw);
-  if(__oldRaw!=='' && (!Number.isFinite(parseFloat(__oldRaw)) || (Number.isFinite(__priceChk) && parseFloat(__oldRaw)<=__priceChk))){ showToast('Ancien prix : il doit être supérieur au prix actuel'); return; }
-  const __packOldRaw=val('pack-oldprice'), __packPriceChk=parseFloat(val('pack-price'));
-  if(!!document.getElementById(`pf-pack-enabled-${id}`)?.checked && __packOldRaw!=='' && (!Number.isFinite(parseFloat(__packOldRaw)) || (Number.isFinite(__packPriceChk) && parseFloat(__packOldRaw)<=__packPriceChk))){ showToast('Ancien prix du Pack : il doit être supérieur au prix du Pack'); return; }
-  if(!collectionId){ showToast('خاصك تختار المجموعة ديال المنتج قبل الحفظ'); return; }
-  if(enabled){
-    const __hasImg=!!((PRODUCT_IMAGE_GALLERY[id]&&PRODUCT_IMAGE_GALLERY[id].length)||PRODUCT_IMAGES[id]);
-    if(!__hasImg){ showToast('خاصك تزيد صورة وحدة على الأقل قبل ما تفعّل المنتج — Ajoutez au moins une image avant d’activer le produit'); return; }
-    if(!(parseFloat(priceRaw)>0)){ showToast('خاصك تكتب الثمن قبل ما تفعّل المنتج — Renseignez le prix avant d’activer le produit'); return; }
-  }
+  /* No product field is mandatory. The admin can save a partial product and
+     complete it later. Optional numeric fields are only stored when valid. */
+  const __oldRaw=val('oldprice');
+  const __oldParsed=parseFloat(__oldRaw);
+  const __packOldRaw=val('pack-oldprice');
+  const __packOldParsed=parseFloat(__packOldRaw);
   const prev=JSON.parse(JSON.stringify({p:{price:p.price,enabled:p.enabled,video:p.video},i18n:{nameFr:I18N.fr[p.nameKey],nameAr:I18N.ar[p.nameKey],descFr:I18N.fr[p.descKey],descAr:I18N.ar[p.descKey],badgeFr:I18N.fr[p.badgeKey],badgeAr:I18N.ar[p.badgeKey]},v:PRODUCT_VARIANTS[id]}));
   const v=PRODUCT_VARIANTS[id]||(PRODUCT_VARIANTS[id]={colors:[],sizes:[],stock:null,pack:null});
   if(nameFr)I18N.fr[p.nameKey]=nameFr;if(nameAr)I18N.ar[p.nameKey]=nameAr;
   const price=parseFloat(priceRaw);if(!Number.isNaN(price)&&price>=0)p.price=price;
-  I18N.fr[p.descKey]=descFr;I18N.ar[p.descKey]=descAr;I18N.fr[p.badgeKey]=badgeFr;I18N.ar[p.badgeKey]=badgeAr;p.video=video;p.enabled=enabled;v.stock=stock;v.collectionId=collectionId||null;v.unassigned=false;v.oldPrice=(__oldRaw===''||!Number.isFinite(parseFloat(__oldRaw)))?null:parseFloat(__oldRaw);
+  I18N.fr[p.descKey]=descFr;I18N.ar[p.descKey]=descAr;I18N.fr[p.badgeKey]=badgeFr;I18N.ar[p.badgeKey]=badgeAr;p.video=video;p.enabled=enabled;v.stock=stock;v.collectionId=collectionId||null;v.unassigned=!collectionId;v.oldPrice=(__oldRaw!==''&&Number.isFinite(__oldParsed))?__oldParsed:null;
   const packEnabled=!!document.getElementById(`pf-pack-enabled-${id}`)?.checked;
   const packPiecesRaw=val('pack-pieces'),packPieces=packPiecesRaw===''?null:Math.max(2,parseInt(packPiecesRaw,10));
   const packPriceRaw=val('pack-price'),packPrice=packPriceRaw===''?null:parseFloat(packPriceRaw);
@@ -9839,13 +9835,13 @@ async function saveProductEdits(id){
   },[]).filter(c=>c.fr||c.ar);
   const packSizes=Array.from(document.querySelectorAll(`.admin-pack-size[data-pid=\"${CSS.escape(id)}\"]`)).map(x=>x.value.trim()).filter(Boolean);
   const packOldPriceRaw=val('pack-oldprice');
-  const packExtra={badge:{fr:val('pack-badge-fr'),ar:val('pack-badge-ar')},label:{fr:val('pack-label-fr'),ar:val('pack-label-ar')},oldPrice:(packOldPriceRaw===''||!Number.isFinite(parseFloat(packOldPriceRaw)))?null:parseFloat(packOldPriceRaw)};
+  const packExtra={badge:{fr:val('pack-badge-fr'),ar:val('pack-badge-ar')},label:{fr:val('pack-label-fr'),ar:val('pack-label-ar')},oldPrice:(packOldPriceRaw!==''&&Number.isFinite(parseFloat(packOldPriceRaw)))?parseFloat(packOldPriceRaw):null};
   if(packEnabled){
     v.pack={...oldPack,enabled:true,pieces:packPieces,price:packPrice,name:{fr:packNameFr,ar:packNameAr},contents:{fr:packContentsFr,ar:packContentsAr},colors:packColors,sizes:packSizes,...packExtra};
   }else{
     v.pack={...oldPack,enabled:false,pieces:packPieces,price:packPrice,name:{fr:packNameFr,ar:packNameAr},contents:{fr:packContentsFr,ar:packContentsAr},colors:packColors,sizes:packSizes,...packExtra};
   }
-  if(packEnabled && (!packPieces || !Number.isFinite(packPrice) || packPrice<=0)){showToast(t('admin.packInvalid'));Object.assign(p,prev.p);I18N.fr[p.nameKey]=prev.i18n.nameFr;I18N.ar[p.nameKey]=prev.i18n.nameAr;I18N.fr[p.descKey]=prev.i18n.descFr;I18N.ar[p.descKey]=prev.i18n.descAr;I18N.fr[p.badgeKey]=prev.i18n.badgeFr;I18N.ar[p.badgeKey]=prev.i18n.badgeAr;PRODUCT_VARIANTS[id]=prev.v;renderAdminProducts();return;}
+  /* An incomplete Pack is allowed and saved as entered. */
   saveProductVariants(PRODUCT_VARIANTS);
   const overrides=loadProductOverrides();overrides[id]={price:p.price,enabled:p.enabled,video:p.video,name:{fr:I18N.fr[p.nameKey],ar:I18N.ar[p.nameKey]},desc:{fr:I18N.fr[p.descKey],ar:I18N.ar[p.descKey]},badge:{fr:I18N.fr[p.badgeKey],ar:I18N.ar[p.badgeKey]}};saveProductOverrides(overrides);
   try{
