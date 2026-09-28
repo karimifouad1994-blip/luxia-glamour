@@ -2172,56 +2172,15 @@ body.luxia-store-home .product-grid > .product-card{
 
 
 <style id="luxia-private-admin-ui">
-/* Admin is intentionally not exposed on the public storefront.
-   Access remains available through the existing /#admin route. */
-.admin-entry,
-.admin-link,
-.admin-button,
-#adminEntry,
-#adminLink,
-[data-admin-link],
-[data-admin-entry]{
-  display:none !important;
-}
+/* Admin launcher is visible by default. It can be hidden later with the built-in control. */
+.admin-entry,.admin-link,.admin-button,#adminEntry,#adminLink,[data-admin-link],[data-admin-entry]{display:inline-flex;}
 </style>
 
 
-<style id="luxia-hide-admin-visible">
-/* Keep #admin route/dashboard intact, but never expose an Admin entry on storefront. */
-a[href="#admin"], a[href$="#admin"],
-button[onclick*="#admin"], [data-action="admin"],
-.admin-entry, .admin-link, .admin-button {
-  display:none !important;
-}
-</style>
+<style id="luxia-hide-admin-visible">/* Admin visibility is controlled by the launcher script below. */</style>
 
 
-<style id="luxia-hide-admin-pill-final">
-/* Never expose the Admin entry point on the public storefront. */
-#adminBtn,
-#admin-button,
-.admin-fab,
-.admin-floating,
-.admin-pill,
-.admin-entry,
-.admin-link,
-.admin-button,
-[data-admin],
-[data-admin-link],
-[data-admin-entry]{
-  display:none !important;
-  visibility:hidden !important;
-  pointer-events:none !important;
-}
-
-/* Fallback for the existing fixed admin control in this template. */
-body > button,
-body > a,
-body > div button,
-body > div a{
-  /* scoped by JS below when their visible label is ADMIN */
-}
-</style>
+<style id="luxia-hide-admin-pill-final">/* Admin visibility is controlled by the launcher script below. */</style>
 
 
 <style id="luxia-hero-logo-luxury-light">
@@ -5657,6 +5616,7 @@ body .lp-preview.lp-preview .lp-picker .lp-picker-pills .pill.selected{backgroun
 <!-- ADMIN OVERLAY -->
 <div class="admin-overlay" id="adminOverlay">
   <button class="modal-close admin-close" id="adminClose" aria-label="Fermer"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+  <button type="button" id="adminHideLauncherBtn" class="admin-hide-launcher-btn">Masquer ADMIN</button>
   <div class="admin-wrap" id="adminWrap"></div>
 </div>
 
@@ -6428,16 +6388,16 @@ async function saveProductToSupabase(id){
   /* Collection is persisted inside variants.collectionId. Do not depend on a
      separate category column: that field may not exist on older products/tables. */
   const row={name_fr:I18N.fr[p.nameKey],name_ar:I18N.ar[p.nameKey],desc_fr:I18N.fr[p.descKey],desc_ar:I18N.ar[p.descKey],badge_fr:I18N.fr[p.badgeKey],badge_ar:I18N.ar[p.badgeKey],price:p.price,enabled:p.enabled!==false,variants:JSON.parse(JSON.stringify(__variants)),images:PRODUCT_IMAGE_GALLERY[id]||null,video:p.video||""};
-  const result=await supabaseRequest(`${SUPABASE_PRODUCTS_URL}?id=eq.${encodeURIComponent(id)}&select=id,variants,category`,{method:"PATCH",headers:{"Prefer":"return=representation"},body:JSON.stringify(row),token:getAdminToken()});
+  const result=await supabaseRequest(`${SUPABASE_PRODUCTS_URL}?id=eq.${encodeURIComponent(id)}&select=id,variants`,{method:"PATCH",headers:{"Prefer":"return=representation"},body:JSON.stringify(row),token:getAdminToken()});
   if(!Array.isArray(result) || !result.length) throw new Error("Product update returned no row");
 
   /* Do not trust a successful HTTP PATCH alone: read the row back and verify
      that the selected collection really reached the database. */
-  const verify=await supabaseRequest(`${SUPABASE_PRODUCTS_URL}?id=eq.${encodeURIComponent(id)}&select=id,variants,category`,{token:getAdminToken()});
+  const verify=await supabaseRequest(`${SUPABASE_PRODUCTS_URL}?id=eq.${encodeURIComponent(id)}&select=id,variants`,{token:getAdminToken()});
   if(!Array.isArray(verify) || !verify.length) throw new Error("Product verification returned no row");
   const saved=verify[0];
   const savedVariants=saved.variants && typeof saved.variants === "object" ? saved.variants : {};
-  const savedCollection=savedVariants.unassigned ? null : (savedVariants.collectionId || saved.category || null);
+  const savedCollection=savedVariants.unassigned ? null : (savedVariants.collectionId || null);
   if(savedCollection !== __collectionId){
     throw new Error("La collection n'a pas été persistée dans la base de données.");
   }
@@ -7593,6 +7553,7 @@ document.getElementById("submitOrder").addEventListener("click", async ()=>{
    ============================================================ */
 const adminOverlay = document.getElementById("adminOverlay");
 document.getElementById("adminClose").addEventListener("click", ()=>{ adminOverlay.classList.remove("open"); });
+document.getElementById("adminHideLauncherBtn")?.addEventListener("click", ()=>{ window.setAdminLauncherVisible?.(false); adminOverlay.classList.remove("open"); });
 
 /* Handle Supabase "reset password" email links: Supabase redirects back to the
    site with #access_token=...&type=recovery in the URL hash. We detect that,
@@ -7616,6 +7577,7 @@ document.getElementById("adminClose").addEventListener("click", ()=>{ adminOverl
 })();
 
 function openAdmin(){
+  window.setAdminLauncherVisible?.(true);
   adminOverlay.classList.add("open");
   if(isAdminAuthenticated()) renderAdminOrders();
   else renderAdminLogin();
@@ -9875,13 +9837,13 @@ async function addNewProductAdmin(){
   I18N.fr[nameKey] = "Nouveau produit"; I18N.ar[nameKey] = "منتج جديد";
   I18N.fr[descKey] = ""; I18N.ar[descKey] = "";
   I18N.fr[badgeKey] = ""; I18N.ar[badgeKey] = "";
-  const p = { id, nameKey, descKey, badgeKey, price:0, enabled:false, video:"" };
+  const p = { id, nameKey, descKey, badgeKey, price:0, enabled:true, video:"" };
   PRODUCT_VARIANTS[id] = { colors: [], sizes: [], stock:null, pack:null, collectionId:null, unassigned:true };
   PRODUCT_IMAGE_GALLERY[id] = [];
   PRODUCT_IMAGES[id] = "";
   const row = {
     id, name_fr:I18N.fr[nameKey], name_ar:I18N.ar[nameKey], desc_fr:"", desc_ar:"", badge_fr:"", badge_ar:"",
-    price:0, enabled:false, variants:PRODUCT_VARIANTS[id], images:null, video:""
+    price:0, enabled:true, variants:PRODUCT_VARIANTS[id], images:null, video:""
   };
   try{
     await supabaseRequest(SUPABASE_PRODUCTS_URL, {method:"POST", headers:{"Prefer":"return=minimal"}, body:JSON.stringify([row]), token:getAdminToken()});
@@ -10356,52 +10318,49 @@ function highlightProductFromUrl(){
 
 <script id="luxia-local-admin-preview-script">
 (function(){
+  const STORAGE_KEY='luxia_admin_launcher_visible';
+  function isVisible(){
+    const raw=localStorage.getItem(STORAGE_KEY);
+    return raw===null ? true : raw==='1';
+  }
   function findAdminLauncher(){
-    const selectors = [
-      '[data-admin]',
-      '#adminBtn',
-      '#openAdmin',
-      '.admin-open',
-      '[onclick*="admin"]',
-      '[onclick*="Admin"]'
-    ];
-    for(const s of selectors){
-      const el=document.querySelector(s);
-      if(el) return el;
-    }
+    const selectors=['[data-admin]','#adminBtn','#openAdmin','.admin-open','[onclick*="admin"]','[onclick*="Admin"]'];
+    for(const sel of selectors){const el=document.querySelector(sel);if(el) return el;}
     return null;
   }
-
   function openAdmin(){
+    localStorage.setItem(STORAGE_KEY,'1');
     const launcher=findAdminLauncher();
-    if(launcher){
-      launcher.click();
-      return;
-    }
-    // Fall back to common global admin functions if the existing file exposes one.
+    if(launcher){launcher.click();return;}
     const names=['openAdmin','showAdmin','openAdminPanel','toggleAdmin'];
-    for(const n of names){
-      if(typeof window[n]==='function'){
-        try{ window[n](); return; }catch(e){}
-      }
-    }
-    alert('هاد النسخة ما لقاتش زر/وظيفة فتح Admin فالكود الحالي.');
+    for(const n of names){if(typeof window[n]==='function'){try{window[n]();return;}catch(e){}}}
+    location.hash='#admin';
   }
-
+  function applyVisibility(){
+    const visible=isVisible();
+    const b=document.getElementById('localAdminPreviewBtn');
+    if(b){b.style.display=visible?'inline-flex':'none';b.setAttribute('aria-hidden',visible?'false':'true');}
+    document.querySelectorAll('a[href="#admin"],a[href$="#admin"],[data-admin-link],[data-admin-entry]').forEach(el=>{
+      if(el.id==='localAdminPreviewBtn') return;
+      el.style.display=visible?'':'none';
+      el.style.visibility=visible?'':'hidden';
+      el.style.pointerEvents=visible?'':'none';
+    });
+  }
+  window.setAdminLauncherVisible=function(visible){
+    localStorage.setItem(STORAGE_KEY,visible?'1':'0');
+    applyVisibility();
+  };
   function addLauncher(){
-    if(document.getElementById('localAdminPreviewBtn')) return;
-    const b=document.createElement('button');
-    b.id='localAdminPreviewBtn';
-    b.type='button';
-    b.textContent='ADMIN';
-    b.title='فتح لوحة الإدارة في المعاينة المحلية';
-    b.addEventListener('click',openAdmin);
-    document.body.appendChild(b);
+    let b=document.getElementById('localAdminPreviewBtn');
+    if(!b){
+      b=document.createElement('button');b.id='localAdminPreviewBtn';b.type='button';b.textContent='ADMIN';b.title='Ouvrir la gestion';
+      b.addEventListener('click',openAdmin);document.body.appendChild(b);
+    }
+    applyVisibility();
   }
-
-  if(document.readyState==='loading'){
-    document.addEventListener('DOMContentLoaded',addLauncher,{once:true});
-  }else addLauncher();
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',addLauncher,{once:true});else addLauncher();
+  new MutationObserver(applyVisibility).observe(document.documentElement,{childList:true,subtree:true});
 })();
 </script>
 
@@ -10449,29 +10408,7 @@ function highlightProductFromUrl(){
 
 <script id="luxia-remove-public-admin-runtime">
 (function(){
-  function hidePublicAdmin(){
-    document.querySelectorAll('button,a,[role="button"]').forEach(function(el){
-      var txt=(el.textContent||'').replace(/\s+/g,' ').trim().toUpperCase();
-      if(txt === 'ADMIN'){
-        /* Keep the actual #admin route available; only hide the visible entry. */
-        if((el.getAttribute('href')||'').toLowerCase()==='#admin') {
-          el.style.display='none';
-          el.style.visibility='hidden';
-          el.style.pointerEvents='none';
-        } else {
-          el.style.display='none';
-          el.style.visibility='hidden';
-          el.style.pointerEvents='none';
-        }
-      }
-    });
-  }
-  if(document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded',hidePublicAdmin);
-  }else{
-    hidePublicAdmin();
-  }
-  new MutationObserver(hidePublicAdmin).observe(document.documentElement,{childList:true,subtree:true});
+  /* Kept for compatibility: admin visibility is now managed by #luxia-local-admin-preview-script. */
 })();
 </script>
 
