@@ -5402,6 +5402,10 @@ body .lp-preview.lp-preview .lp-picker .lp-picker-pills .pill.selected{backgroun
 .admin-collection-group-title b{min-width:26px;height:26px;padding:0 8px;display:inline-flex;align-items:center;justify-content:center;border-radius:999px;background:#b99a62;color:#fff;font-size:12px;}
 .admin-collection-group.is-none .admin-collection-group-title{background:#b99a62;}
 .admin-collection-group.is-none .admin-collection-group-title b{background:#292622;}
+/* FIX: .admin-wrap h3{color:#292622!important} rendait le titre sombre sur fond sombre */
+.admin-wrap h3.admin-collection-group-title,#adminWrap h3.admin-collection-group-title{color:#fff!important;font-size:15px;font-weight:600;}
+.admin-wrap h3.admin-collection-group-title span,#adminWrap h3.admin-collection-group-title span{color:#fff!important;}
+.admin-wrap h3.admin-collection-group-title b,#adminWrap h3.admin-collection-group-title b{color:#fff!important;}
 </style>
 <style id="luxia-offer-banner">
 .lx-offer-wrap{margin:0 0 18px;}
@@ -5807,6 +5811,7 @@ function buildProductVariants(){
     const backend = PRODUCT_BACKEND_ROWS[p.id] || {};
     const s = backend.variants || stored[p.id] || {};
     result[p.id] = {
+      ...s, /* FIX: garder collectionId, unassigned et tout autre champ (avant, ils étaient perdus à chaque chargement -> retour à "lingerie") */
       colors: (Array.isArray(s.colors) ? s.colors : []).slice(),
       sizes:  (Array.isArray(s.sizes) ? s.sizes : []).slice(),
       stock:  (typeof s.stock === "number" && !isNaN(s.stock)) ? s.stock : null,
@@ -6840,11 +6845,14 @@ function openProductDetailModal(id){
     const needsColor=colors.length>0, needsSize=sizes.length>0;
     const missingColor=needsColor&&!detailColor, missingSize=needsSize&&!detailSize;
     if(missingColor||missingSize){
-      const target=missingColor?m.querySelector('#detailColorGroup'):m.querySelector('#detailSizeGroup');
-      target?.classList.add('luxia-variant-attention','luxia-variant-missing');
-      setTimeout(()=>target?.classList.remove('luxia-variant-attention'),1600);
-      target?.scrollIntoView({behavior:'smooth',block:'center'});
-      showToast(lang==='ar' ? (missingColor&&missingSize?'اختاري اللون والمقاس أولاً':missingColor?'اختاري اللون أولاً':'اختاري المقاس أولاً') : (missingColor&&missingSize?'Choisissez la couleur et la taille':'Choisissez d’abord '+(missingColor?'la couleur':'la taille')));
+      /* Pas de pack : on ouvre d'abord la fenêtre "couleur + taille" (même logique que le pack),
+         puis la cliente continue vers le panier / la commande. */
+      closeProductDetailForPack();
+      window.__lxReturnDetailId=id;
+      openVariantModal(id,'piece');
+      if(detailColor){ variantState.color=detailColor; }
+      if(detailSize){ variantState.size=detailSize; }
+      renderVariantOptions(); updateVariantSummary();
       return;
     }
     currentVariantProduct=p;
@@ -7151,7 +7159,11 @@ function openVariantModal(productId, mode='piece'){
   openModal(variantOverlay);
 }
 function closeVariantModal(){ closeModal(variantOverlay); }
-document.getElementById("variantClose").addEventListener("click", closeVariantModal);
+document.getElementById("variantClose").addEventListener("click", ()=>{
+  closeVariantModal();
+  const rid=window.__lxReturnDetailId; window.__lxReturnDetailId=null;
+  if(rid) setTimeout(()=>openProductDetailModal(rid),60);
+});
 function renderVariantModeSwitch(){
   const modal=document.querySelector('#variantOverlay .modal'); if(!modal||!currentVariantProduct) return;
   let box=document.getElementById('variantModeSwitch');
@@ -7240,6 +7252,7 @@ document.getElementById('addToCartBtn').addEventListener('click',()=>{
   const existing=cart.find(i=>i.productId===currentVariantProduct.id&&i.mode===(pack?'pack':'piece')&&(Array.isArray(i.colors)?JSON.stringify(i.colors):(i.color||''))===colorKey&&i.size===(variantState.size||''));
   if(existing) existing.qty+=variantState.qty;
   else cart.push({lineId:'l'+Date.now()+Math.random().toString(36).slice(2,7),productId:currentVariantProduct.id,nameKey:currentVariantProduct.nameKey,mode:pack?'pack':'piece',packPieces:pack?getPackPieces(currentVariantProduct.id):1,price,color:pack?colors[0]:variantState.color,colors:pack?colors.slice():null,size:variantState.size||'',qty:variantState.qty});
+  window.__lxReturnDetailId=null;
   saveCart();updateCartBadge();closeVariantModal();
   /* After a successful add, always leave the product-detail view immediately.
      The cart keeps the selected colour/size exactly as before. */
@@ -9541,7 +9554,7 @@ function renderAdminProducts(){
             <div class="admin-two-col"><div class="field"><label>${t('admin.field.badgeFr')}</label><input type="text" id="pf-badge-fr-${p.id}" value="${escAttr(I18N.fr[p.badgeKey]||'')}"></div><div class="field"><label>${t('admin.field.badgeAr')}</label><input type="text" id="pf-badge-ar-${p.id}" value="${escAttr(I18N.ar[p.badgeKey]||'')}"></div></div>
             <div class="field"><label>${t('admin.field.video')}</label><input type="text" id="pf-video-${p.id}" value="${escAttr(p.video||'')}" placeholder="https://.../video.mp4" style="direction:ltr;text-align:left;"></div>
             <div class="field"><label>${t('admin.videoUploadLabel')}</label><input type="file" accept="video/*" id="pf-video-file-${p.id}"><span id="pf-video-status-${p.id}" class="admin-upload-status"></span></div>
-            <div class="admin-toggle-row"><label><input type="checkbox" id="pf-enabled-${p.id}" ${enabled?'checked':''}> <span>${t('admin.field.enabled')}</span></label><div class="field admin-stock"><label>${t('admin.field.stock')}</label><input type="number" min="0" step="1" id="pf-stock-${p.id}" placeholder="${t('admin.field.stockPlaceholder')}" value="${v.stock==null?'':v.stock}"></div></div>
+            <div class="admin-toggle-row"><label><input type="checkbox" id="pf-enabled-${p.id}" ${(enabled||v.unassigned)?'checked':''}> <span>${t('admin.field.enabled')}</span></label><div class="field admin-stock"><label>${t('admin.field.stock')}</label><input type="number" min="0" step="1" id="pf-stock-${p.id}" placeholder="${t('admin.field.stockPlaceholder')}" value="${v.stock==null?'':v.stock}"></div></div>
           </section>
 
           <section class="admin-section-card"><div class="admin-section-title"><span>02</span><div><h3>${t('admin.variantsTitle')}</h3><p>${t('admin.variantsHint')}</p></div></div>
@@ -9748,6 +9761,11 @@ async function saveProductEdits(id){
   const __packOldRaw=val('pack-oldprice'), __packPriceChk=parseFloat(val('pack-price'));
   if(!!document.getElementById(`pf-pack-enabled-${id}`)?.checked && __packOldRaw!=='' && (!Number.isFinite(parseFloat(__packOldRaw)) || (Number.isFinite(__packPriceChk) && parseFloat(__packOldRaw)<=__packPriceChk))){ showToast('Ancien prix du Pack : il doit être supérieur au prix du Pack'); return; }
   if(!collectionId){ showToast('خاصك تختار المجموعة ديال المنتج قبل الحفظ'); return; }
+  if(enabled){
+    const __hasImg=!!((PRODUCT_IMAGE_GALLERY[id]&&PRODUCT_IMAGE_GALLERY[id].length)||PRODUCT_IMAGES[id]);
+    if(!__hasImg){ showToast('خاصك تزيد صورة وحدة على الأقل قبل ما تفعّل المنتج — Ajoutez au moins une image avant d’activer le produit'); return; }
+    if(!(parseFloat(priceRaw)>0)){ showToast('خاصك تكتب الثمن قبل ما تفعّل المنتج — Renseignez le prix avant d’activer le produit'); return; }
+  }
   const prev=JSON.parse(JSON.stringify({p:{price:p.price,enabled:p.enabled,video:p.video},i18n:{nameFr:I18N.fr[p.nameKey],nameAr:I18N.ar[p.nameKey],descFr:I18N.fr[p.descKey],descAr:I18N.ar[p.descKey],badgeFr:I18N.fr[p.badgeKey],badgeAr:I18N.ar[p.badgeKey]},v:PRODUCT_VARIANTS[id]}));
   const v=PRODUCT_VARIANTS[id]||(PRODUCT_VARIANTS[id]={colors:[],sizes:[],stock:null,pack:null});
   if(nameFr)I18N.fr[p.nameKey]=nameFr;if(nameAr)I18N.ar[p.nameKey]=nameAr;
@@ -9776,7 +9794,7 @@ async function saveProductEdits(id){
   if(packEnabled && (!packPieces || !Number.isFinite(packPrice) || packPrice<=0)){showToast(t('admin.packInvalid'));Object.assign(p,prev.p);I18N.fr[p.nameKey]=prev.i18n.nameFr;I18N.ar[p.nameKey]=prev.i18n.nameAr;I18N.fr[p.descKey]=prev.i18n.descFr;I18N.ar[p.descKey]=prev.i18n.descAr;I18N.fr[p.badgeKey]=prev.i18n.badgeFr;I18N.ar[p.badgeKey]=prev.i18n.badgeAr;PRODUCT_VARIANTS[id]=prev.v;renderAdminProducts();return;}
   saveProductVariants(PRODUCT_VARIANTS);
   const overrides=loadProductOverrides();overrides[id]={price:p.price,enabled:p.enabled,video:p.video,name:{fr:I18N.fr[p.nameKey],ar:I18N.ar[p.nameKey]},desc:{fr:I18N.fr[p.descKey],ar:I18N.ar[p.descKey]},badge:{fr:I18N.fr[p.badgeKey],ar:I18N.ar[p.badgeKey]}};saveProductOverrides(overrides);
-  try{if(isAdminAuthenticated())await saveProductToSupabase(id);normalizeLuxiaVariants();renderStoreCategoriesUI();renderProducts();showToast(t('admin.productSaved'));}
+  try{if(isAdminAuthenticated())await saveProductToSupabase(id);normalizeLuxiaVariants();renderStoreCategoriesUI();renderProducts();showToast(enabled?t('admin.productSaved'):'تسجل، لكن المنتج غير مفعّل — ما غاديش يبان فالموقع حتى تفعّلو — Enregistré, mais désactivé : invisible sur le site');}
   catch(err){Object.assign(p,prev.p);I18N.fr[p.nameKey]=prev.i18n.nameFr;I18N.ar[p.nameKey]=prev.i18n.nameAr;I18N.fr[p.descKey]=prev.i18n.descFr;I18N.ar[p.descKey]=prev.i18n.descAr;I18N.fr[p.badgeKey]=prev.i18n.badgeFr;I18N.ar[p.badgeKey]=prev.i18n.badgeAr;PRODUCT_VARIANTS[id]=prev.v;saveProductVariants(PRODUCT_VARIANTS);console.error(err);showToast(err?.message||t('admin.backendWriteError'));}
   openProductId=id;renderAdminProducts();
 }
@@ -10201,7 +10219,7 @@ function highlightProductFromUrl(){
   }
   window.getStoreProductCollection=getStoreProductCollectionNew;
   window.getStoreProductCategory=function(p){return getStoreProductCollectionNew(p);};
-  window.getStoreFilteredProducts=function(){const enabled=PRODUCTS.filter(p=>p.enabled!==false);return activeStoreCategory==='all'?enabled:enabled.filter(p=>getStoreProductCollectionNew(p)===activeStoreCategory);};
+  window.getStoreFilteredProducts=function(){const enabled=PRODUCTS.filter(p=>p.enabled!==false&&((PRODUCT_IMAGE_GALLERY[p.id]&&PRODUCT_IMAGE_GALLERY[p.id].length)||PRODUCT_IMAGES[p.id]));return activeStoreCategory==='all'?enabled:enabled.filter(p=>getStoreProductCollectionNew(p)===activeStoreCategory);};
   window.renderStoreCategoriesUI=function(){
     const cols=getLuxiaCollections(),pills=document.getElementById('storeCategoryPills'),menu=document.getElementById('storeMenuList');
     if(pills)pills.innerHTML=`<button type="button" class="store-filter ${activeStoreCategory==='all'?'active':''}" data-category="all" role="tab" aria-selected="${activeStoreCategory==='all'}">${currentLang==='ar'?'الكل':'TOUS'}</button>`+cols.map(c=>`<button type="button" class="store-filter ${activeStoreCategory===c.id?'active':''}" data-category="${escAttr(c.id)}" role="tab" aria-selected="${activeStoreCategory===c.id}">${escHtml(c[currentLang]||c.fr)}</button>`).join('');
