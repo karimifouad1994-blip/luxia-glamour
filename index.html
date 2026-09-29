@@ -214,6 +214,7 @@ footer{background:var(--bg-deep); border-top:1px solid var(--line); padding:56px
 @media(min-width:640px){.footer-bottom{flex-direction:row; justify-content:space-between;}}
 .admin-link{font-size:calc(10px * var(--font-scale)); color:#ffffff30; letter-spacing:.08em;}
 .admin-link:hover{color:var(--ivory-dim);}
+#adminLink{color:#5f5851!important;opacity:1;text-decoration:none;font-size:12px;letter-spacing:.06em;border:1px solid #d9d1c6;padding:6px 14px;border-radius:20px;background:transparent;}#adminLink:hover{color:#292622!important;border-color:#9b7844;}
 
 /* MODALS (shared) */
 .modal-overlay{position:fixed; inset:0; z-index:1000; background:rgba(12,6,9,.72); backdrop-filter:blur(6px); display:none; align-items:flex-end; justify-content:center; opacity:0; transition:opacity .3s ease;}
@@ -5518,6 +5519,7 @@ body .lp-preview.lp-preview .lp-picker .lp-picker-pills .pill.selected{backgroun
     </div>
     <div class="footer-bottom">
       <span>© 2026 <span data-brand-mark>LUXIA</span> — <span data-i18n="footer.rights">Tous droits réservés</span></span>
+      <a class="admin-link" id="adminLink" href="#admin" data-i18n="admin.link">Admin</a>
       <div class="lang-switch">
         <button type="button" class="lang-btn active" data-lang="fr">🇫🇷 FR</button>
         <button type="button" class="lang-btn" data-lang="ar">🇲🇦 AR</button>
@@ -6165,7 +6167,15 @@ function applySiteTheme(){
     else document.documentElement.style.removeProperty(cssVar);
   });
 }
+function applySiteAdminLink(){
+  const raw=(SITE_CONTENT.fr && SITE_CONTENT.fr.__show_admin_link!==undefined ? SITE_CONTENT.fr.__show_admin_link : (SITE_CONTENT.ar ? SITE_CONTENT.ar.__show_admin_link : undefined));
+  const visible=!(raw==='0' || raw===0 || raw===false);
+  const el=document.getElementById("adminLink");
+  if(!el) return;
+  if(visible) el.style.removeProperty("display"); else el.style.setProperty("display","none","important");
+}
 function applyBrandName(){
+  try{ applySiteAdminLink(); }catch(e){}
   const name=(SITE_BRAND_NAME||"LUXIA").trim()||"LUXIA";
   document.querySelectorAll("[data-brand-mark]").forEach(el=>{ el.textContent=name; });
   document.title=`${name} — Luxury Collection`;
@@ -6745,6 +6755,7 @@ function ensureProductDetailModal(){
     clearProductDetailGalleryTimer();
     m.classList.remove('open');
     m.setAttribute('aria-hidden','true');
+    try{ luxiaClearProductParam(); }catch(e){}
   };
   m.querySelector('#productDetailClose').addEventListener('click',close);
   m.addEventListener('click',e=>{if(e.target===m)close();});
@@ -7575,6 +7586,8 @@ function adminLanguageSwitcherHTML(){
     <button type="button" class="lang-btn" data-lang="ar">🇲🇦 AR</button>
   </div>`;
 }
+document.getElementById("adminLink")?.addEventListener("click",function(e){ e.preventDefault(); openAdmin(); });
+window.addEventListener("hashchange",function(){ if(location.hash==="#admin") openAdmin(); });
 function refreshOpenAdminView(){
   if(!adminOverlay.classList.contains("open")) return;
   if(isAdminAuthenticated()){
@@ -7870,6 +7883,16 @@ async function renderAdminSettings(){
       <button class="btn btn-primary" id="saveSiteWhatsappBtn" style="margin-top:12px;">حفظ رقم WhatsApp</button>
     </div>
     <div style="height:1px; background:var(--line); margin:30px 0;"></div>
+    <h3 style="font-family:var(--font-display); font-size:calc(24px * var(--font-scale)); margin-bottom:10px;">رابط الأدمين في الموقع / Lien Admin sur le site</h3>
+    <p style="color:var(--ivory-dim); font-size:calc(12px * var(--font-scale)); margin-bottom:14px;">إلا خبيتيه، تقدر دخل للأدمين مباشرة بالرابط /#admin — Si masqué, l'admin reste accessible via /#admin.</p>
+    <div class="field" style="max-width:700px;">
+      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+        <input type="checkbox" id="siteShowAdminLink" ${(SITE_CONTENT.fr&&SITE_CONTENT.fr.__show_admin_link==='0')||(SITE_CONTENT.ar&&SITE_CONTENT.ar.__show_admin_link==='0')?'':'checked'} style="width:auto;">
+        <span>إظهار رابط الأدمين في واجهة الموقع / Afficher le lien Admin</span>
+      </label>
+      <button class="btn btn-primary" id="saveSiteAdminLinkBtn" style="margin-top:12px;">حفظ / Enregistrer</button>
+    </div>
+    <div style="height:1px; background:var(--line); margin:30px 0;"></div>
     <h3 style="font-family:var(--font-display); font-size:calc(24px * var(--font-scale)); margin-bottom:10px;">مصاريف التوصيل</h3>
     <p style="color:var(--ivory-dim); font-size:calc(12px * var(--font-scale)); margin-bottom:14px;">حددي تمن التوصيل للدار البيضاء وتمن التوصيل لباقي المدن. هاد التغيير كيبان مباشرة فالموقع وفصفحات اللاندينغ.</p>
     <div class="field" style="max-width:700px; display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:16px;">
@@ -8041,6 +8064,19 @@ async function renderAdminSettings(){
       diagAppend(`DONE: threw error -> ${err?.message||err}`);
       console.error(err); showToast(err?.message || t("admin.backendWriteError"));
     }finally{ waBtn.disabled=false; }
+  });
+  const adminLinkBtn=document.getElementById("saveSiteAdminLinkBtn");
+  if(adminLinkBtn) adminLinkBtn.addEventListener("click",async()=>{
+    const show=document.getElementById("siteShowAdminLink").checked;
+    adminLinkBtn.disabled=true;
+    try{
+      const content={fr:{...(SITE_CONTENT.fr||{})},ar:{...(SITE_CONTENT.ar||{})}};
+      content.fr.__show_admin_link=show?"1":"0"; content.ar.__show_admin_link=show?"1":"0";
+      await saveSiteContent(content);
+      applySiteAdminLink();
+      showToast(t("admin.settingsSaved"));
+    }catch(err){ console.error(err); showToast(err?.message || t("admin.backendWriteError")); }
+    finally{ adminLinkBtn.disabled=false; }
   });
   const shippingBtn=document.getElementById("saveShippingSettingsBtn");
   if(shippingBtn) shippingBtn.addEventListener("click",async()=>{
@@ -9579,6 +9615,8 @@ function renderAdminProducts(){
           <div class="admin-pack-variants"><div class="admin-block-head"><strong>Couleurs & tailles du Pack — الألوان والمقاسات</strong><small>Le Pack reprend automatiquement les couleurs et les tailles du produit principal (section 02), avec le même affichage. Rien à configurer ici.</small></div></div>
         </section>
 
+        ${luxiaProductLinkCardHTML(p)}
+
         <div class="admin-save-row"><button type="button" class="btn btn-primary" data-save="${p.id}">${t('admin.save')}</button><button type="button" class="btn btn-ghost" data-deleteproduct="${p.id}">🗑 ${t('admin.deleteProduct')}</button></div>
       </div>
     </div>`;
@@ -9599,7 +9637,7 @@ function renderAdminProducts(){
   document.querySelectorAll('[data-deleteproduct]').forEach(btn=>btn.addEventListener('click',async e=>{e.preventDefault();e.stopPropagation();await deleteProductAdmin(String(btn.dataset.deleteproduct));}));
   document.getElementById('addProductBtn')?.addEventListener('click',addNewProductAdmin);
   document.getElementById('adminLogoutBtn')?.addEventListener('click',()=>signOutAdmin());
-  bindProductImageEvents(); bindProductVariantEvents(); bindAdminPackEvents(); bindAdminCatalogTypeEvents(); bindAdminOfferCard();
+  bindProductImageEvents(); bindProductVariantEvents(); bindAdminPackEvents(); bindAdminCatalogTypeEvents(); bindAdminOfferCard(); bindAdminDirectLinks();
 }
 
 
@@ -10048,7 +10086,7 @@ window.addEventListener("DOMContentLoaded",()=>{
        and rendering the landing page. This removes the blank ~2s startup gap. */
     bootLandingRoute();
   }else{
-    luneaInitPromise.catch(()=>{}).then(highlightProductFromUrl);
+    luneaInitPromise.catch(()=>{}).then(()=>{ highlightProductFromUrl(); luxiaOpenProductFromUrl(); });
   }
 });
 
@@ -10056,6 +10094,66 @@ window.addEventListener("DOMContentLoaded",()=>{
    link land here with ?product=<id>. We scroll straight to that exact
    product — so her attention isn't lost among the whole catalogue — while
    leaving the rest of the store fully scrollable/browsable as usual. */
+/* ============================================================
+   LIEN DIRECT PAR PRODUIT  —  /?produit=<id>
+   Chaque produit (déjà en base OU ajouté plus tard depuis l'admin) a un
+   identifiant unique (p.id). Le lien direct utilise cet id : deux produits
+   avec le même nom ont donc TOUJOURS deux liens différents. Le lien ouvre
+   directement la fiche du produit (photos, description, couleurs/tailles,
+   bouton « Ajouter au panier ») — pas la collection entière.
+   ============================================================ */
+function luxiaProductUrl(id){
+  const base = location.origin + location.pathname.replace(/index\.html$/,'');
+  return `${base}?produit=${encodeURIComponent(id)}`;
+}
+function luxiaClearProductParam(){
+  try{
+    const u=new URL(location.href);
+    if(!u.searchParams.has('produit')) return;
+    u.searchParams.delete('produit');
+    history.replaceState(null,'',u.pathname+(u.search||'')+u.hash);
+  }catch(e){}
+}
+function luxiaOpenProductFromUrl(){
+  try{
+    const pid=new URLSearchParams(location.search).get('produit');
+    if(!pid) return;
+    const p=PRODUCTS.find(x=>String(x.id)===String(pid));
+    if(!p || p.enabled===false){ luxiaClearProductParam(); return; }
+    openProductDetailModal(p.id);
+  }catch(e){ console.warn('Direct product link failed',e); }
+}
+function luxiaCopyText(text, btn){
+  const done=()=>{
+    const old=btn?btn.dataset.label||btn.textContent:'';
+    if(btn){ btn.dataset.label=old; btn.textContent='✓ Copié'; setTimeout(()=>{btn.textContent=old;},1400); }
+    showToast('Lien copié · تنسخ الرابط');
+  };
+  const fallback=()=>{
+    const ta=document.createElement('textarea'); ta.value=text; ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.select(); try{document.execCommand('copy'); done();}catch(e){} ta.remove();
+  };
+  if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done).catch(fallback);
+  else fallback();
+}
+function luxiaProductLinkCardHTML(p){
+  const url=luxiaProductUrl(p.id);
+  return `<section class="admin-section-card admin-direct-link-card">
+    <div class="admin-section-title"><span>🔗</span><div><h3>Lien direct du produit · رابط مباشر للمنتج</h3><p>Généré automatiquement — unique pour ce produit, même si un autre produit porte le même nom. Ouvre directement la fiche avec « Ajouter au panier » (idéal pour Reels / Stories / pubs). · كيتصاوب أوتوماتيكياً ومختلف لكل منتج.</p></div></div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px">
+      <input type="text" readonly value="${escAttr(url)}" data-direct-link-input="${escAttr(p.id)}" style="direction:ltr;text-align:left;flex:1;min-width:220px" onclick="this.select()">
+      <button type="button" class="btn btn-primary" data-copy-direct-link="${escAttr(p.id)}">Copier</button>
+      <a class="btn btn-ghost" href="${escAttr(url)}" target="_blank" rel="noopener">Ouvrir ↗</a>
+    </div>
+  </section>`;
+}
+function bindAdminDirectLinks(){
+  document.querySelectorAll('[data-copy-direct-link]').forEach(btn=>btn.addEventListener('click',e=>{
+    e.preventDefault(); e.stopPropagation();
+    luxiaCopyText(luxiaProductUrl(btn.dataset.copyDirectLink), btn);
+  }));
+}
+
 function highlightProductFromUrl(){
   try{
     const pid=new URLSearchParams(location.search).get('product');
