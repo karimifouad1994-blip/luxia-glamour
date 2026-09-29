@@ -7649,7 +7649,6 @@ function adminTabsHTML(active){
     <button type="button" class="btn ${active==='products'?'btn-primary':'btn-ghost'}" data-admintab="products">${t("admin.productsTab")}</button>
     <button type="button" class="btn ${active==='collections'?'btn-primary':'btn-ghost'}" data-admintab="collections">${t("admin.collectionsTab")}</button>
     <button type="button" class="btn ${active==='landing'?'btn-primary':'btn-ghost'}" data-admintab="landing">Landing Pages</button>
-    <button type="button" class="btn ${active==='gift'?'btn-primary':'btn-ghost'}" data-admintab="gift">🎁 Cadeaux</button>
     <button type="button" class="btn ${active==='settings'?'btn-primary':'btn-ghost'}" data-admintab="settings">${t("admin.settingsTab")}</button>
   </div>`;
 }
@@ -7660,7 +7659,6 @@ function bindAdminTabs(){
       else if(b.dataset.admintab==="products") renderAdminProducts();
       else if(b.dataset.admintab==="collections") renderAdminCollections();
       else if(b.dataset.admintab==="landing") renderAdminLandingPages();
-      else if(b.dataset.admintab==="gift") renderAdminGift();
       else renderAdminSettings();
     });
   });
@@ -9550,7 +9548,7 @@ function renderProductImagesHTML(p){
 function renderAdminProducts(){
   let html=adminLanguageSwitcherHTML();
   html+=adminTabsHTML('products');
-  html+=`<div class="admin-page-head"><div><div class="admin-kicker">${t('admin.productsTab')}</div><h2>${t('admin.productsTitle')}</h2><p>${t('admin.productsHint')}</p></div><div class="admin-head-actions"><button class="btn btn-primary" id="addProductBtn">+ ${t('admin.newProduct')}</button><button class="btn btn-ghost" id="adminLogoutBtn">${t('admin.logout')}</button></div></div>`;
+  html+=`<div class="admin-page-head"><div><div class="admin-kicker">${t('admin.productsTab')}</div><h2>${t('admin.productsTitle')}</h2><p>${t('admin.productsHint')}</p></div><div class="admin-head-actions"><button class="btn btn-primary" id="addProductBtn">+ ${t('admin.newProduct')}</button><button class="btn btn-ghost" id="addGiftPackBtn">🎁 + Pack cadeau</button><button class="btn btn-ghost" id="adminLogoutBtn">${t('admin.logout')}</button></div></div>`;
   html+=adminOfferCardHTML();
   const __adminColOf=p=>{const v=PRODUCT_VARIANTS[p.id]||{};return v.unassigned?'':(v.collectionId||getStoreProductCollection(p));};
   const __adminCardHTML=p=>{
@@ -9617,7 +9615,7 @@ function renderAdminProducts(){
           <div class="admin-pack-variants"><div class="admin-block-head"><strong>Couleurs & tailles du Pack — الألوان والمقاسات</strong><small>Le Pack reprend automatiquement les couleurs et les tailles du produit principal (section 02), avec le même affichage. Rien à configurer ici.</small></div></div>
         </section>
 
-        ${luxiaProductLinkCardHTML(p)}
+        ${luxiaGiftCardHTML(p)}${luxiaProductLinkCardHTML(p)}
 
         <div class="admin-save-row"><button type="button" class="btn btn-primary" data-save="${p.id}">${t('admin.save')}</button><button type="button" class="btn btn-ghost" data-deleteproduct="${p.id}">🗑 ${t('admin.deleteProduct')}</button></div>
       </div>
@@ -9867,7 +9865,10 @@ async function addNewProductAdmin(){
   I18N.fr[descKey] = ""; I18N.ar[descKey] = "";
   I18N.fr[badgeKey] = ""; I18N.ar[badgeKey] = "";
   const p = { id, nameKey, descKey, badgeKey, price:0, enabled:true, video:"" };
+  const giftNew=!!window.__luxiaNewGift; window.__luxiaNewGift=false;
+  if(giftNew){ I18N.fr[nameKey]="Pack Cadeau"; I18N.ar[nameKey]="باك كادو"; }
   PRODUCT_VARIANTS[id] = { colors: [], sizes: [], stock:null, pack:null, collectionId:null, unassigned:true };
+  if(giftNew) PRODUCT_VARIANTS[id].gift={items:[{name:"",type:"cloth"}],msg:true,hide:true,wrap:true,wrapPrice:15};
   PRODUCT_IMAGE_GALLERY[id] = [];
   PRODUCT_IMAGES[id] = "";
   const row = {
@@ -10518,71 +10519,40 @@ function highlightProductFromUrl(){
 <!-- LUXIA-3D-PRODUCT-FRAME -->
 
 <style>
-#giftSection{position:relative;background:linear-gradient(160deg,#4a1526,#26090f);color:#f7e9c8;padding:64px 18px;text-align:center;overflow:hidden}
-#giftSection .gf-rib{position:absolute;top:0;left:50%;width:34px;height:100%;transform:translateX(-50%);background:linear-gradient(90deg,#b8923f,#e8cf8f,#b8923f);opacity:.13}
-.gf-in{position:relative;max-width:1000px;margin:auto}.gf-in small{letter-spacing:.3em;color:#e0c690}.gf-in h2{font-family:var(--font-display);font-size:30px;margin:10px 0}.gf-in>p{opacity:.85;margin-bottom:28px}
-.gf-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:18px}
-.gf-card{background:#ffffff0f;border:1px solid #e0c69066;border-radius:18px;padding:12px;cursor:pointer;transition:.2s}.gf-card:hover{transform:translateY(-4px);border-color:#e0c690}
-.gf-img{height:250px;border-radius:12px;background:#0003 center/cover;position:relative}.gf-img b{position:absolute;top:10px;left:10px;background:#e0c690;color:#3a0f1c;font-size:11px;padding:4px 10px;border-radius:12px}
-.gf-card h3{margin:12px 0 4px}.gf-pr span{font-size:20px;color:#e0c690}.gf-pr s{opacity:.55;margin:0 8px}.gf-pr em{font-style:normal;background:#e0c690;color:#3a0f1c;font-size:11px;padding:2px 8px;border-radius:10px}.gf-card i{display:block;font-size:12px;margin-top:6px;color:#ffb4a8}
 .gf-modal{display:none;position:fixed;inset:0;z-index:2500;background:#000a;overflow:auto;padding:16px}.gf-modal.open{display:block}
-.gf-box{background:#fffdf8;color:#292622;max-width:480px;margin:auto;border-radius:20px;padding:18px;position:relative}.gf-box>img{width:100%;border-radius:14px}.gf-th{display:flex;gap:6px;margin:8px 0;overflow:auto}.gf-th img{width:60px;height:60px;object-fit:cover;border-radius:8px;cursor:pointer}
-.gf-x{position:absolute;top:10px;right:10px;background:#fff;border:0;border-radius:50%;width:32px;height:32px}.gf-it{margin:10px 0}.gf-it select,.gf-box textarea{width:100%;padding:10px;margin-top:6px;border:1px solid #d6cdc2;border-radius:10px}
-.gf-ck{display:flex;gap:8px;align-items:center;margin:8px 0}.gf-box .btn{margin-top:12px}
-.gf-a{margin-bottom:14px}.gf-a input,.gf-a textarea,.gf-a select{width:100%;margin:4px 0}.gf-a input[type=checkbox]{width:auto}.gf-itrow{display:grid;gap:6px;border-top:1px dashed #d6cdc2;padding:8px 0}
+.gf-box{background:#fffdf8;color:#292622;max-width:480px;margin:auto;border-radius:20px;padding:18px;position:relative}.gf-box>img{width:100%;border-radius:14px}
+.gf-x{position:absolute;top:10px;right:10px;background:#fff;border:0;border-radius:50%;width:32px;height:32px;z-index:2}.gf-it{margin:10px 0}.gf-it select,.gf-box textarea{width:100%;padding:10px;margin-top:6px;border:1px solid #d6cdc2;border-radius:10px}
+.gf-ck{display:flex;gap:8px;align-items:center;margin:8px 0}.gf-box .btn{margin-top:12px}.gf-pr{font-size:20px;margin:6px 0}
+.gf-itrow{display:grid;gap:6px;border-top:1px dashed #d6cdc2;padding:8px 0}.gf-itrow input,.gf-itrow select{width:100%}
 </style>
 <script>
 (function(){
-const DEF={on:true,tag:"Offrez l'élégance, on s'occupe du reste.",msg:true,hide:true,wrap:true,wrapPrice:15,cmp:true,badge:true,scar:true,packs:[]};
-let G=JSON.parse(JSON.stringify(DEF));
 const $=id=>document.getElementById(id),E=s=>escHtml(s||''),A=s=>escAttr(s||''),csv=s=>String(s||'').split(',').map(x=>x.trim()).filter(Boolean);
-const ttl=p=>(currentLang==='ar'&&p.ar)||p.title||'Pack Cadeau',sav=p=>p.old>p.price?p.old-p.price:0;
-function slugs(store){const m={},u={};G.packs.forEach(p=>{const b=(typeof luxiaSlugify==='function'?luxiaSlugify(p.title||'pack-cadeau'):'')||'pack-cadeau';let x=b,n=2;while(u[x])x=b+'-'+(n++);u[x]=1;m[p.id]=x;if(store){let o=(p.olds||[]).slice();if(p.slug&&p.slug!==x&&!o.includes(p.slug))o.push(p.slug);p.olds=o.filter(y=>y!==x);p.slug=x}});return m}
-const gurl=p=>location.origin+location.pathname.replace(/index\.html$/,'')+'?cadeau='+encodeURIComponent(slugs()[p.id]||p.id);
-let opened=false;
-function fromUrl(){if(opened)return;const k=new URLSearchParams(location.search).get('cadeau');if(!k)return;const m=slugs(),p=G.packs.find(x=>x.on!==false&&(m[x.id]===k||x.id===k||(x.olds||[]).includes(k)));if(p){opened=true;openP(p.id)}}
-function reg(p){const k='gp.'+p.id+'.name';I18N.fr[k]=p.title||'Pack Cadeau';I18N.ar[k]=p.ar||p.title||'Pack Cadeau';PRODUCT_IMAGES['gp_'+p.id]=p.img||'';PRODUCT_VARIANTS['gp_'+p.id]=PRODUCT_VARIANTS['gp_'+p.id]||{colors:[],sizes:[],stock:null,pack:null};return k}
-function load(){try{const r=(SITE_CONTENT.fr||{}).__gift||(SITE_CONTENT.ar||{}).__gift;G={...DEF,...(r?JSON.parse(r):{})};G.packs=G.packs||[]}catch(e){G={...DEF}}
-delete I18N.fr.__gift;delete I18N.ar.__gift;delete I18N.fr.__product_slugs;delete I18N.ar.__product_slugs;G.packs.forEach(reg);render();fromUrl()}
-function card(p){return `<div class="gf-card" data-gp="${A(p.id)}"><div class="gf-img" style="background-image:url('${A(p.img)}')">${G.badge&&p.badge?`<b>${E(p.badge)}</b>`:''}</div><h3>${E(ttl(p))}</h3><div class="gf-pr"><span>${p.price} DH</span>${G.cmp&&sav(p)?`<s>${p.old} DH</s><em>-${sav(p)} DH</em>`:''}</div>${G.scar&&p.stock>0?`<i>Édition limitée · Plus que ${p.stock}</i>`:''}</div>`}
-function render(){let s=$('giftSection');const ps=G.packs.filter(p=>p.on!==false);
-if(!G.on||!ps.length){s&&s.remove();return}
-if(!s){s=document.createElement('section');s.id='giftSection';const g=$('productGrid');(g&&g.closest('section')?g.closest('section'):document.body).after(s)}
-s.innerHTML=`<div class="gf-rib"></div><div class="gf-in"><small>🎁 LUXIA GIFT BOX</small><h2>Pour elle. Pour lui. Pour toi.</h2><p>${E(G.tag)}</p><div class="gf-grid">${ps.map(card).join('')}</div></div>`;
-s.querySelectorAll('[data-gp]').forEach(b=>b.onclick=()=>openP(b.dataset.gp))}
+const TY=[['cloth','Vêtement (couleur + taille)'],['shoes','Chaussures (couleur + pointure)'],['simple','Sans option']];
+const rowH=it=>`<div class="gf-itrow" data-git><input data-gi="name" placeholder="Article (Pyjama, Chaussons…)" value="${A(it.name)}"><select data-gi="type">${TY.map(o=>`<option value="${o[0]}" ${it.type===o[0]?'selected':''}>${o[1]}</option>`).join('')}</select><input data-gi="colors" placeholder="Couleurs : Rouge, Noir" value="${A(it.colors)}"><input data-gi="sizes" placeholder="Tailles / Pointures : S, M, L ou 38, 39" value="${A(it.sizes)}"><button type="button" class="btn btn-ghost" data-grm>✕ Retirer l'article</button></div>`;
+window.luxiaGiftCardHTML=function(p){const g=(PRODUCT_VARIANTS[p.id]||{}).gift;if(!g)return '';
+const ck=(k,l)=>`<label class="gf-ck"><input type="checkbox" data-gk="${k}" ${g[k]!==false?'checked':''} style="width:auto"> ${l}</label>`;
+return `<section class="admin-section-card" data-gift-card="${A(p.id)}"><div class="admin-section-title"><span>🎁</span><div><h3>Contenu du Pack Cadeau</h3><p>Chaque article a ses propres options. Photos, galerie, vidéo et collection : utilisez les sections ci-dessus, comme pour un produit.</p></div></div><div data-gitems>${(g.items||[]).map(rowH).join('')}</div><button type="button" class="btn btn-ghost" data-gadd="${A(p.id)}">+ Article</button>${ck('msg','Carte message')}${ck('hide','Option « sans prix »')}${ck('wrap','Emballage premium')}<label>Prix emballage premium (DH)</label><input type="number" data-gk="wrapPrice" value="${g.wrapPrice??15}"></section>`};
+document.addEventListener('click',e=>{const a=e.target.closest('[data-gadd]');if(a){const c=a.closest('[data-gift-card]'),w=c.querySelector('[data-gitems]');w.insertAdjacentHTML('beforeend',rowH({name:'',type:'cloth'}));return}
+const r=e.target.closest('[data-grm]');if(r){r.closest('[data-git]').remove();return}
+if(e.target.closest('#addGiftPackBtn')){window.__luxiaNewGift=true;addNewProductAdmin()}});
+function collectGift(id){const c=document.querySelector(`[data-gift-card="${CSS.escape(id)}"]`);const v=PRODUCT_VARIANTS[id];if(!c||!v||!v.gift)return;
+v.gift.items=[...c.querySelectorAll('[data-git]')].map(r=>{const o={};r.querySelectorAll('[data-gi]').forEach(x=>o[x.dataset.gi]=x.value);return o}).filter(o=>o.name.trim());
+c.querySelectorAll('[data-gk]').forEach(x=>v.gift[x.dataset.gk]=x.type==='checkbox'?x.checked:(+x.value||0))}
+const _sp=window.saveProductEdits;window.saveProductEdits=function(id){try{collectGift(id)}catch(e){console.warn(e)}return _sp.apply(this,arguments)};
+/* storefront: options modal for gift products */
 const sel=(k,i,l,a)=>a.length?`<select data-k="${k}${i}"><option value="">${l}</option>${a.map(x=>`<option>${E(x)}</option>`).join('')}</select>`:'';
 const opt=(it,i)=>it.type==='shoes'?sel('c',i,'Couleur',csv(it.colors))+sel('p',i,'Pointure',csv(it.sizes)):it.type==='simple'?'':sel('c',i,'Couleur',csv(it.colors))+sel('s',i,'Taille',csv(it.sizes));
-function openP(id){const p=G.packs.find(x=>x.id===id);if(!p)return;let m=$('giftModal');if(!m){m=document.createElement('div');m.id='giftModal';document.body.appendChild(m)}
-const im=[p.img,...(p.gal||[])].filter(Boolean),cl=()=>m.classList.remove('open');m.className='gf-modal open';
-m.innerHTML=`<div class="gf-box"><button class="gf-x" id="gfX">✕</button><img id="gfMain" src="${A(im[0])}"><div class="gf-th">${im.map(u=>`<img src="${A(u)}">`).join('')}</div><h3>${E(ttl(p))}</h3><p>${E(p.desc)}</p><div class="gf-pr"><span>${p.price} DH</span>${G.cmp&&sav(p)?` <s>${p.old} DH</s> <em>-${sav(p)} DH</em>`:''}</div>${(p.items||[]).map((it,i)=>`<div class="gf-it"><b>🎀 ${E(it.name)}</b>${opt(it,i)}</div>`).join('')}${G.msg?'<label>💌 Carte message</label><textarea id="gfMsg" maxlength="200"></textarea>':''}${G.hide?'<label class="gf-ck"><input type="checkbox" id="gfHide"> Ne pas afficher le prix</label>':''}${G.wrap?`<label class="gf-ck"><input type="checkbox" id="gfWrap"> Emballage premium (+${G.wrapPrice} DH)</label>`:''}<button class="btn btn-primary btn-block" id="gfAdd">Ajouter au panier</button></div>`;
-$('gfX').onclick=cl;m.querySelectorAll('.gf-th img').forEach(i=>i.onclick=()=>$('gfMain').src=i.src);
+function openGift(id){const p=PRODUCTS.find(x=>x.id===id),g=(PRODUCT_VARIANTS[id]||{}).gift;if(!p||!g)return false;let m=$('giftModal');if(!m){m=document.createElement('div');m.id='giftModal';document.body.appendChild(m)}
+const cl=()=>m.classList.remove('open'),its=g.items||[];m.className='gf-modal open';
+m.innerHTML=`<div class="gf-box"><button class="gf-x" id="gfX">✕</button><img src="${A(PRODUCT_IMAGES[id])}"><h3>${E(t(p.nameKey))}</h3><div class="gf-pr">${p.price} DH</div>${its.map((it,i)=>`<div class="gf-it"><b>🎀 ${E(it.name)}</b>${opt(it,i)}</div>`).join('')}${g.msg!==false?'<label>💌 Carte message</label><textarea id="gfMsg" maxlength="200"></textarea>':''}${g.hide!==false?'<label class="gf-ck"><input type="checkbox" id="gfHide" style="width:auto"> Ne pas afficher le prix</label>':''}${g.wrap!==false?`<label class="gf-ck"><input type="checkbox" id="gfWrap" style="width:auto"> Emballage premium (+${g.wrapPrice??15} DH)</label>`:''}<button class="btn btn-primary btn-block" id="gfAdd">Ajouter au panier</button></div>`;
+$('gfX').onclick=cl;
 $('gfAdd').onclick=()=>{if([...m.querySelectorAll('select')].some(s=>!s.value)){showToast('Choisissez toutes les options');return}
-const v=(i,k)=>m.querySelector(`[data-k="${k}${i}"]`)?.value,parts=(p.items||[]).map((it,i)=>it.name+(it.type==='simple'?'':': '+[v(i,'c'),v(i,'s')||v(i,'p')].filter(Boolean).join(' / ')));
+const v=(i,k)=>m.querySelector(`[data-k="${k}${i}"]`)?.value,parts=its.map((it,i)=>it.name+(it.type==='simple'?'':': '+[v(i,'c'),v(i,'s')||v(i,'p')].filter(Boolean).join(' / ')));
 const w=$('gfWrap')?.checked,msg=($('gfMsg')?.value||'').trim(),size='🎁 '+parts.join(' · ')+(msg?` · 💌 "${msg}"`:'')+($('gfHide')?.checked?' · Sans prix':'')+(w?' · Emballage premium':'');
-cart.push({lineId:'l'+Date.now()+Math.random().toString(36).slice(2,7),productId:'gp_'+p.id,nameKey:reg(p),mode:'piece',packPieces:1,price:p.price+(w?G.wrapPrice:0),color:null,colors:null,size,colorText:'',qty:1});
-saveCart();updateCartBadge();renderCart();cl();showToast('Ajouté 🎁')}}
-/* ---- ADMIN ---- */
-const ty=[['cloth','Vêtement (couleur + taille)'],['shoes','Chaussures (couleur + pointure)'],['simple','Sans option']];
-const ff=(l,f,v,t)=>`<div><label>${l}</label><input ${t?'type="number" ':''}data-f="${f}" value="${A(v)}"></div>`;
-const packEd=(p,k)=>`<div class="admin-card gf-a" data-pk="${k}"><b>${E(p.title||'Pack Cadeau')}</b><label class="gf-ck"><input type="checkbox" data-f="on" ${p.on!==false?'checked':''}> Actif</label><div class="lp-admin-grid">${ff('Titre (vide = Pack Cadeau)','title',p.title)}${ff('Titre AR (optionnel)','ar',p.ar)}${ff('Prix (DH)','price',p.price,1)}${ff('Ancien prix total','old',p.old||'',1)}${ff('Badge (ex: Le plus offert)','badge',p.badge)}${ff('Stock limité (0 = masqué)','stock',p.stock||0,1)}</div><label>Description</label><textarea data-f="desc">${E(p.desc)}</textarea><label>Image principale (URL)</label><input data-f="img" value="${A(p.img)}"><input type="file" accept="image/*" data-up="img"><label>Galerie (une URL par ligne)</label><textarea data-f="galtxt">${E((p.gal||[]).join('\n'))}</textarea><input type="file" accept="image/*" multiple data-up="gal"><b>Articles du pack</b>${(p.items||[]).map((it,j)=>`<div class="gf-itrow" data-it="${j}"><input data-i="name" placeholder="Nom (Pyjama…)" value="${A(it.name)}"><select data-i="type">${ty.map(o=>`<option value="${o[0]}" ${it.type===o[0]?'selected':''}>${o[1]}</option>`).join('')}</select><input data-i="colors" placeholder="Couleurs : Rouge, Noir" value="${A(it.colors)}"><input data-i="sizes" placeholder="Tailles / Pointures : S, M, L ou 38, 39" value="${A(it.sizes)}"><button class="btn btn-ghost" data-rmit="${j}">✕ Retirer l'article</button></div>`).join('')}<div class="gf-link"><label>🔗 Lien direct du pack</label><input readonly value="${A(gurl(p))}" style="direction:ltr;text-align:left" onclick="this.select()"><button type="button" class="btn btn-primary" data-gcopy="${A(gurl(p))}">Copier</button> <a class="btn btn-ghost" href="${A(gurl(p))}" target="_blank" rel="noopener">Ouvrir ↗</a><small>Ouvre directement la carte du pack. Le lien suit le titre (mis à jour à l'enregistrement). Les anciens liens restent valides.</small></div><button class="btn btn-ghost" data-addit="${k}">+ Article</button> <button class="btn btn-ghost" data-rmpack="${k}">🗑 Supprimer le pack</button></div>`;
-function collect(){document.querySelectorAll('[data-g]').forEach(e=>G[e.dataset.g]=e.type==='checkbox'?e.checked:e.type==='number'?+e.value||0:e.value);
-document.querySelectorAll('[data-pk]').forEach(c=>{const p=G.packs[+c.dataset.pk];c.querySelectorAll('[data-f]').forEach(e=>p[e.dataset.f]=e.type==='checkbox'?e.checked:e.type==='number'?+e.value||0:e.value);
-p.gal=(p.galtxt||'').split('\n').map(x=>x.trim()).filter(Boolean);delete p.galtxt;
-p.items=[...c.querySelectorAll('[data-it]')].map(r=>{const o={};r.querySelectorAll('[data-i]').forEach(e=>o[e.dataset.i]=e.value);return o})})}
-window.renderAdminGift=function(){if(!isAdminAuthenticated()){renderAdminLogin();return}
-const ck=(k,l)=>`<label class="gf-ck"><input type="checkbox" data-g="${k}" ${G[k]?'checked':''}> ${l}</label>`;
-$('adminWrap').innerHTML=adminLanguageSwitcherHTML()+adminTabsHTML('gift')+`<h2>🎁 Pack Cadeaux</h2><div class="admin-card gf-a">${ck('on','Afficher la collection sur le site')}${ck('msg','Carte message')}${ck('hide','Option « sans prix »')}${ck('wrap','Emballage premium')}${ck('cmp','Comparaison de prix (économie)')}${ck('badge','Badges')}${ck('scar','Rareté (stock limité)')}<label>Prix emballage (DH)</label><input type="number" data-g="wrapPrice" value="${G.wrapPrice}"><label>Slogan</label><input data-g="tag" value="${A(G.tag)}"></div>${G.packs.map(packEd).join('')}<button class="btn btn-ghost" id="gfNew">+ Nouveau pack</button> <button class="btn btn-primary" id="gfSave">Enregistrer</button>`;
-bindAdminTabs();const R=()=>renderAdminGift();
-$('gfNew').onclick=()=>{collect();G.packs.push({id:'g'+Date.now().toString(36),title:'',price:0,on:true,items:[{name:'',type:'cloth'}]});R()};
-$('gfSave').onclick=async()=>{collect();slugs(true);const b=$('gfSave');b.disabled=true;try{const c={fr:{...SITE_CONTENT.fr},ar:{...SITE_CONTENT.ar}},j=JSON.stringify(G);c.fr.__gift=j;c.ar.__gift=j;await saveSiteContent(c);load();showToast(t('admin.settingsSaved'))}catch(e){showToast(e.message||'Erreur')}b.disabled=false};
-document.querySelectorAll('[data-gcopy]').forEach(b=>b.onclick=()=>luxiaCopyText(b.closest('.gf-link').querySelector('input').value,b));
-document.querySelectorAll('[data-pk] [data-f=title]').forEach(i=>i.oninput=()=>{const c=i.closest('[data-pk]'),k=+c.dataset.pk,keep=G.packs.map(x=>x.title);G.packs[k].title=i.value;const sv=G.packs.map(x=>x.slug);G.packs.forEach(x=>{x.slug=undefined});const m=slugs();G.packs.forEach((x,j)=>{x.slug=sv[j]});G.packs.forEach((x,j)=>{x.title=keep[j]});G.packs[k].title=keep[k];const base=location.origin+location.pathname.replace(/index\.html$/,'');c.querySelector('.gf-link input').value=base+'?cadeau='+encodeURIComponent(m[G.packs[k].id])});
-document.querySelectorAll('[data-addit]').forEach(b=>b.onclick=()=>{collect();G.packs[+b.dataset.addit].items.push({name:'',type:'cloth'});R()});
-document.querySelectorAll('[data-rmit]').forEach(b=>b.onclick=()=>{collect();G.packs[+b.closest('[data-pk]').dataset.pk].items.splice(+b.dataset.rmit,1);R()});
-document.querySelectorAll('[data-rmpack]').forEach(b=>b.onclick=()=>{if(!confirm('Supprimer ce pack ?'))return;collect();G.packs.splice(+b.dataset.rmpack,1);R()});
-document.querySelectorAll('[data-up]').forEach(i=>i.onchange=async()=>{collect();const p=G.packs[+i.closest('[data-pk]').dataset.pk];try{for(const f of i.files){const u=await uploadProductImageToStorage(f,'gift-'+p.id);if(i.dataset.up==='img')p.img=u;else(p.gal=p.gal||[]).push(u)}R()}catch(e){showToast(e.message||'Upload')}})};
-const _a=window.applySiteContent;window.applySiteContent=function(){_a.apply(this,arguments);try{load()}catch(e){}};
-try{load()}catch(e){}
+cart.push({lineId:'l'+Date.now()+Math.random().toString(36).slice(2,7),productId:id,nameKey:p.nameKey,mode:'piece',packPieces:1,price:p.price+(w?(g.wrapPrice??15):0),color:null,colors:null,size,colorText:'',qty:1});
+saveCart();updateCartBadge();renderCart();cl();showToast('Ajouté 🎁')};return true}
+const _ov=window.openVariantModal;window.openVariantModal=function(id,mode){if(openGift(id))return;return _ov.apply(this,arguments)};
 })();
 </script>
 </body>
