@@ -6627,19 +6627,58 @@ function renderProducts(){
   const products = getStoreFilteredProducts();
   updateStoreCount(products.length);
 
+  /* ---- gift pack cards: only products of a gift collection / with a gift config get the box look ---- */
+  const isGiftProduct = p => {
+    try{
+      const v=PRODUCT_VARIANTS[p.id]||{};
+      if(v.gift) return true;
+      const cid=getStoreProductCollection(p);
+      const c=getLuxiaCollections().find(x=>x.id===cid)||{};
+      return /cadeau|gift|كادو|هدايا|هدية|hadaya|hdaya/i.test([cid,c.fr,c.ar].join(' '));
+    }catch(e){ return false; }
+  };
+  const giftBowSVG = () => `<svg class="gp-bow" viewBox="0 0 140 92" preserveAspectRatio="xMidYMin meet" aria-hidden="true" focusable="false">
+      <defs>
+        <linearGradient id="gpbA" x1="0" y1="0" x2="1" y2="1"><stop offset="0" style="stop-color:var(--bw-hi,#f7e6ae)"/><stop offset=".5" style="stop-color:var(--bw-mid,#cfae5f)"/><stop offset="1" style="stop-color:var(--bw-lo,#8a6a2f)"/></linearGradient>
+        <linearGradient id="gpbB" x1="1" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--bw-hi,#f7e6ae)"/><stop offset=".5" style="stop-color:var(--bw-mid,#cfae5f)"/><stop offset="1" style="stop-color:var(--bw-lo,#8a6a2f)"/></linearGradient>
+        <linearGradient id="gpbT" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--bw-mid,#cfae5f)"/><stop offset=".55" style="stop-color:var(--bw-lo,#8a6a2f)"/><stop offset="1" style="stop-color:var(--bw-deep,#4f3a17)"/></linearGradient>
+        <linearGradient id="gpbK" x1="0" y1="0" x2="1" y2="0"><stop offset="0" style="stop-color:var(--bw-lo,#8a6a2f)"/><stop offset=".45" style="stop-color:var(--bw-hi,#f7e6ae)"/><stop offset="1" style="stop-color:var(--bw-lo,#8a6a2f)"/></linearGradient>
+        <radialGradient id="gpbG" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#000" stop-opacity=".5"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>
+      </defs>
+      <path d="M63 43 C55 56 44 68 27 86 L37 80 L44 90 C55 75 65 63 73 49 Z" fill="url(#gpbT)"/>
+      <path d="M77 43 C85 55 92 66 108 83 L99 78 L94 89 C84 75 76 63 68 49 Z" fill="url(#gpbT)"/>
+      <path d="M45 82 C52 72 58 64 64 56" fill="none" stroke="#fff0bf" stroke-width="1" opacity=".35" stroke-linecap="round"/>
+      <path fill-rule="evenodd" fill="url(#gpbA)" d="M66 39 C58 14 27 1 10 13 C-1 21 3 42 20 48 C38 54 58 47 66 39 Z M60 39 C54 22 33 12 19 20 C12 25 15 37 25 41 C38 45 54 43 60 39 Z"/>
+      <path fill-rule="evenodd" fill="url(#gpbB)" d="M74 39 C82 14 113 1 130 13 C141 21 137 42 120 48 C102 54 82 47 74 39 Z M80 39 C86 22 107 12 121 20 C128 25 125 37 115 41 C102 45 86 43 80 39 Z"/>
+      <path d="M12 16 C28 4 55 12 64 34" fill="none" stroke="#fff3c9" stroke-width="1.3" opacity=".55" stroke-linecap="round"/>
+      <path d="M128 16 C112 4 85 12 76 34" fill="none" stroke="#fff3c9" stroke-width="1.3" opacity=".55" stroke-linecap="round"/>
+      <path d="M19 47 C36 53 55 46 63 39" fill="none" stroke="#3f2f12" stroke-width="1" opacity=".45" stroke-linecap="round"/>
+      <path d="M121 47 C104 53 85 46 77 39" fill="none" stroke="#3f2f12" stroke-width="1" opacity=".45" stroke-linecap="round"/>
+      <ellipse cx="70" cy="40" rx="17" ry="13" fill="url(#gpbG)"/>
+      <rect x="62" y="29" width="16" height="21" rx="6.5" fill="url(#gpbK)" stroke="#5b4420" stroke-width=".8"/>
+      <path d="M66 32 C65 38 65 43 66 47" fill="none" stroke="#fff2c4" stroke-width="1.1" opacity=".6" stroke-linecap="round"/>
+      <path d="M74 32 C75 38 75 43 74 47" fill="none" stroke="#3f2f12" stroke-width="1" opacity=".4" stroke-linecap="round"/>
+    </svg>`;
+  const giftLidHTML = () => `<div class="gp-lid" data-gift-lid><span class="gp-tag">🎁 ${currentLang==='ar'?'باك كادو':'Pack cadeau'}</span>${giftBowSVG()}</div>`;
+  const giftBoxOpen = '<div class="gp-box"><i class="gp-rb gp-rb-t"></i><i class="gp-rb gp-rb-b"></i><i class="gp-rb gp-rb-l"></i><i class="gp-rb gp-rb-r"></i><i class="gp-tw"></i><i class="gp-tw"></i><i class="gp-tw"></i><i class="gp-tw"></i>';
+
   const renderCard = p => {
     const gallery=PRODUCT_IMAGE_GALLERY[p.id]&&PRODUCT_IMAGE_GALLERY[p.id].length?PRODUCT_IMAGE_GALLERY[p.id]:[PRODUCT_IMAGES[p.id]];
     const colors=getProductColors(p.id);
     const sizes=getProductSizes(p.id);
-    return `<article class="product-card" data-product-card="${escAttr(p.id)}">
+    const gift=isGiftProduct(p);
+    return `<article class="product-card${gift?' gp-card':''}" data-product-card="${escAttr(p.id)}"${gift?' data-gift-pack="1"':''}>
+      ${gift?giftLidHTML():''}
       <div class="product-title-price-head" data-detail-product="${escAttr(p.id)}">
         <div class="product-title-above">
           <span class="product-title-above-text">${t(p.nameKey)}</span>
         </div>
       </div>
+      ${gift?giftBoxOpen:''}
       <div class="product-visual product-main-click" data-detail-product="${escAttr(p.id)}" data-gallery-index="0" style="touch-action:pan-y;cursor:pointer;">
         <img class="product-photo" src="${escAttr(gallery[0])}" alt="${escAttr(t(p.nameKey))}" loading="lazy">
       </div>
+      ${gift?'</div>':''}
       ${gallery.length>1?`<div class="product-gallery-strip" aria-label="صور إضافية للمنتج">
         ${gallery.map((src,i)=>`<button type="button" class="product-gallery-thumb ${i===0?'active':''}" data-gallery-thumb="${escAttr(p.id)}:${i}" aria-label="الصورة ${i+1}"><img src="${escAttr(src)}" alt="${escAttr(t(p.nameKey))} — ${i+1}" loading="lazy"></button>`).join('')}
       </div>`:''}
@@ -6658,9 +6697,10 @@ function renderProducts(){
     collections.forEach(c=>{
       const group=products.filter(p=>getStoreProductCollection(p)===c.id);
       if(!group.length) return;
-      sections.push(`<section class="home-collection-section" data-home-collection="${escAttr(c.id)}">
+      const giftSection=group.every(isGiftProduct);
+      sections.push(`<section class="home-collection-section${giftSection?' gp-section':''}" data-home-collection="${escAttr(c.id)}">
         <div class="home-collection-heading">
-          <span class="home-collection-kicker">${currentLang==='ar'?'المجموعة':'COLLECTION'}</span>
+          <span class="home-collection-kicker">${giftSection?(currentLang==='ar'?'🎁 أفكار هدايا':'🎁 Idées cadeaux'):(currentLang==='ar'?'المجموعة':'COLLECTION')}</span>
           <h3>${escHtml(c[currentLang]||c.fr||c.ar||c.id)}</h3>
           <div class="home-collection-rule"></div>
         </div>
@@ -6984,7 +7024,7 @@ function showCartSuccessToast(langMode='fr'){
   el.classList.remove("show");
   el.classList.add("cart-success-toast");
   el.style.pointerEvents='auto';
-  el.innerHTML=`<div class="cart-success-title">${ar?'تمت إضافة المنتج إلى السلة بنجاح.':'Produit ajouté au panier avec succès.'}</div><div class="cart-success-actions"><button type="button" class="cart-success-action" data-toast-continue>${ar?'متابعة التسوق':'Continuer vos achats'}</button><button type="button" class="cart-success-action primary" data-toast-cart>${ar?'الاطلاع على السلة وإتمام الطلب':'Consulter votre panier et confirmer votre commande'}</button></div>`;
+  el.innerHTML=`<div class="cart-success-title"><svg class="cs-check" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M7 12.5l3.2 3.2L17 9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>${ar?'تمت إضافة المنتج إلى السلة بنجاح.':'Produit ajouté au panier avec succès.'}</span></div><div class="cart-success-actions"><button type="button" class="cart-success-action" data-toast-continue>${ar?'متابعة التسوق':'Continuer vos achats'}</button><button type="button" class="cart-success-action primary" data-toast-cart>${ar?'عرض السلة':'Voir le panier'}</button></div>`;
   el.classList.add("show");
   el.querySelector('[data-toast-continue]')?.addEventListener('click',hideToast,{once:true});
   el.querySelector('[data-toast-cart]')?.addEventListener('click',()=>{
@@ -7133,6 +7173,14 @@ function openVariantModal(productId, mode='piece'){
   const pieces=pack ? Math.floor(Number(pack.pieces)) : 0;
   variantState={purchaseMode,color:null,colors:Array(pieces).fill(null),size:null,qty:1};
   qtyValue.textContent='1';
+  { const __ep=window.__luxiaEditPending; window.__luxiaEditPending=null; window.__luxiaEditLine=null;
+    if(__ep && __ep.productId===productId){
+      window.__luxiaEditLine=__ep.lineId;
+      variantState.color=__ep.color||null;
+      if(Array.isArray(__ep.colors)&&__ep.colors.length) variantState.colors=__ep.colors.slice();
+      variantState.size=__ep.size||null; variantState.qty=__ep.qty||1;
+      qtyValue.textContent=String(variantState.qty);
+    } }
   const title=document.querySelector('#variantOverlay [data-i18n="variant.title"]');
   const sub=document.querySelector('#variantOverlay [data-i18n="variant.subtitle"]');
   if(title) title.textContent = purchaseMode==='pack' ? t('variant.packTitle') : t('variant.title');
@@ -7248,9 +7296,12 @@ document.getElementById('addToCartBtn').addEventListener('click',()=>{
   if(typeof v.stock==='number' && v.stock<=0){showToast(t('variant.outOfStock'));return;}
   const price=pack?Number(cfg.price):Number(currentVariantProduct.price)||0;
   const colorKey=pack?JSON.stringify(colors):(variantState.color||'');
+  const __edId=window.__luxiaEditLine; window.__luxiaEditLine=null; let __edIdx=-1;
+  if(__edId){ __edIdx=cart.findIndex(i=>i.lineId===__edId); if(__edIdx>-1) cart.splice(__edIdx,1); }
   const existing=cart.find(i=>i.productId===currentVariantProduct.id&&i.mode===(pack?'pack':'piece')&&(Array.isArray(i.colors)?JSON.stringify(i.colors):(i.color||''))===colorKey&&i.size===(variantState.size||''));
   if(existing) existing.qty+=variantState.qty;
   else cart.push({lineId:'l'+Date.now()+Math.random().toString(36).slice(2,7),productId:currentVariantProduct.id,nameKey:currentVariantProduct.nameKey,mode:pack?'pack':'piece',packPieces:pack?getPackPieces(currentVariantProduct.id):1,price,color:pack?colors[0]:variantState.color,colors:pack?colors.slice():null,size:variantState.size||'',qty:variantState.qty});
+  if(__edIdx>-1 && !existing){ const __it=cart.pop(); cart.splice(__edIdx,0,__it); }
   window.__lxReturnDetailId=null;
   saveCart();updateCartBadge();closeVariantModal();
   /* After a successful add, always leave the product-detail view immediately.
@@ -7312,6 +7363,21 @@ function updateCartBadge(){
   document.getElementById("cartBtn")?.classList.toggle("has-items", n>0);
 }
 
+function luxiaGiftCartMeta(item){
+  const ar=currentLang==='ar', dh=t("unit.dh");
+  const parts=String(item.size||'').replace(/ · Emballage premium$/,'').split(' · ').filter(Boolean);
+  const base=Number(item.basePrice)||0, prem=Number(item.packagingPremium)||0;
+  return `<div class="cart-item-meta gx-cart-meta">${parts.map(x=>`<div>${escHtml(x)}</div>`).join('')}
+</div>`;
+}
+function luxiaGiftSummaryRows(){
+  const ar=currentLang==='ar', dh=t("unit.dh");
+  const prem=cart.reduce((n,i)=>n+(i.isGiftPack===true?(Number(i.packagingPremium)||0)*i.qty:0),0);
+  if(!(prem>0)) return '';
+  const total=cartTotal();
+  return `<div class="row gx-sum-row"><span>${ar?'المنتجات':'Produits'}</span><span>${total-prem} ${dh}</span></div>
+    <div class="row gx-sum-row"><span>${ar?'التغليف الفاخر':'Emballage premium'}</span><span>+${prem} ${dh}</span></div>`;
+}
 function renderCart(){
   const body = document.getElementById("cartBody");
   if(cart.length === 0){
@@ -7326,7 +7392,7 @@ function renderCart(){
       <div class="cart-item-photo"><img src="${PRODUCT_IMAGES[item.productId]}" alt=""></div>
       <div class="cart-item-info">
         <h4>${t(item.nameKey)}</h4>
-        <div class="cart-item-meta">${item.mode==='pack'?t('variant.pack')+' · ':''}${colorTxt}${item.size?` · ${item.size}`:''}</div>
+        ${item.isGiftPack===true?luxiaGiftCartMeta(item):`<div class="cart-item-meta">${item.mode==='pack'?t('variant.pack')+' · ':''}${colorTxt}${item.size?` · ${item.size}`:''}${item.packagingPremium>0?`<br><span style="color:#9f8059">🎁 Emballage premium : +${item.packagingPremium} DH</span>`:''}</div>`}
         <div class="cart-item-row">
           <div class="cart-item-qty">
             <button type="button" class="qty-btn" data-act="minus">−</button>
@@ -7335,7 +7401,7 @@ function renderCart(){
           </div>
           <span class="cart-item-price">${item.price*item.qty} ${t("unit.dh")}</span>
         </div>
-        <button type="button" class="cart-item-remove" data-act="remove">🗑️ ${t("cart.remove")}</button>
+        <div class="gx-cart-actions"><button type="button" class="cart-item-edit" data-act="edit">${currentLang==='ar'?'تعديل':'Modifier'}</button><button type="button" class="cart-item-remove" data-act="remove">${t("cart.remove")}</button></div>
       </div>
     </div>`;
   }).join("");
@@ -7343,7 +7409,7 @@ function renderCart(){
   document.getElementById("cartBody").innerHTML = `
     <div class="cart-list">${items}</div>
     <div class="order-summary">
-      <div class="row total"><span>${t("cart.subtotal")}</span><span>${total} ${t("unit.dh")}</span></div>
+      ${luxiaGiftSummaryRows()}<div class="row total"><span>${t("cart.subtotal")}</span><span>${total} ${t("unit.dh")}</span></div>
       <div class="luxia-shipping-info">
   <div><span>🚚 ${currentLang==='ar'?'التوصيل إلى الدار البيضاء':'Livraison à Casablanca'}</span><strong>${SITE_SHIPPING_CASA} ${t("unit.dh")} · ${currentLang==='ar'?'خلال 24 ساعة':'dans 24h'}</strong></div>
   <div><span>🚚 ${currentLang==='ar'?'التوصيل خارج الدار البيضاء':'Livraison hors Casablanca'}</span><strong>${SITE_SHIPPING_OTHER} ${t("unit.dh")} · ${currentLang==='ar'?'خلال 24–48 ساعة':'24–48h'}</strong></div>
@@ -7361,6 +7427,7 @@ function renderCart(){
     row.querySelector('[data-act="minus"]').addEventListener("click", ()=> changeQty(lineId, -1));
     row.querySelector('[data-act="plus"]').addEventListener("click", ()=> changeQty(lineId, 1));
     row.querySelector('[data-act="remove"]').addEventListener("click", ()=> removeLine(lineId));
+    row.querySelector('[data-act="edit"]')?.addEventListener("click", ()=> luxiaEditCartLine(lineId));
   });
   document.getElementById("cartCheckoutBtn").addEventListener("click", ()=>{
     hideToast();
@@ -7370,6 +7437,16 @@ function renderCart(){
   document.getElementById("cartContinueBtn").addEventListener("click", closeCartPanel);
 }
 
+function luxiaEditCartLine(lineId){
+  const item=cart.find(i=>i.lineId===lineId); if(!item) return;
+  hideToast();
+  closeModal(cartOverlay);
+  window.__luxiaEditPending=item;
+  openVariantModal(item.productId, item.mode||'piece');
+}
+document.getElementById("variantClose")?.addEventListener("click",()=>{
+  if(window.__luxiaEditLine){ window.__luxiaEditLine=null; openCartPanel(); }
+});
 function changeQty(lineId, delta){
   const item = cart.find(i=>i.lineId===lineId);
   if(!item) return;
@@ -7515,7 +7592,19 @@ document.getElementById("submitOrder").addEventListener("click", async ()=>{
       address: document.getElementById("fAddress").value.trim(),
       remark: "",
     },
-    items: cart.map(i=>({ name: `${i.mode==='pack'?'Pack — ':''}${t(i.nameKey)}`, color: itemColorText(i), size:i.size, qty:i.qty, price:i.price })),
+    items: cart.map(i=>({
+      name: `${i.mode==='pack'?'Pack — ':''}${t(i.nameKey)}`,
+      color: itemColorText(i),
+      size:i.size,
+      qty:i.qty,
+      price:i.price,
+      ...(i.isGiftPack ? {
+        gift_pack:true,
+        base_price:Number(i.basePrice||i.price)||0,
+        packaging_premium:Number(i.packagingPremium||0)||0,
+        packaging_premium_total:(Number(i.packagingPremium||0)||0)*Number(i.qty||1)
+      } : {})
+    })),
     delivery_fee: getCheckoutDeliveryFee(),
     total: cartTotal() + getCheckoutDeliveryFee(),
     payment: "cod"
@@ -9201,8 +9290,8 @@ ${sizesSectionHTML}
     const refreshCartUI=()=>{
       const live=document.getElementById('lp-cart-live'),count=document.getElementById('lp-cart-count');
       const items=[];
-      mainCartItems.forEach((item,i)=>items.push(`<div class="lp-cart-item"><div><div class="lp-cart-item-name">${escHtml(mainProductName)}</div><div class="lp-cart-item-meta">${item.mode==='pack'?'Pack':'1 '+(lang==='ar'?'قطعة':'pièce')} · ${item.price}dh${item.colorText?` · ${escHtml(item.colorText)}`:''}${item.size?` · ${escHtml(item.size)}`:''}</div></div><button type="button" class="lp-cart-remove" data-cart-remove-main="${i}">🗑️ ${lang==='ar'?'حذف':'Supprimer'}</button></div>`));
-      if(p2Added)items.push(`<div class="lp-cart-item"><div><div class="lp-cart-item-name">${escHtml(product2Name)}</div><div class="lp-cart-item-meta">${p2price}dh${p2HasVariants?` · ${escHtml(summaryText(p2Variants,p2HasColors,p2Pack,p2HasSizes,p2State))}`:''}</div></div><button type="button" class="lp-cart-remove" id="lp-cart-remove-p2">🗑️ ${lang==='ar'?'حذف':'Supprimer'}</button></div>`);
+      mainCartItems.forEach((item,i)=>items.push(`<div class="lp-cart-item"><div><div class="lp-cart-item-name">${escHtml(mainProductName)}</div><div class="lp-cart-item-meta">${item.mode==='pack'?'Pack':'1 '+(lang==='ar'?'قطعة':'pièce')} · ${item.price}dh${item.colorText?` · ${escHtml(item.colorText)}`:''}${item.size?` · ${escHtml(item.size)}`:''}</div></div><span class="gx-lp-actions"><button type="button" class="lp-cart-edit" data-cart-edit-main="${i}">${lang==='ar'?'تعديل':'Modifier'}</button><button type="button" class="lp-cart-remove" data-cart-remove-main="${i}">${lang==='ar'?'حذف':'Supprimer'}</button></span></div>`));
+      if(p2Added)items.push(`<div class="lp-cart-item"><div><div class="lp-cart-item-name">${escHtml(product2Name)}</div><div class="lp-cart-item-meta">${p2price}dh${p2HasVariants?` · ${escHtml(summaryText(p2Variants,p2HasColors,p2Pack,p2HasSizes,p2State))}`:''}</div></div><span class="gx-lp-actions"><button type="button" class="lp-cart-edit" id="lp-cart-edit-p2">${lang==='ar'?'تعديل':'Modifier'}</button><button type="button" class="lp-cart-remove" id="lp-cart-remove-p2">${lang==='ar'?'حذف':'Supprimer'}</button></span></div>`);
       const cartTotalNow=mainCartItems.reduce((s,i)=>s+i.price*i.qty,0)+(p2Added?p2price:0);
       if(live)live.innerHTML=items.join('')||`<div class="lp-cart-empty">${lang==='ar'?'السلة فارغة':'Votre panier est vide'}</div>`;
       if(live&&items.length){
@@ -9232,6 +9321,24 @@ ${sizesSectionHTML}
       document.getElementById('lp-cart-fab')?.classList.toggle('lp-has-items', lpLiveCount>0);
       document.querySelectorAll('[data-cart-remove-main]').forEach(b=>b.addEventListener('click',()=>{const i=Number(b.dataset.cartRemoveMain);if(Number.isInteger(i))mainCartItems.splice(i,1);showForm=false;paint();}));
       document.getElementById('lp-cart-remove-p2')?.addEventListener('click',()=>{p2Added=false;paint()});
+      document.querySelectorAll('[data-cart-edit-main]').forEach(b=>b.addEventListener('click',()=>{
+        const i=Number(b.dataset.cartEditMain); const it=mainCartItems[i]; if(!it) return;
+        mainCartItems.splice(i,1);
+        mainState.purchaseMode=it.mode==='pack'?'pack':'piece';
+        mainState.color=it.color||null;
+        mainState.colors=(Array.isArray(it.colors)&&it.colors.length)?it.colors.slice():Array(mainPack).fill(null);
+        mainState.size=it.size||null;
+        mainOpen=true; showForm=false;
+        document.getElementById('lp-cart-drawer')?.classList.remove('open');
+        paint();
+        setTimeout(()=>document.getElementById('lp-main-picker')?.scrollIntoView({behavior:'smooth',block:'center'}),60);
+      }));
+      document.getElementById('lp-cart-edit-p2')?.addEventListener('click',()=>{
+        p2Added=false; p2Open=true; showForm=false;
+        document.getElementById('lp-cart-drawer')?.classList.remove('open');
+        paint();
+        setTimeout(()=>document.getElementById('lp-p2-picker')?.scrollIntoView({behavior:'smooth',block:'center'}),60);
+      });
       document.getElementById('lp-cart-checkout')?.addEventListener('click',()=>{hideToast();document.getElementById('lp-cart-drawer')?.classList.remove('open');showForm=true;paint();setTimeout(()=>{document.getElementById('lp-order-form')?.scrollIntoView({behavior:'smooth',block:'center'});},50);});
     };
 document.getElementById('lp-pyjama-menu')?.addEventListener('click',()=>{document.getElementById('order')?.scrollIntoView({behavior:'smooth',block:'start'});});
@@ -9429,7 +9536,20 @@ document.getElementById('lp-cart-drawer')?.addEventListener('click',e=>{if(e.tar
       lpDeliveryType=cityType; lpDeliveryFee=getLPDeliveryFee();
       const finalTotal=total+lpDeliveryFee;
       const mainColorText=mainCartItems.map(i=>i.colorText).filter(Boolean).join(' + ');
-      const items=mainCartItems.map(i=>({name:mainProductName,type:i.mode==='pack'?'pack':'piece',color:i.colorText||'',size:i.size||'',qty:i.qty,price:i.price}));
+      const items=mainCartItems.map(i=>({
+        name:mainProductName,
+        type:i.mode==='pack'?'pack':'piece',
+        color:i.colorText||'',
+        size:i.size||'',
+        qty:i.qty,
+        price:i.price,
+        ...(i.isGiftPack ? {
+          gift_pack:true,
+          base_price:Number(i.basePrice||i.price)||0,
+          packaging_premium:Number(i.packagingPremium||0)||0,
+          packaging_premium_total:(Number(i.packagingPremium||0)||0)*Number(i.qty||1)
+        } : {})
+      }));
       if(p2Added) items.push({name:product2Name,color:p2Pack>1?p2State.colors.map(id=>labelFor(p2Variants,id)).join(' + '):(p2State.color?labelFor(p2Variants,p2State.color):''),size:p2State.size||'',qty:1,price:p2price});
       const order={
         id:'LP-'+Date.now().toString(36).toUpperCase(),
@@ -10449,6 +10569,7 @@ function highlightProductFromUrl(){
   document.head.appendChild(colorAttentionStyle);
 
   const css=document.createElement('style');css.id='luxia-v5-admin-pack-css';css.textContent=`
+  .admin-pack-gift-help{display:grid;grid-template-columns:120px 1fr;gap:7px 12px;padding:12px 13px;margin:0 0 12px;background:#fffdf9;border:1px solid #e0d8ce;border-radius:11px;font-size:12px;line-height:1.45;color:#6f675f}.admin-pack-gift-help b{color:#8f6f3f}.admin-pack-gift-help span{color:#817970}.gf-itrow select,.gf-itrow input{min-width:0}.gf-itrow{grid-template-columns:130px 1fr 1.2fr auto;align-items:center}.gf-itrow button{margin-top:0!important;white-space:nowrap}@media(max-width:680px){.gf-itrow{grid-template-columns:1fr 1fr}.gf-itrow button{grid-column:1/-1}.admin-pack-gift-help{grid-template-columns:1fr}}
   .admin-page-head{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;margin:0 0 24px}.admin-page-head h2{margin:3px 0 5px;font-size:34px}.admin-page-head p{margin:0;color:#756e66;max-width:620px}.admin-kicker{font-size:11px;letter-spacing:.18em;color:#9a7847;text-transform:uppercase}.admin-head-actions{display:flex;gap:9px;flex-wrap:wrap}.admin-product-card{background:#fffdf9;border:1px solid #ddd5ca;border-radius:16px;overflow:hidden;margin-bottom:14px;box-shadow:0 8px 24px -22px rgba(42,36,30,.45)}.admin-product-summary{width:100%;display:grid;grid-template-columns:56px 1fr auto 20px;gap:13px;align-items:center;padding:12px 14px;border:0;background:transparent;text-align:start;cursor:pointer;color:#302b27}.admin-product-thumb{width:56px;height:56px;border-radius:10px;overflow:hidden;background:#eee8df;display:block}.admin-product-thumb img{width:100%;height:100%;object-fit:contain}.admin-product-summary-main{display:flex;flex-direction:column;gap:3px;min-width:0}.admin-product-summary-main b{font-family:var(--font-display);font-size:19px;font-weight:500}.admin-product-summary-main small{color:#817970;font-size:12px}.admin-status.is-on{background:#f2eee5;color:#8c6e40;border-color:#d8c7aa}.admin-status.is-off{background:#f5eeee;color:#8c5f58;border-color:#e2cdca}.admin-product-chevron{color:#9b938a;font-size:17px}.admin-product-body{display:none;padding:0 14px 16px;border-top:1px solid #e4ddd4}.admin-product-body.open{display:block}.admin-section-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.admin-section-card,.admin-collection-create{background:#faf8f3;border:1px solid #e0d8ce;border-radius:14px;padding:16px;margin-top:14px}.admin-section-title{display:flex;gap:11px;align-items:flex-start;margin-bottom:16px}.admin-section-title>span{font-size:11px;color:#9a7847;letter-spacing:.14em;padding-top:4px}.admin-section-title h3{margin:0 0 2px;font-size:21px;font-weight:500}.admin-section-title p{margin:0;color:#817970;font-size:12px}.admin-two-col{display:grid;grid-template-columns:1fr 1fr;gap:11px}.admin-three-col{display:grid;grid-template-columns:110px 150px 1fr;gap:11px}.admin-toggle-row{display:flex;justify-content:space-between;gap:12px;align-items:end}.admin-toggle-row>label,.admin-pack-enable label{display:flex;align-items:center;gap:8px;min-height:44px}.admin-stock{width:180px}.admin-variant-block{padding:13px 0;border-top:1px solid #e3dcd3}.admin-block-head{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:9px}.admin-block-head strong{font-size:14px;color:#423b35}.admin-block-head small{font-size:11px;color:#8a8279}.admin-variant-list{display:flex;flex-direction:column;gap:7px}.admin-variant-pill{display:flex;gap:7px;align-items:center;padding:7px;background:#fffdf9;border:1px solid #ddd5ca;border-radius:10px}.admin-variant-pill input[type=text]{min-width:0;flex:1}.admin-variant-pill input[type=color]{width:34px;height:34px;padding:2px}.admin-variant-add{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin-top:9px}.admin-variant-add input[type=text]{flex:1;min-width:90px}.admin-pack-card{margin-top:14px}.admin-pack-enable{display:flex;justify-content:space-between;align-items:center;gap:15px;padding:11px 13px;margin-bottom:13px;background:#f3eee5;border:1px solid #ded3c4;border-radius:11px}.admin-pack-note{font-size:11px;color:#83796e}.admin-pack-variants{margin-top:15px;padding-top:13px;border-top:1px solid #e3dcd3}.admin-save-row{display:flex;gap:9px;justify-content:flex-end;margin-top:14px}.admin-upload-status{font-size:12px;color:#967644}.admin-collections-list{margin-top:14px;background:#fffdf9;border:1px solid #ddd5ca;border-radius:14px;padding:16px}.admin-collections-order-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:8px}.admin-collections-order-head h3{margin:0 0 4px}.admin-collections-order-head p{margin:0;color:#8b837b;font-size:11px;line-height:1.45}.admin-order-hint{font-size:14px;letter-spacing:.18em;color:#9a7847;padding-top:2px}.admin-collection-sort-row{grid-template-columns:34px 1fr auto;display:grid!important;align-items:center}.admin-collection-position{width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center;border:1px solid #d9d1c6;border-radius:50%;font-size:11px;color:#8f6f3f;background:#faf6ef}.admin-collection-name{display:flex;flex-direction:column;min-width:0}.admin-collection-name b{font-size:14px}.admin-collection-sort-actions{display:flex;align-items:center;justify-content:flex-end;gap:6px;flex-wrap:wrap}.admin-collection-move{min-width:38px!important;padding:7px 10px!important;font-size:16px!important;line-height:1!important}.admin-collection-move:disabled{opacity:.28;cursor:not-allowed}.admin-collection-move:not(:disabled):hover{border-color:#b99a62!important;color:#8f6f3f!important}.admin-collections-list h3{margin:0 0 10px}.admin-collection-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 0;border-top:1px solid #e5ded5}.admin-collection-row div{display:flex;flex-direction:column}.admin-collection-row small{color:#8b837b;margin-top:2px}.variant-mode-card{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 18px}.variant-mode{border:1px solid #d9d1c6;background:#fffdf9;border-radius:12px;padding:11px 12px;text-align:start;color:#5e574f}.variant-mode strong,.variant-mode small{display:block;margin-top:3px}.variant-mode small{color:#8f6f3f;font-size:11px}.variant-mode.active{background:#292622;border-color:#292622;color:#fffdf8}.pack-offer-modal .order-summary{margin:10px 0 16px}.pack-offer-modal .modal-actions{display:grid;gap:9px}.pack-offer-modal .btn-primary{background:#292622!important;color:#fffdf8!important}.pack-offer-modal .btn-ghost{background:#fffdf9!important}
   @media(max-width:720px){.admin-collections-order-head{flex-direction:column}.admin-collection-sort-row{grid-template-columns:30px 1fr}.admin-collection-sort-actions{grid-column:2;justify-content:flex-start;margin-top:7px}.admin-page-head{flex-direction:column}.admin-section-grid,.admin-two-col{grid-template-columns:1fr}.admin-three-col{grid-template-columns:1fr 1fr}.admin-toggle-row{flex-direction:column;align-items:stretch}.admin-stock{width:auto}.admin-product-summary{grid-template-columns:48px 1fr auto 16px}.admin-product-thumb{width:48px;height:48px}.admin-head-actions{width:100%}.admin-head-actions .btn{flex:1}.variant-mode-card{grid-template-columns:1fr 1fr}}
   `;document.head.appendChild(css);
@@ -10523,38 +10644,1046 @@ function highlightProductFromUrl(){
 .gf-box{background:#fffdf8;color:#292622;max-width:480px;margin:auto;border-radius:20px;padding:18px;position:relative}.gf-box>img{width:100%;border-radius:14px}
 .gf-x{position:absolute;top:10px;right:10px;background:#fff;border:0;border-radius:50%;width:32px;height:32px;z-index:2}.gf-it{margin:10px 0}.gf-it select,.gf-box textarea{width:100%;padding:10px;margin-top:6px;border:1px solid #d6cdc2;border-radius:10px}
 .gf-ck{display:flex;gap:8px;align-items:center;margin:8px 0}.gf-box .btn{margin-top:12px}.gf-pr{font-size:20px;margin:6px 0}
-.gf-itrow{display:grid;gap:6px;border-top:1px dashed #d6cdc2;padding:8px 0}.gf-itrow input,.gf-itrow select{width:100%}
+.gf-itrow{display:grid;gap:6px;border-top:1px dashed #d6cdc2;padding:10px 0}.gf-lb{font-size:12px;letter-spacing:.04em;opacity:.75;margin-top:4px}.gf-itrow input,.gf-itrow select{width:100%}
 </style>
 <script>
 (function(){
 const $=id=>document.getElementById(id),E=s=>escHtml(s||''),A=s=>escAttr(s||''),csv=s=>String(s||'').split(',').map(x=>x.trim()).filter(Boolean);
-const TY=[['cloth','Vêtement (couleur + taille)'],['shoes','Chaussures (couleur + pointure)'],['simple','Sans option']];
-const rowH=it=>`<div class="gf-itrow" data-git><input data-gi="name" placeholder="Article (Pyjama, Chaussons…)" value="${A(it.name)}"><select data-gi="type">${TY.map(o=>`<option value="${o[0]}" ${it.type===o[0]?'selected':''}>${o[1]}</option>`).join('')}</select><input data-gi="colors" placeholder="Couleurs : Rouge, Noir" value="${A(it.colors)}"><input data-gi="sizes" placeholder="Tailles / Pointures : S, M, L ou 38, 39" value="${A(it.sizes)}"><button type="button" class="btn btn-ghost" data-grm>✕ Retirer l'article</button></div>`;
+const TY=[['cloth','Vêtements'],['shoes','Chaussures']];
+const isShoes=t=>['shoes','shoe','pantoufles','pantoufle','chaussons','chausson'].includes(String(t||'').toLowerCase());
+const prevHTML=(items,o)=>{
+  const vis=items.map(x=>{const sh=isShoes(x.type);return{sh,name:String(x.name||'').trim(),colors:sh?[]:csv(x.colors),sizes:csv(x.sizes||x.pointures)}}).filter(x=>x.name);
+  let h=vis.map(x=>{
+    const ok=x.colors.length||x.sizes.length,chips=[];
+    if(x.colors.length)chips.push(['Couleur',x.colors]);
+    if(x.sizes.length)chips.push([x.sh?'Pointure':'Taille',x.sizes]);
+    return `<div class="gf-pv-it${ok?'':' warn'}"><b>${E(x.name)}</b>${ok?chips.map(c=>`<div class="gf-pv-sel"><span>${c[0]} ▾</span><i>${E(c[1].join(' · '))}</i></div>`).join(''):`<div class="gf-pv-warn">⚠ ${x.sh?'Aucune pointure renseignée':'Aucune taille ni couleur renseignée'} : cet article n’apparaîtra pas chez la cliente.</div>`}</div>`;
+  }).join('');
+  if(!vis.length)h='<div class="gf-pv-warn">⚠ Aucun article nommé : la cliente ne verra aucun choix.</div>';
+  const ex=[];
+  if(o.msg)ex.push('Carte message');
+  if(o.hide)ex.push('Ne pas afficher le prix');
+  if(o.wrap)ex.push(`Emballage premium (+${o.wrapPrice} DH)`);
+  if(ex.length)h+=`<div class="gf-pv-ex">${ex.map(x=>`<span>${E(x)}</span>`).join('')}<small>Affichés après que la cliente a choisi ses tailles / pointures.</small></div>`;
+  return h;
+};
+const readCard=c=>({
+  items:[...c.querySelectorAll('[data-git]')].map(r=>{const o={};r.querySelectorAll('[data-gi]').forEach(x=>o[x.dataset.gi]=x.value);return o}),
+  opts:{msg:!!c.querySelector('[data-gk="msg"]')?.checked,hide:!!c.querySelector('[data-gk="hide"]')?.checked,wrap:!!c.querySelector('[data-gk="wrap"]')?.checked,wrapPrice:Math.max(0,Number(c.querySelector('[data-gk="wrapPrice"]')?.value)||0)}
+});
+const refreshPrev=c=>{if(!c)return;const box=c.querySelector('[data-gprev]');if(!box)return;const d=readCard(c);box.innerHTML=prevHTML(d.items,d.opts)};
+const rowH=it=>{
+  const type=isShoes(it.type)?'shoes':'cloth',sh=type==='shoes';
+  const value=it.sizes||it.pointures||'';
+  return `<div class="gf-itrow" data-git data-gtype="${type}">
+    <label class="gf-lb">Type d’article</label>
+    <select data-gi="type"><option value="cloth" ${sh?'':'selected'}>Vêtement (couleur + taille)</option><option value="shoes" ${sh?'selected':''}>Chaussures (pointure)</option></select>
+    <label class="gf-lb">Nom affiché à la cliente</label>
+    <input data-gi="name" placeholder="${sh?'Ex : Pantouf':'Ex : Pyjama'}" value="${A(it.name)}">
+    <label class="gf-lb gf-colors">Couleurs proposées (séparées par une virgule)</label>
+    <input class="gf-colors" data-gi="colors" placeholder="Ex : Rouge, Noir, Rose" value="${A(sh?'':(it.colors||''))}">
+    <label class="gf-lb" data-gl="sizes">${sh?'Pointures proposées (séparées par une virgule)':'Tailles proposées (séparées par une virgule)'}</label>
+    <input data-gi="sizes" placeholder="${sh?'Ex : 36, 37, 38, 39, 40':'Ex : S, M, L, XL'}" value="${A(value)}">
+    <button type="button" class="btn btn-ghost" data-grm>✕ Retirer l’article</button>
+  </div>`;
+};
 window.luxiaGiftCardHTML=function(p){const g=(PRODUCT_VARIANTS[p.id]||{}).gift;if(!g)return '';
+const wp=g.wrapPrice??15;
 const ck=(k,l)=>`<label class="gf-ck"><input type="checkbox" data-gk="${k}" ${g[k]!==false?'checked':''} style="width:auto"> ${l}</label>`;
-return `<section class="admin-section-card" data-gift-card="${A(p.id)}"><div class="admin-section-title"><span>🎁</span><div><h3>Contenu du Pack Cadeau</h3><p>Chaque article a ses propres options. Photos, galerie, vidéo et collection : utilisez les sections ci-dessus, comme pour un produit.</p></div></div><div data-gitems>${(g.items||[]).map(rowH).join('')}</div><button type="button" class="btn btn-ghost" data-gadd="${A(p.id)}">+ Article</button>${ck('msg','Carte message')}${ck('hide','Option « sans prix »')}${ck('wrap','Emballage premium')}<label>Prix emballage premium (DH)</label><input type="number" data-gk="wrapPrice" value="${g.wrapPrice??15}"></section>`};
-document.addEventListener('click',e=>{const a=e.target.closest('[data-gadd]');if(a){const c=a.closest('[data-gift-card]'),w=c.querySelector('[data-gitems]');w.insertAdjacentHTML('beforeend',rowH({name:'',type:'cloth'}));return}
-const r=e.target.closest('[data-grm]');if(r){r.closest('[data-git]').remove();return}
+const o={msg:g.msg!==false,hide:g.hide!==false,wrap:g.wrap!==false,wrapPrice:wp};
+return `<section class="admin-section-card gf-admin" data-gift-card="${A(p.id)}">
+  <div class="admin-section-title"><span>🎁</span><div><h3>Contenu du Pack Cadeau</h3><p>Vous décidez de tout ce que la cliente voit. Ce qui n’est pas rempli n’apparaît pas.</p></div></div>
+
+  <div class="gf-step"><i>1</i><div><b>Articles du pack</b><small>Vêtement → la cliente choisit couleur (si vous en écrivez) et taille. Chaussures → la cliente choisit la pointure.</small></div></div>
+  <div data-gitems>${(g.items||[]).map(rowH).join('')}</div>
+  <button type="button" class="btn btn-ghost" data-gadd="${A(p.id)}">+ Ajouter un article</button>
+
+  <div class="gf-step"><i>2</i><div><b>Options du pack</b><small>Proposées à la cliente après le choix des tailles / pointures.</small></div></div>
+  ${ck('msg','Carte message')}
+  ${ck('hide','Option « ne pas afficher le prix »')}
+  ${ck('wrap','Emballage premium')}
+  <label class="gf-lb">Prix de l’emballage premium (DH)</label>
+  <input type="number" min="0" step="1" data-gk="wrapPrice" value="${wp}">
+
+  <div class="gf-step"><i>3</i><div><b>Aperçu côté cliente</b><small>Exactement ce qu’elle verra dans la fenêtre du pack (se met à jour en direct).</small></div></div>
+  <div class="gf-prev" data-gprev>${prevHTML(g.items||[],o)}</div>
+</section>`};
+document.addEventListener('change',e=>{const sel=e.target.closest('[data-gi="type"]');if(!sel)return;const row=sel.closest('[data-git]');const sh=sel.value==='shoes';row.dataset.gtype=sh?'shoes':'cloth';row.querySelector('[data-gl]').textContent=sh?'Pointures proposées (séparées par une virgule)':'Tailles proposées (séparées par une virgule)';const si=row.querySelector('[data-gi="sizes"]');si.placeholder=sh?'Ex : 36, 37, 38, 39, 40':'Ex : S, M, L, XL';row.querySelector('[data-gi="name"]').placeholder=sh?'Ex : Pantouf':'Ex : Pyjama';if(sh)row.querySelector('[data-gi="colors"]').value='';refreshPrev(sel.closest('[data-gift-card]'))});
+['input','change'].forEach(ev=>document.addEventListener(ev,e=>{const c=e.target.closest&&e.target.closest('[data-gift-card]');if(c)refreshPrev(c)}));
+document.addEventListener('click',e=>{const a=e.target.closest('[data-gadd]');if(a){const c=a.closest('[data-gift-card]'),w=c.querySelector('[data-gitems]');w.insertAdjacentHTML('beforeend',rowH({name:'',type:'cloth',sizes:''}));refreshPrev(c);return}
+const r=e.target.closest('[data-grm]');if(r){const cc=r.closest('[data-gift-card]');r.closest('[data-git]').remove();refreshPrev(cc);return}
 if(e.target.closest('#addGiftPackBtn')){window.__luxiaNewGift=true;addNewProductAdmin()}});
 function collectGift(id){const c=document.querySelector(`[data-gift-card="${CSS.escape(id)}"]`);const v=PRODUCT_VARIANTS[id];if(!c||!v||!v.gift)return;
-v.gift.items=[...c.querySelectorAll('[data-git]')].map(r=>{const o={};r.querySelectorAll('[data-gi]').forEach(x=>o[x.dataset.gi]=x.value);return o}).filter(o=>o.name.trim());
+v.gift.items=[...c.querySelectorAll('[data-git]')].map(r=>{const o={};r.querySelectorAll('[data-gi]').forEach(x=>o[x.dataset.gi]=x.value);if(o.type==='shoes')o.colors='';return o}).filter(o=>o.name.trim());
 c.querySelectorAll('[data-gk]').forEach(x=>v.gift[x.dataset.gk]=x.type==='checkbox'?x.checked:(+x.value||0))}
 const _sp=window.saveProductEdits;window.saveProductEdits=function(id){try{collectGift(id)}catch(e){console.warn(e)}return _sp.apply(this,arguments)};
 /* storefront: options modal for gift products */
-const sel=(k,i,l,a)=>a.length?`<select data-k="${k}${i}"><option value="">${l}</option>${a.map(x=>`<option>${E(x)}</option>`).join('')}</select>`:'';
-const opt=(it,i)=>it.type==='shoes'?sel('c',i,'Couleur',csv(it.colors))+sel('p',i,'Pointure',csv(it.sizes)):it.type==='simple'?'':sel('c',i,'Couleur',csv(it.colors))+sel('s',i,'Taille',csv(it.sizes));
-function openGift(id){const p=PRODUCTS.find(x=>x.id===id),g=(PRODUCT_VARIANTS[id]||{}).gift;if(!p||!g)return false;let m=$('giftModal');if(!m){m=document.createElement('div');m.id='giftModal';document.body.appendChild(m)}
-const cl=()=>m.classList.remove('open'),its=g.items||[];m.className='gf-modal open';
-m.innerHTML=`<div class="gf-box"><button class="gf-x" id="gfX">✕</button><img src="${A(PRODUCT_IMAGES[id])}"><h3>${E(t(p.nameKey))}</h3><div class="gf-pr">${p.price} DH</div>${its.map((it,i)=>`<div class="gf-it"><b>🎀 ${E(it.name)}</b>${opt(it,i)}</div>`).join('')}${g.msg!==false?'<label>💌 Carte message</label><textarea id="gfMsg" maxlength="200"></textarea>':''}${g.hide!==false?'<label class="gf-ck"><input type="checkbox" id="gfHide" style="width:auto"> Ne pas afficher le prix</label>':''}${g.wrap!==false?`<label class="gf-ck"><input type="checkbox" id="gfWrap" style="width:auto"> Emballage premium (+${g.wrapPrice??15} DH)</label>`:''}<button class="btn btn-primary btn-block" id="gfAdd">Ajouter au panier</button></div>`;
-$('gfX').onclick=cl;
-$('gfAdd').onclick=()=>{if([...m.querySelectorAll('select')].some(s=>!s.value)){showToast('Choisissez toutes les options');return}
-const v=(i,k)=>m.querySelector(`[data-k="${k}${i}"]`)?.value,parts=its.map((it,i)=>it.name+(it.type==='simple'?'':': '+[v(i,'c'),v(i,'s')||v(i,'p')].filter(Boolean).join(' / ')));
-const w=$('gfWrap')?.checked,msg=($('gfMsg')?.value||'').trim(),size='🎁 '+parts.join(' · ')+(msg?` · 💌 "${msg}"`:'')+($('gfHide')?.checked?' · Sans prix':'')+(w?' · Emballage premium':'');
-cart.push({lineId:'l'+Date.now()+Math.random().toString(36).slice(2,7),productId:id,nameKey:p.nameKey,mode:'piece',packPieces:1,price:p.price+(w?(g.wrapPrice??15):0),color:null,colors:null,size,colorText:'',qty:1});
-saveCart();updateCartBadge();renderCart();cl();showToast('Ajouté 🎁')};return true}
+const sel=(k,i,l,a)=>{
+  const values=Array.isArray(a)?a.filter(x=>String(x??'').trim()!==''):[];
+  if(!values.length)return '';
+  return `<select required data-k="${k}${i}" aria-label="${E(l)}">
+    <option value="">${E(l)}</option>
+    ${values.map(x=>`<option value="${E(x)}">${E(x)}</option>`).join('')}
+  </select>`;
+};
+
+/* PACK CADEAU — ONLY TWO CUSTOMER CHOICES:
+   Pyjama   => Taille
+   Pantouf  => Pointure
+   No Couleur selector on the gift card.
+*/
+const giftItemKind=(it)=>{
+  const type=String(it?.type||'').toLowerCase();
+  if(type==='shoes'||type==='shoe'||type==='pantoufles'||type==='pantoufle'||type==='chaussons'||type==='chausson') return 'pantouf';
+  if(type==='cloth'||type==='pyjama'||type==='vetement') return 'pyjama';
+  const raw=String(it?.name||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  if(/pantouf|chausson|slipper|chaussure/.test(raw)) return 'pantouf';
+  return 'pyjama';
+};
+
+const giftVisibleItems=(g)=>(Array.isArray(g&&g.items)?g.items:[]).map(it=>{
+  const kind=giftItemKind(it);
+  return {it,kind,name:String(it.name||'').trim(),colors:kind==='pantouf'?[]:csv(it.colors),sizes:csv(it.sizes)};
+}).filter(x=>x.name&&(x.colors.length||x.sizes.length));
+
+const opt=(it,i)=>{
+  const kind=giftItemKind(it);
+  if(kind==='pyjama') return sel('s',i,'Taille',csv(it.sizes));
+  if(kind==='pantouf') return sel('p',i,'Pointure',csv(it.sizes));
+  return '';
+};
+
+function openGift(id){
+  const p=PRODUCTS.find(x=>x.id===id),g=(PRODUCT_VARIANTS[id]||{}).gift;
+  if(!p||!g)return false;
+
+  let m=$('giftModal');
+  if(!m){
+    m=document.createElement('div');
+    m.id='giftModal';
+    document.body.appendChild(m);
+  }
+
+  const cl=()=>m.classList.remove('open');
+  const __ep=window.__luxiaEditPending; window.__luxiaEditPending=null; window.__luxiaEditLine=null;
+  const __editItem=(__ep&&__ep.productId===id)?__ep:null;
+  if(__editItem) window.__luxiaEditLine=__editItem.lineId;
+  const its=giftVisibleItems(g).map(x=>x.it);
+  const wrapPrice=Math.max(0,Number.isFinite(Number(g.wrapPrice))?Number(g.wrapPrice):15);
+
+  m.className='gf-modal open';
+  m.innerHTML=`<div class="gf-box">
+    <button class="gf-x" id="gfX" type="button" aria-label="Fermer">✕</button>
+    <img src="${A(PRODUCT_IMAGES[id])}">
+    <h3>${E(t(p.nameKey))}</h3>
+    <div class="gf-pr" id="gfPrice">${p.price} DH</div>
+
+    ${its.map((it,i)=>{
+      const kind=giftItemKind(it);
+      return `<div class="gf-it" data-gift-item="${i}">
+        <b>${E(String(it.name).trim())}</b>
+        ${kind==='pantouf'?'':sel('c',i,'Couleur',csv(it.colors))}
+        ${kind==='pantouf'?sel('p',i,'Pointure',csv(it.sizes)):sel('s',i,'Taille',csv(it.sizes))}
+      </div>`;
+    }).join('')}
+
+    <div id="gfAfterChoices" style="display:none">
+      ${g.msg!==false?'<label>Carte message</label><textarea id="gfMsg" maxlength="200"></textarea>':''}
+      ${g.hide!==false?'<label class="gf-ck"><input type="checkbox" id="gfHide" style="width:auto"> Ne pas afficher le prix</label>':''}
+      ${g.wrap!==false?`<label class="gf-ck"><input type="checkbox" id="gfWrap" style="width:auto"> Emballage premium (+${wrapPrice} DH)</label>`:''}
+    </div>
+
+    <button class="btn btn-primary btn-block" id="gfAdd" type="button">Ajouter au panier</button>
+  </div>`;
+
+  $('gfX').onclick=()=>{ cl(); if(window.__luxiaEditLine){ window.__luxiaEditLine=null; if(typeof openCartPanel==='function') openCartPanel(); } };
+
+  const syncGiftAfterChoices=()=>{
+    const selects=[...m.querySelectorAll('.gf-it select')];
+    const complete=selects.every(s=>String(s.value||'').trim());
+    const after=$('gfAfterChoices');
+    if(after) after.style.display=complete?'block':'none';
+  };
+  m.querySelectorAll('.gf-it select').forEach(s=>{
+    s.addEventListener('change',()=>{
+      s.classList.toggle('is-required-missing',!s.value);
+      syncGiftAfterChoices();
+    });
+    s.addEventListener('click',e=>e.stopPropagation());
+    s.addEventListener('pointerdown',e=>e.stopPropagation());
+  });
+  syncGiftAfterChoices();
+
+  const updGiftPrice=()=>{
+    const el=$('gfPrice'); if(!el) return;
+    const base=Number(p.price)||0, on=$('gfWrap')?.checked===true;
+    el.innerHTML=on?`${base+wrapPrice} DH <small style="opacity:.7;font-size:13px">(dont emballage premium +${wrapPrice} DH)</small>`:`${base} DH`;
+  };
+  m.addEventListener('change',e=>{ if(e.target&&e.target.id==='gfWrap') updGiftPrice(); });
+  updGiftPrice();
+  if(__editItem&&__editItem.giftSel){
+    const gs=__editItem.giftSel, sl=gs.sel||{};
+    m.querySelectorAll('[data-k]').forEach(el=>{ const v=sl[el.dataset.k]; if(v&&[...el.options].some(o=>o.value===v)) el.value=v; });
+    const a=$('gfMsg'); if(a&&gs.msg) a.value=gs.msg;
+    const h=$('gfHide'); if(h) h.checked=!!gs.hide;
+    const w2=$('gfWrap'); if(w2) w2.checked=!!gs.wrap;
+    syncGiftAfterChoices(); updGiftPrice();
+  }
+
+  $('gfAdd').onclick=()=>{
+    const selects=[...m.querySelectorAll('.gf-it select')];
+    const missing=selects.filter(s=>!String(s.value||'').trim());
+
+    if(missing.length){
+      missing.forEach(s=>{
+        s.classList.add('is-required-missing');
+        const box=s.closest('.gf-it');
+        [box,s].forEach(el=>{if(!el)return;el.classList.remove('gf-alert');void el.offsetWidth;el.classList.add('gf-alert');setTimeout(()=>el.classList.remove('gf-alert'),1400);});
+      });
+      try{navigator.vibrate&&navigator.vibrate([90,50,90,50,140]);}catch(e){}
+      missing[0].closest('.gf-it').scrollIntoView({behavior:'smooth',block:'center'});
+      setTimeout(()=>{try{missing[0].focus({preventScroll:true});}catch(e){}},350);
+      showToast('Choisissez la couleur, la taille ou la pointure de chaque article');
+      return;
+    }
+
+    const v=(i,k)=>m.querySelector(`[data-k="${k}${i}"]`)?.value||'';
+
+    const parts=its.map((it,i)=>{
+      const kind=giftItemKind(it);
+      const col=v(i,'c')?`Couleur ${v(i,'c')} · `:'';
+      if(kind==='pyjama') return `${it.name||'Pyjama'}: ${col}Taille ${v(i,'s')}`;
+      if(kind==='pantouf') return `${it.name||'Pantoufles'}: ${col}Pointure ${v(i,'p')}`;
+      return it.name||'Produit';
+    });
+
+    const w=$('gfWrap')?.checked===true;
+    const msg=($('gfMsg')?.value||'').trim();
+    const hidePrice=$('gfHide')?.checked===true;
+    const packagingPremium=w?wrapPrice:0;
+    const basePrice=Number(p.price)||0;
+    const unitPrice=basePrice+packagingPremium;
+
+    const size=parts.join(' · ')
+      +(msg?` · Message : "${msg}"`:'')
+      +(hidePrice?' · Sans prix':'')
+      +(w?' · Emballage premium':'');
+
+    const __gl=window.__luxiaEditLine; window.__luxiaEditLine=null; let __gi=-1;
+    if(__gl){ __gi=cart.findIndex(i=>i.lineId===__gl); if(__gi>-1) cart.splice(__gi,1); }
+    const __selObj={}; m.querySelectorAll('[data-k]').forEach(el=>{ __selObj[el.dataset.k]=el.value||''; });
+    cart.push({
+      lineId:'l'+Date.now()+Math.random().toString(36).slice(2,7),
+      giftSel:{sel:__selObj,msg,hide:hidePrice,wrap:w},
+      productId:id,
+      nameKey:p.nameKey,
+      mode:'piece',
+      packPieces:1,
+      price:unitPrice,
+      basePrice,
+      packagingPremium,
+      packagingPremiumTotal:packagingPremium,
+      color:null,
+      colors:null,
+      size,
+      colorText:'',
+      qty:1,
+      isGiftPack:true
+    });
+    if(__gi>-1){ const __it=cart.pop(); cart.splice(__gi,0,__it); }
+
+    saveCart();
+    updateCartBadge();
+    renderCart();
+    cl();
+    try{ const __pd=document.getElementById('productDetailOverlay');
+      if(__pd){ if(typeof clearProductDetailGalleryTimer==='function') clearProductDetailGalleryTimer(); __pd.classList.remove('open'); __pd.setAttribute('aria-hidden','true'); }
+      document.body.style.overflow=''; }catch(e){}
+    if(typeof openCartPanel==='function') openCartPanel(); else showToast('Ajouté au panier');
+  };
+
+  return true;
+}
+
 const _ov=window.openVariantModal;window.openVariantModal=function(id,mode){if(openGift(id))return;return _ov.apply(this,arguments)};
 })();
 </script>
+<style id="luxia-gift-pack-card">
+/* =========================================================
+   LUXIA — GIFT PACK CARD
+   Applies ONLY to cards carrying .gp-card (gift packs / gift collection).
+   Every other product card keeps its existing look and behaviour.
+   Palette: burgundy #6d1834 · rose #a63558 · champagne gold #f6dd9c / #c9a24f · blush #fbe6e6
+   ========================================================= */
+body.luxia-store-home .product-grid .product-card.gp-card{
+  background:
+    radial-gradient(circle,rgba(201,162,79,.28) 1px,transparent 1.8px) 0 0/22px 22px,
+    linear-gradient(180deg,#fff5ef 0%,#fbe6e6 58%,#f6dadd 100%) !important;
+  border:1.5px solid #d9b871 !important;
+  border-radius:22px !important;
+  box-shadow:0 0 0 1px rgba(255,255,255,.7) inset,0 12px 26px -10px rgba(109,24,52,.45),0 2px 0 rgba(201,162,79,.5) !important;
+  padding-bottom:6px;
+}
+/* lid: the top of the gift box */
+.gp-card .gp-lid{
+  position:relative; height:68px; overflow:hidden;
+  background:
+    radial-gradient(circle,rgba(246,221,156,.38) 1.2px,transparent 1.7px) 0 0/14px 14px,
+    linear-gradient(180deg,#8f2748,#6d1834);
+  border-bottom:3px solid #d9b871;
+  box-shadow:inset 0 -10px 14px rgba(0,0,0,.2);
+}
+.gp-card .gp-lid::before{
+  content:""; position:absolute; top:0; bottom:0; left:50%; width:34px; transform:translateX(-50%);
+  background:linear-gradient(90deg,#c9a24f,#f6dd9c 46%,#c9a24f);
+  box-shadow:0 0 10px rgba(246,221,156,.45);
+}
+.gp-card .gp-tag{
+  position:absolute; top:10px; inset-inline-start:11px; z-index:3;
+  font-size:calc(11px * var(--font-scale,1)); font-weight:700; letter-spacing:.02em;
+  color:#f6dd9c; background:rgba(60,8,28,.55); border:1px solid rgba(246,221,156,.6);
+  padding:3px 9px; border-radius:999px; backdrop-filter:blur(2px);
+}
+/* the bow: closed = ribbon bow, open = flower */
+.gp-card .gp-bow{
+  position:absolute; left:50%; top:50%; width:92px; height:72px; margin:-36px 0 0 -46px; z-index:2;
+  overflow:visible; filter:drop-shadow(0 3px 4px rgba(0,0,0,.35));
+}
+.gp-card .gp-bow .rb{fill:#f4c9d3; stroke:#b23a5c; stroke-width:1.4; stroke-linejoin:round}
+.gp-card .gp-bow .rb-d{fill:#e59ab0; stroke:#b23a5c; stroke-width:1.4; stroke-linejoin:round}
+.gp-card .gp-bow .knot{fill:#f6dd9c; stroke:#c9a24f; stroke-width:1.6}
+.gp-card .gp-bow .pt{fill:#ffe9ee; stroke:#b23a5c; stroke-width:1.2}
+.gp-card .gp-bow .pt.alt{fill:#f7bccb}
+.gp-card .gp-pt{
+  transform:translate(46px,36px) rotate(var(--a)) scale(0);
+  transition:transform .65s cubic-bezier(.2,1.5,.4,1) calc(var(--i) * 45ms);
+}
+.gp-card .gp-loop-l,.gp-card .gp-loop-r,.gp-card .gp-tail-l,.gp-card .gp-tail-r{transition:transform .6s cubic-bezier(.3,1.4,.5,1),opacity .4s}
+.gp-card .gp-loop-l{transform-origin:46px 36px}
+.gp-card .gp-loop-r{transform-origin:46px 36px}
+.gp-card .gp-tail-l,.gp-card .gp-tail-r{transform-origin:46px 38px}
+.gp-card.gp-open .gp-pt{transform:translate(46px,36px) rotate(var(--a)) scale(1)}
+.gp-card.gp-open .gp-loop-l{transform:rotate(-28deg) scale(.78)}
+.gp-card.gp-open .gp-loop-r{transform:rotate(28deg) scale(.78)}
+.gp-card.gp-open .gp-tail-l{transform:rotate(-34deg) scale(.7);opacity:.0}
+.gp-card.gp-open .gp-tail-r{transform:rotate(34deg) scale(.7);opacity:.0}
+.gp-card.gp-open .gp-bow .knot{animation:gpKnot .6s ease-out}
+@keyframes gpKnot{0%{transform:scale(1)}50%{transform:scale(1.5)}100%{transform:scale(1.15)}}
+.gp-card .gp-bow .knot{transform-origin:46px 36px;transform-box:view-box}
+.gp-card.gp-open .gp-lid{animation:gpLid .5s ease-out}
+@keyframes gpLid{0%{transform:translateY(0)}35%{transform:translateY(-5px)}100%{transform:translateY(0)}}
+
+/* title, framed photo, price, button */
+body.luxia-store-home .gp-card .product-title-price-head{background:transparent !important}
+body.luxia-store-home .gp-card .product-title-above-text{color:#6d1834 !important}
+.gp-card .gp-box{
+  position:relative; margin:10px 14px 8px; padding:11px; border-radius:4px;
+  background:radial-gradient(circle,#f6dd9c 1.5px,transparent 2.1px) 0 0/14px 14px,#8f2748;
+  box-shadow:0 10px 20px -6px rgba(109,24,52,.5),inset 0 0 0 1.5px rgba(246,221,156,.6);
+  cursor:pointer;
+}
+body.luxia-store-home .gp-card .gp-box .product-visual{margin:0 !important; width:100% !important; border-radius:2px; background:#fff}
+.gp-card .gp-rb{position:absolute; z-index:3; background:linear-gradient(90deg,#c9a24f,#f6dd9c 48%,#c9a24f)}
+.gp-card .gp-rb-t,.gp-card .gp-rb-b{left:50%; width:26px; height:11px; transform:translateX(-50%)}
+.gp-card .gp-rb-t{top:0}.gp-card .gp-rb-b{bottom:0}
+.gp-card .gp-rb-l,.gp-card .gp-rb-r{top:50%; width:11px; height:26px; transform:translateY(-50%); background:linear-gradient(180deg,#c9a24f,#f6dd9c 48%,#c9a24f)}
+.gp-card .gp-rb-l{left:0}.gp-card .gp-rb-r{right:0}
+.gp-card .gp-tw{
+  position:absolute; z-index:4; width:12px; height:12px; pointer-events:none;
+  background:#fff6cf; clip-path:polygon(50% 0,62% 38%,100% 50%,62% 62%,50% 100%,38% 62%,0 50%,38% 38%);
+  animation:gpTwinkle 2.8s ease-in-out infinite;
+}
+.gp-card .gp-tw:nth-of-type(1){top:-5px;left:-5px}
+.gp-card .gp-tw:nth-of-type(2){top:-5px;right:-5px;animation-delay:.7s}
+.gp-card .gp-tw:nth-of-type(3){bottom:-5px;left:-5px;animation-delay:1.4s}
+.gp-card .gp-tw:nth-of-type(4){bottom:-5px;right:-5px;animation-delay:2.1s}
+@keyframes gpTwinkle{0%,100%{opacity:.15;transform:scale(.5)}50%{opacity:1;transform:scale(1.15)}}
+body.luxia-store-home .gp-card .product-price-bottom{color:#6d1834 !important;font-weight:700 !important}
+body.luxia-store-home .gp-card .btn-order{
+  background:linear-gradient(135deg,#8f2748,#6d1834) !important; color:#f6dd9c !important;
+  border:1px solid #d9b871 !important; box-shadow:0 6px 14px -6px rgba(109,24,52,.7) !important;
+}
+/* gift collection heading */
+body.luxia-store-home .home-collection-section.gp-section .home-collection-heading h3{color:#6d1834 !important}
+body.luxia-store-home .home-collection-section.gp-section .home-collection-kicker{color:#a63558 !important}
+
+/* glitter thrown when the bow blooms (lives in a fixed layer so nothing clips it) */
+#gpGlitterLayer{position:fixed; inset:0; pointer-events:none; z-index:99999; overflow:hidden}
+.gp-glit{
+  position:absolute; width:var(--sz); height:var(--sz); margin:calc(var(--sz) / -2) 0 0 calc(var(--sz) / -2);
+  background:var(--c); opacity:0; will-change:transform,opacity;
+  animation:gpGlitter 1.6s cubic-bezier(.2,.7,.3,1) forwards;
+  box-shadow:0 0 6px var(--c);
+}
+.gp-glit.g0{clip-path:polygon(50% 0,62% 38%,100% 50%,62% 62%,50% 100%,38% 62%,0 50%,38% 38%)}
+.gp-glit.g1{clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%)}
+.gp-glit.g2{border-radius:50%}
+@keyframes gpGlitter{
+  0%{opacity:0;transform:translate(0,0) scale(.2) rotate(0)}
+  12%{opacity:1}
+  42%{opacity:1;transform:translate(calc(var(--dx) * .75),var(--up)) scale(1.1) rotate(calc(var(--rot) * .4))}
+  100%{opacity:0;transform:translate(var(--dx),var(--dn)) scale(.6) rotate(var(--rot))}
+}
+@media (prefers-reduced-motion:reduce){
+  .gp-card .gp-tw{animation:none;opacity:.7}
+  .gp-card .gp-pt,.gp-card .gp-loop-l,.gp-card .gp-loop-r,.gp-card .gp-tail-l,.gp-card .gp-tail-r{transition:none}
+  .gp-glit{display:none}
+  .gp-card.gp-open .gp-lid,.gp-card.gp-open .gp-bow .knot{animation:none}
+}
+</style>
+
+<style id="luxia-gift-pack-matte-black-gold-final">
+/* =========================================================
+   LUXIA — GIFT PACK CARDS
+   FINAL VISUAL OVERRIDE — MATTE BLACK + LUXURY GOLD
+   Applies ONLY to .gp-card gift-pack cards.
+   No product/order functionality is changed.
+   ========================================================= */
+
+/* Main card: deep matte black, restrained gold border */
+body.luxia-store-home .product-grid .product-card.gp-card{
+  background:#151515 !important;
+  background-color:#151515 !important;
+  border:1px solid #b99a62 !important;
+  border-radius:20px !important;
+  box-shadow:
+    0 14px 30px rgba(0,0,0,.22),
+    0 0 0 1px rgba(255,255,255,.025) inset !important;
+  color:#f1ece2 !important;
+}
+
+/* Gift-box lid: black matte instead of burgundy */
+.gp-card .gp-lid{
+  background:
+    radial-gradient(circle,rgba(201,170,105,.18) 1px,transparent 1.6px) 0 0/18px 18px,
+    linear-gradient(180deg,#1b1b1b,#111111) !important;
+  border-bottom:1px solid #b99a62 !important;
+  box-shadow:inset 0 -10px 18px rgba(0,0,0,.32) !important;
+}
+
+/* Gold center ribbon */
+.gp-card .gp-lid::before{
+  background:linear-gradient(90deg,#8f713d,#d8bd7b 48%,#8f713d) !important;
+  box-shadow:0 0 8px rgba(201,170,105,.18) !important;
+}
+
+/* Gift label */
+.gp-card .gp-tag{
+  color:#d8bd7b !important;
+  background:rgba(15,15,15,.78) !important;
+  border:1px solid rgba(201,170,105,.62) !important;
+}
+
+/* Bow: monochrome gold */
+.gp-card .gp-bow .rb{
+  fill:#b99a62 !important;
+  stroke:#806538 !important;
+}
+.gp-card .gp-bow .rb-d{
+  fill:#8e723f !important;
+  stroke:#806538 !important;
+}
+.gp-card .gp-bow .knot{
+  fill:#d8bd7b !important;
+  stroke:#a08045 !important;
+}
+.gp-card .gp-bow .pt{
+  fill:#ead7a8 !important;
+  stroke:#9b7a43 !important;
+}
+.gp-card .gp-bow .pt.alt{
+  fill:#c8aa68 !important;
+}
+
+/* Product title area */
+body.luxia-store-home .gp-card .product-title-price-head{
+  background:transparent !important;
+}
+body.luxia-store-home .gp-card .product-title-above-text{
+  color:#d8bd7b !important;
+  text-shadow:none !important;
+}
+
+/* Elegant image frame: black + fine gold */
+.gp-card .gp-box{
+  background:
+    radial-gradient(circle,rgba(201,170,105,.16) 1.2px,transparent 1.8px) 0 0/18px 18px,
+    #111111 !important;
+  border:1px solid rgba(185,154,98,.72) !important;
+  border-radius:6px !important;
+  box-shadow:
+    0 10px 20px rgba(0,0,0,.26),
+    inset 0 0 0 1px rgba(255,255,255,.025) !important;
+}
+
+/* Keep the actual product photo clean */
+body.luxia-store-home .gp-card .gp-box .product-visual{
+  background:#f8f6f0 !important;
+  border-radius:3px !important;
+}
+
+/* Gold ribbon crossing the photo frame */
+.gp-card .gp-rb{
+  background:linear-gradient(90deg,#8f713d,#d8bd7b 48%,#8f713d) !important;
+}
+.gp-card .gp-rb-l,
+.gp-card .gp-rb-r{
+  background:linear-gradient(180deg,#8f713d,#d8bd7b 48%,#8f713d) !important;
+}
+
+/* Remove the old pink/rose visual language */
+body.luxia-store-home .gp-card .product-price-bottom{
+  color:#d8bd7b !important;
+  font-weight:700 !important;
+}
+body.luxia-store-home .gp-card .btn-order{
+  background:#0f0f0f !important;
+  color:#d8bd7b !important;
+  border:1px solid #b99a62 !important;
+  box-shadow:0 7px 16px rgba(0,0,0,.28) !important;
+}
+body.luxia-store-home .gp-card .btn-order:hover{
+  background:#1b1b1b !important;
+  color:#ead7a8 !important;
+  border-color:#d8bd7b !important;
+}
+
+/* Collection heading above the cards */
+body.luxia-store-home .home-collection-section.gp-section .home-collection-heading h3{
+  color:#b99a62 !important;
+}
+body.luxia-store-home .home-collection-section.gp-section .home-collection-kicker{
+  color:#8f774c !important;
+}
+
+/* Small decorative sparkles: muted gold, not white/pink */
+.gp-card .gp-tw{
+  background:#d8bd7b !important;
+  box-shadow:0 0 6px rgba(216,189,123,.35) !important;
+}
+
+/* Gift-card text/details that may inherit the old palette */
+.gp-card,
+.gp-card *{
+  --gift-gold:#b99a62;
+  --gift-gold-soft:#d8bd7b;
+  --gift-black:#151515;
+}
+</style>
+
+
+<style id="luxia-gift-pack-visual-fixes">
+/* LUXIA — GIFT PACK CARD: visual fixes (photo fill, badge vs bow, dark strip, price, CTA) */
+body.luxia-store-home .product-grid .product-card.gp-card .gp-lid{height:84px !important;}
+/* bow moved up + a bit smaller, badge sits under it on the ribbon: nothing overlaps */
+body.luxia-store-home .gp-card .gp-bow{top:7px !important;margin:0 0 0 -46px !important;transform:scale(.74);transform-origin:50% 0;}
+body.luxia-store-home .gp-card .gp-tag{
+  top:auto !important;bottom:7px !important;inset-inline-start:50% !important;
+  transform:translateX(-50%);
+  inset-inline-end:auto !important;
+  font-size:calc(10px * var(--font-scale,1)) !important;letter-spacing:.06em !important;white-space:nowrap;
+  padding:2px 10px !important;
+}
+html[dir="rtl"] body.luxia-store-home .gp-card .gp-tag{transform:translateX(50%);}
+/* title band: black instead of purple */
+body.luxia-store-home .gp-card .product-title-price-head{
+  background:#151515 !important;border:0 !important;border-bottom:1px solid rgba(185,154,98,.28) !important;border-radius:0 !important;
+}
+body.luxia-store-home .gp-card .product-title-above,body.luxia-store-home .gp-card .product-title-above-text{background:transparent !important;background-image:none !important;box-shadow:none !important;}
+body.luxia-store-home .gp-card .product-title-above-text{color:#ead7a8 !important;font-weight:600 !important;}
+/* photo fills the whole frame — no white gap under it */
+body.luxia-store-home .product-grid .product-card.gp-card .gp-box .product-visual{
+  display:block !important;position:relative !important;width:100% !important;
+  aspect-ratio:4/5 !important;height:auto !important;min-height:0 !important;
+  overflow:hidden !important;background:#111 !important;border-radius:3px !important;
+}
+body.luxia-store-home .product-grid .product-card.gp-card .gp-box .product-visual > .product-photo{
+  position:absolute !important;inset:0 !important;width:100% !important;height:100% !important;
+  max-height:none !important;object-fit:cover !important;object-position:center 35% !important;
+  border-radius:0 !important;margin:0 !important;
+}
+/* thumbnails strip: dark, same family as the card */
+body.luxia-store-home .gp-card .product-gallery-strip{background:#151515 !important;border:0 !important;padding:8px 12px !important;}
+body.luxia-store-home .gp-card .product-gallery-thumb{background:#1c1c1c !important;border:1px solid rgba(185,154,98,.35) !important;opacity:.8;}
+body.luxia-store-home .gp-card .product-gallery-thumb.active{border-color:#d8bd7b !important;opacity:1;box-shadow:0 0 0 1px #d8bd7b;}
+/* price: gold on black, readable old price */
+body.luxia-store-home .gp-card .product-price-bottom{
+  background:transparent !important;border:0 !important;box-shadow:none !important;
+  color:#ead7a8 !important;font-size:calc(24px * var(--font-scale,1)) !important;text-align:center !important;
+  padding:6px 0 2px !important;
+}
+body.luxia-store-home .gp-card .product-price-bottom .lx-old-price{
+  color:#a8987a !important;opacity:1 !important;font-size:.62em !important;
+  text-decoration-line:line-through !important;text-decoration-color:rgba(216,189,123,.75) !important;text-decoration-thickness:1px !important;color:#bfae8c !important;font-weight:400 !important;letter-spacing:.02em;margin-inline-start:4px;
+}
+/* main button: filled gold */
+body.luxia-store-home .gp-card .btn-order{
+  background:linear-gradient(135deg,#e2c98a,#b99a62) !important;color:#151515 !important;
+  border:1px solid #e2c98a !important;font-weight:600 !important;letter-spacing:.08em !important;
+  box-shadow:0 8px 18px rgba(185,154,98,.28) !important;
+}
+body.luxia-store-home .gp-card .btn-order:hover{background:linear-gradient(135deg,#f0dba0,#c9aa68) !important;color:#151515 !important;}
+/* room between the fixed header and the collection heading */
+body.luxia-store-home .home-collection-section.gp-section{scroll-margin-top:calc(var(--promo-h) + var(--header-h) + 28px);}
+body.luxia-store-home .home-collection-section.gp-section .home-collection-heading{padding-top:18px;}
+</style>
+
+<style id="luxia-gift-pack-options-interaction-fix">
+/* ONLY the Pack Cadeau options modal */
+#giftModal.gf-modal{
+  z-index:99999 !important;
+  pointer-events:auto !important;
+  touch-action:auto !important;
+}
+#giftModal.gf-modal .gf-box{
+  position:relative !important;
+  z-index:100000 !important;
+  pointer-events:auto !important;
+  touch-action:auto !important;
+}
+#giftModal.gf-modal .gf-it select{
+  display:block !important;
+  position:relative !important;
+  z-index:100001 !important;
+  width:100% !important;
+  min-height:46px !important;
+  padding:11px 40px 11px 12px !important;
+  margin-top:7px !important;
+  border:1px solid #b99a62 !important;
+  border-radius:10px !important;
+  background:#fffdf8 !important;
+  color:#292622 !important;
+  font:inherit !important;
+  line-height:1.2 !important;
+  opacity:1 !important;
+  visibility:visible !important;
+  pointer-events:auto !important;
+  cursor:pointer !important;
+  -webkit-appearance:auto !important;
+  appearance:auto !important;
+}
+#giftModal.gf-modal .gf-it select:disabled{
+  opacity:.65 !important;
+  pointer-events:none !important;
+}
+#giftModal.gf-modal .gf-it select.is-required-missing{
+  border-color:#b33b3b !important;
+  box-shadow:0 0 0 2px rgba(179,59,59,.10) !important;
+}
+#giftModal.gf-modal .gf-it.gf-alert{animation:gfShake .6s cubic-bezier(.36,.07,.19,.97) both,gfGlow 1.4s ease-out 1;border-radius:12px;}
+#giftModal.gf-modal .gf-it select.is-required-missing{border:2px solid #e0203c !important;background:#fff1f2 !important;}
+#giftModal.gf-modal .gf-it select.gf-alert{box-shadow:0 0 0 4px rgba(224,32,60,.35) !important;}
+@keyframes gfShake{10%,90%{transform:translateX(-2px)}20%,80%{transform:translateX(5px)}30%,50%,70%{transform:translateX(-9px)}40%,60%{transform:translateX(9px)}}
+@keyframes gfGlow{0%{background:rgba(224,32,60,.28);box-shadow:0 0 0 0 rgba(224,32,60,.6)}100%{background:transparent;box-shadow:0 0 0 14px rgba(224,32,60,0)}}
+#giftModal.gf-modal .gf-it{
+  position:relative !important;
+  z-index:100000 !important;
+}
+#giftModal.gf-modal .gf-x,
+#giftModal.gf-modal #gfAdd{
+  position:relative !important;
+  z-index:100002 !important;
+  pointer-events:auto !important;
+}
+</style>
+
+<style id="luxia-gift-pack-square-photo-and-modal-theme">
+/* ---------- CARD: full square photo, no duplicate "Pack cadeau" label ---------- */
+body.luxia-store-home .gp-card .gp-tag{display:none !important;}
+body.luxia-store-home .home-collection-section.gp-section .home-collection-kicker{display:none !important;}
+body.luxia-store-home .product-grid .product-card.gp-card .gp-lid{height:60px !important;}
+body.luxia-store-home .gp-card .gp-bow{top:5px !important;transform:scale(.7) !important;}
+body.luxia-store-home .gp-card .product-title-price-head{padding:7px 8px !important;}
+body.luxia-store-home .gp-card .gp-box{
+  margin:0 !important;padding:0 !important;border:0 !important;border-radius:0 !important;
+  background:#111 !important;box-shadow:none !important;
+}
+body.luxia-store-home .gp-card .gp-rb,body.luxia-store-home .gp-card .gp-tw{display:none !important;}
+body.luxia-store-home .product-grid .product-card.gp-card .gp-box .product-visual{
+  aspect-ratio:1/1 !important;border-radius:0 !important;
+}
+body.luxia-store-home .product-grid .product-card.gp-card .gp-box .product-visual > .product-photo{
+  object-position:center center !important;
+}
+body.luxia-store-home .gp-card .gp-box::after{
+  content:"";position:absolute;left:0;right:0;bottom:0;height:2px;z-index:3;
+  background:linear-gradient(90deg,#8f713d,#d8bd7b 50%,#8f713d);
+}
+/* ---------- OPENED PACK (options modal): same black + gold gift theme ---------- */
+#giftModal.gf-modal{background:rgba(0,0,0,.78) !important;}
+#giftModal.gf-modal .gf-box{
+  background:#151515 !important;color:#f1ece2 !important;
+  border:1px solid #b99a62 !important;border-radius:20px !important;
+  padding:0 0 18px !important;overflow:hidden !important;
+  box-shadow:0 20px 50px rgba(0,0,0,.5) !important;
+}
+#giftModal.gf-modal .gf-box::before{
+  content:"";position:absolute;top:0;left:50%;width:34px;height:100%;max-height:100%;
+  transform:translateX(-50%);z-index:1;pointer-events:none;
+  background:linear-gradient(90deg,#8f713d,#d8bd7b 48%,#8f713d);
+  -webkit-mask:linear-gradient(#000 0,#000 56px,transparent 56px);mask:linear-gradient(#000 0,#000 56px,transparent 56px);
+}
+#giftModal.gf-modal .gf-box>img{
+  display:block;width:100% !important;aspect-ratio:1/1;object-fit:cover;border-radius:0 !important;
+  border-bottom:2px solid #b99a62;margin-top:0;
+}
+#giftModal.gf-modal .gf-box>*:not(img):not(.gf-x){margin-left:18px !important;margin-right:18px !important;}
+#giftModal.gf-modal .gf-box h3{color:#ead7a8 !important;font-family:"Cormorant Garamond",Georgia,serif;font-size:22px;margin-top:16px !important;margin-bottom:0 !important;}
+#giftModal.gf-modal .gf-pr{color:#d8bd7b !important;font-weight:700;}
+#giftModal.gf-modal .gf-it b{color:#ead7a8 !important;}
+#giftModal.gf-modal .gf-it select,
+#giftModal.gf-modal .gf-box textarea{
+  background:#1d1d1d !important;color:#f1ece2 !important;border:1px solid #b99a62 !important;
+}
+#giftModal.gf-modal .gf-it select option{background:#151515;color:#f1ece2;}
+#giftModal.gf-modal .gf-it select.is-required-missing{border:2px solid #ff3b57 !important;background:#3a1218 !important;}
+#giftModal.gf-modal .gf-x{position:absolute !important;top:12px !important;right:12px !important;left:auto !important;margin:0 !important;background:#151515 !important;color:#d8bd7b !important;border:1px solid #b99a62 !important;z-index:5 !important;}
+#giftModal.gf-modal label,#giftModal.gf-modal .gf-ck{color:#e6dcc6 !important;}
+#giftModal.gf-modal #gfAdd{
+  background:linear-gradient(135deg,#e2c98a,#b99a62) !important;color:#151515 !important;
+  border:1px solid #e2c98a !important;font-weight:600 !important;letter-spacing:.08em;
+  width:calc(100% - 36px) !important;
+}
+</style>
+
+<style id="luxia-gift-admin-layout">
+.gf-admin [data-gitems]{counter-reset:gi}
+.gf-admin .gf-itrow{grid-template-columns:minmax(0,1fr) !important;counter-increment:gi;border:1px solid #d9cdb8;border-radius:14px;background:#fffdf8;padding:12px;margin:8px 0;display:grid;gap:6px}
+.gf-admin .gf-itrow::before{content:"Article " counter(gi);font-weight:700;color:#8f713d;font-size:13px;letter-spacing:.06em;text-transform:uppercase}
+.gf-admin .gf-itrow>*{width:100%;min-width:0;box-sizing:border-box;margin:0}.gf-admin .gf-itrow .gf-lb{margin-top:6px}
+.gf-admin .gf-itrow[data-gtype="shoes"] .gf-colors{display:none}
+.gf-admin .gf-step{display:flex;gap:10px;align-items:flex-start;margin:20px 0 6px;padding-top:14px;border-top:1px solid #e3d9c6}
+.gf-admin .gf-step:first-of-type{margin-top:12px}
+.gf-admin .gf-step i{flex:0 0 26px;height:26px;border-radius:50%;background:#151515;color:#d8bd7b;font-style:normal;font-weight:700;display:grid;place-items:center;font-size:13px}
+.gf-admin .gf-step b{display:block}.gf-admin .gf-step small{display:block;opacity:.7;line-height:1.35;margin-top:2px}
+.gf-admin .gf-prev{background:#151515;color:#f1ece2;border:1px solid #b99a62;border-radius:14px;padding:14px;display:grid;gap:10px}
+.gf-admin .gf-pv-it b{color:#ead7a8;display:block;margin-bottom:5px}
+.gf-admin .gf-pv-sel{display:flex;justify-content:space-between;gap:10px;border:1px solid #b99a62;border-radius:10px;background:#1d1d1d;padding:9px 12px;margin-top:6px;font-size:14px}
+.gf-admin .gf-pv-sel span{opacity:.85}.gf-admin .gf-pv-sel i{font-style:normal;color:#d8bd7b;text-align:right}
+.gf-admin .gf-pv-warn{color:#ff8a9a;font-size:13px;line-height:1.35}
+.gf-admin .gf-pv-ex{display:flex;flex-wrap:wrap;gap:6px;border-top:1px dashed rgba(185,154,98,.4);padding-top:10px}
+.gf-admin .gf-pv-ex span{border:1px solid rgba(185,154,98,.6);border-radius:999px;padding:4px 10px;font-size:12.5px;color:#ead7a8}
+.gf-admin .gf-pv-ex small{flex-basis:100%;opacity:.6;font-size:12px}
+</style>
+
+<style id="luxia-gift-slim-lid-and-themed-modals">
+/* ---------- CARD: thin lid + long horizontal realistic bow ---------- */
+body.luxia-store-home .product-grid .product-card.gp-card .gp-lid{height:44px !important;overflow:visible !important;position:relative;z-index:4;}
+body.luxia-store-home .gp-card .gp-lid::before{
+  top:50% !important;bottom:auto !important;left:0 !important;right:0 !important;width:auto !important;height:11px !important;
+  transform:translateY(-50%) !important;
+  background:linear-gradient(180deg,#f0dba0,#b99a62 48%,#7d6232) !important;
+  box-shadow:0 1px 0 rgba(0,0,0,.4),0 -1px 0 rgba(255,240,200,.25) !important;
+}
+body.luxia-store-home .gp-card .gp-bow{
+  left:50% !important;top:0 !important;width:156px !important;height:52px !important;
+  margin:0 0 0 -78px !important;z-index:5 !important;transform:none !important;
+  filter:drop-shadow(0 2px 2px rgba(0,0,0,.55)) !important;
+}
+.gp-card.gp-open .gp-bow{animation:gpBowPop .55s ease-out}
+@keyframes gpBowPop{0%{transform:scale(1)}40%{transform:scale(1.12)}100%{transform:scale(1)}}
+
+/* ---------- OPENED GIFT PRODUCT: detail sheet + option sheet in black & gold ---------- */
+#productDetailOverlay .product-detail-modal.gp-themed,
+#variantOverlay .modal.gp-themed{
+  background:#151515 !important;color:#f1ece2 !important;border:1px solid #b99a62 !important;
+  box-shadow:0 20px 50px rgba(0,0,0,.55) !important;
+}
+.gp-themed .modal-head{background:transparent !important;border-bottom:1px solid rgba(185,154,98,.35) !important;}
+.gp-themed .modal-head h3,.gp-themed h4,.gp-themed .field label{color:#ead7a8 !important;}
+.gp-themed .modal-sub,.gp-themed p,.gp-themed li,.gp-themed .product-detail-section{color:#e6dcc6 !important;}
+.gp-themed .modal-close{background:#151515 !important;color:#d8bd7b !important;border:1px solid #b99a62 !important;}
+.gp-themed .modal-close svg{stroke:#d8bd7b !important;}
+.gp-themed .product-detail-main-image,.gp-themed .product-detail-main-image img{border-radius:0 !important;background:#111 !important;}
+.gp-themed .product-detail-main-image img{aspect-ratio:1/1;object-fit:cover;width:100%;display:block;}
+.gp-themed .product-detail-gallery{border-bottom:2px solid #b99a62 !important;background:#151515 !important;}
+.gp-themed .product-detail-thumbs{background:#151515 !important;}
+.gp-themed .product-detail-thumb{background:#1c1c1c !important;border:1px solid rgba(185,154,98,.35) !important;opacity:.8}
+.gp-themed .product-detail-thumb.active{border-color:#d8bd7b !important;opacity:1;box-shadow:0 0 0 1px #d8bd7b !important;}
+.gp-themed .product-detail-color-option,.gp-themed .product-detail-size-option,
+.gp-themed .pill,.gp-themed .qty-btn{background:#1d1d1d !important;color:#ead7a8 !important;border:1px solid #b99a62 !important;box-shadow:none !important;}
+#variantOverlay .modal.gp-themed #sizePills .pill.selected,
+#variantOverlay .modal.gp-themed .pill.color-pill.selected,
+#variantOverlay .modal.gp-themed .pill.color-pill.variant-color-option.selected,
+.gp-themed .pill.selected{background:linear-gradient(135deg,#e2c98a,#b99a62) !important;color:#151515 !important;border-color:#e2c98a !important;}
+#variantOverlay .modal.gp-themed .pill.color-pill .variant-color-name{color:#ead7a8 !important;}
+#variantOverlay .modal.gp-themed .pill.color-pill.variant-color-option.selected .variant-color-name{color:#151515 !important;}
+.gp-themed .qty-value{color:#ead7a8 !important;}
+.gp-themed .order-summary{background:#1d1d1d !important;color:#e6dcc6 !important;border:1px solid rgba(185,154,98,.4) !important;}
+.gp-themed .order-summary *{color:inherit;}
+.gp-themed .product-detail-price{color:#ead7a8 !important;}
+.gp-themed .lx-old-price{color:#bfae8c !important;}
+.gp-themed .btn-primary,.gp-themed .product-detail-add{
+  background:linear-gradient(135deg,#e2c98a,#b99a62) !important;color:#151515 !important;
+  border:1px solid #e2c98a !important;font-weight:600 !important;letter-spacing:.08em;box-shadow:0 8px 18px rgba(185,154,98,.28) !important;
+}
+#variantOverlay .modal.gp-themed .order-summary,
+#variantOverlay .modal.gp-themed #variantSummary,
+#variantOverlay .modal.gp-themed #variantPackInfo{background:#1d1d1d !important;background-image:none !important;border:1px solid rgba(185,154,98,.45) !important;box-shadow:none !important;}
+#variantOverlay .modal.gp-themed .order-summary *{color:#e6dcc6 !important;border-color:rgba(185,154,98,.3) !important;}
+#variantOverlay .modal.gp-themed .order-summary strong,
+#variantOverlay .modal.gp-themed .order-summary [class*="total"],
+#variantOverlay .modal.gp-themed .order-summary [class*="total"] *{color:#ead7a8 !important;}
+.gp-themed .product-detail-section,.gp-themed .product-detail-content section,.gp-themed .product-detail-variant-group{border-color:rgba(185,154,98,.3) !important;}
+.gp-themed hr{border-color:rgba(185,154,98,.3) !important;}
+</style>
+
+<style id="luxia-gift-bow-right-realistic">
+/* bow: realistic satin bow sitting on the right of the horizontal ribbon */
+body.luxia-store-home .product-grid .product-card.gp-card .gp-lid{height:46px !important;}
+body.luxia-store-home .gp-card .gp-bow{
+  --bw-hi:#f7e6ae;--bw-mid:#cfae5f;--bw-lo:#8a6a2f;--bw-deep:#4f3a17;
+  left:auto !important;right:14px !important;top:3px !important;
+  width:80px !important;height:52px !important;margin:0 !important;
+  transform:rotate(-9deg) !important;transform-origin:50% 42% !important;
+  filter:drop-shadow(0 3px 2px rgba(0,0,0,.6)) drop-shadow(0 0 1px rgba(0,0,0,.5)) !important;
+  z-index:5 !important;overflow:visible !important;
+}
+.gp-card.gp-open .gp-bow{animation:gpBowPop2 .55s ease-out !important}
+@keyframes gpBowPop2{0%{transform:rotate(-9deg) scale(1)}40%{transform:rotate(-14deg) scale(1.14)}100%{transform:rotate(-9deg) scale(1)}}
+/* ---- alternative bow colours (paste over the --bw-* values above to try) ----
+   champagne rose : --bw-hi:#f6dcd0; --bw-mid:#d9a898; --bw-lo:#9a6656; --bw-deep:#573428;
+   burgundy satin : --bw-hi:#d24a63; --bw-mid:#8f1f3a; --bw-lo:#5a0f22; --bw-deep:#33091a;
+   ivory pearl    : --bw-hi:#fffaf0; --bw-mid:#e6dcc6; --bw-lo:#a89c82; --bw-deep:#665c48;
+*/
+</style>
+
+<style id="luxia-gift-premium-v11">
+/* ===== LUXIA — GIFT PACK PREMIUM (black + bordeaux + gold), shared by card + modals ===== */
+:root{
+  --gx-ink:#141014; --gx-wine:#2a1119; --gx-wine-2:#3a1a26;
+  --gx-gold-hi:#f0dba0; --gx-gold:#d8bd7b; --gx-gold-lo:#a8853f;
+  --gx-ivory:#f8f1e8; --gx-rose:#e7b3ae;
+  --gx-gold-grad:linear-gradient(135deg,#f0dba0,#c9a24f 55%,#a8853f);
+}
+/* ---- Section: dark bordeaux backdrop so the black cards sit inside a "gift box" ---- */
+body.luxia-store-home .home-collection-section.gp-section{
+  background:radial-gradient(120% 70% at 50% 0%,#3a1a26 0%,#24101a 55%,#1a0b12 100%) !important;
+  border-radius:22px !important; padding:6px 10px 22px !important; margin-top:14px !important;
+  box-shadow:inset 0 0 0 1px rgba(216,189,123,.28) !important;
+}
+body.luxia-store-home .home-collection-section.gp-section .home-collection-heading h3{color:var(--gx-gold) !important;}
+/* ---- Card ---- */
+body.luxia-store-home .product-grid .product-card.gp-card{
+  background:linear-gradient(180deg,var(--gx-ink) 0%,var(--gx-ink) 56%,var(--gx-wine) 100%) !important;
+  border:1px solid rgba(216,189,123,.75) !important;
+  box-shadow:0 22px 44px -20px rgba(0,0,0,.85),0 0 0 1px rgba(216,189,123,.10),inset 0 1px 0 rgba(255,236,180,.28) !important;
+}
+body.luxia-store-home .gp-card .product-title-price-head{background:linear-gradient(180deg,#1a1116,#141014) !important;}
+body.luxia-store-home .gp-card .product-title-above-text{color:var(--gx-gold-hi) !important;letter-spacing:.02em;}
+body.luxia-store-home .gp-card .product-gallery-strip{
+  background:transparent !important;
+  -webkit-mask-image:linear-gradient(90deg,#000 86%,transparent 100%);mask-image:linear-gradient(90deg,#000 86%,transparent 100%);
+}
+html[dir="rtl"] body.luxia-store-home .gp-card .product-gallery-strip{
+  -webkit-mask-image:linear-gradient(270deg,#000 86%,transparent 100%);mask-image:linear-gradient(270deg,#000 86%,transparent 100%);
+}
+body.luxia-store-home .gp-card .product-price-bottom{color:var(--gx-gold-hi) !important;text-shadow:0 1px 10px rgba(216,189,123,.25);}
+body.luxia-store-home .gp-card .btn-order{
+  background:var(--gx-gold-grad) !important;border:1px solid var(--gx-gold-hi) !important;color:#1a0b12 !important;
+  box-shadow:0 10px 22px -8px rgba(216,189,123,.55),inset 0 1px 0 rgba(255,255,255,.45) !important;
+}
+/* discount badge (injected by JS below) */
+.gp-card .gx-badge{
+  position:absolute;top:10px;inset-inline-start:10px;z-index:6;pointer-events:none;
+  background:linear-gradient(135deg,#f3c9c4,#c98780);color:#2a1119;
+  font:600 calc(12px * var(--font-scale,1))/1 var(--font-body,sans-serif);letter-spacing:.04em;
+  padding:6px 11px;border-radius:999px;box-shadow:0 6px 14px -4px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.55);
+}
+/* ---- Modals: same palette as the card ---- */
+#productDetailOverlay .product-detail-modal.gp-themed,
+#variantOverlay .modal.gp-themed,
+#giftModal.gf-modal .gf-box{
+  background:linear-gradient(180deg,var(--gx-ink) 0%,#1b0d14 55%,var(--gx-wine) 100%) !important;
+  border:1px solid rgba(216,189,123,.75) !important;
+  box-shadow:0 26px 60px -16px rgba(0,0,0,.85),inset 0 1px 0 rgba(255,236,180,.25) !important;
+}
+#giftModal.gf-modal{background:radial-gradient(90% 60% at 50% 30%,rgba(58,26,38,.85),rgba(10,4,7,.92)) !important;}
+.gp-themed .modal-head h3,.gp-themed h4,#giftModal.gf-modal .gf-box h3{color:var(--gx-gold-hi) !important;}
+.gp-themed .order-summary,
+#variantOverlay .modal.gp-themed .order-summary,
+#variantOverlay .modal.gp-themed #variantSummary,
+#variantOverlay .modal.gp-themed #variantPackInfo{background:rgba(58,26,38,.55) !important;border:1px solid rgba(216,189,123,.4) !important;}
+.gp-themed .product-detail-color-option,.gp-themed .product-detail-size-option,.gp-themed .pill,.gp-themed .qty-btn{background:rgba(42,17,25,.7) !important;border-color:rgba(216,189,123,.6) !important;}
+#giftModal.gf-modal .gf-it select,#giftModal.gf-modal .gf-box textarea{background:#211018 !important;border-color:rgba(216,189,123,.6) !important;}
+.gp-themed .btn-primary,.gp-themed .product-detail-add,#giftModal.gf-modal #gfAdd{
+  background:var(--gx-gold-grad) !important;border:1px solid var(--gx-gold-hi) !important;color:#1a0b12 !important;
+  box-shadow:0 10px 22px -8px rgba(216,189,123,.55),inset 0 1px 0 rgba(255,255,255,.45) !important;
+}
+</style>
+<script id="luxia-gift-premium-v11-js">
+/* adds a "-NN%" badge on gift-pack cards when an old price exists */
+(function(){
+  function num(t){var d=(t||'').replace(/[^\d]/g,'');return d?parseInt(d,10):0;}
+  function run(){
+    try{
+      document.querySelectorAll('.gp-card').forEach(function(card){
+        if(card.querySelector('.gx-badge')) return;
+        var pb=card.querySelector('.product-price-bottom'), old=pb&&pb.querySelector('.lx-old-price');
+        var vis=card.querySelector('.gp-box .product-visual'); if(!pb||!old||!vis) return;
+        var o=num(old.textContent), c=pb.cloneNode(true); var co=c.querySelector('.lx-old-price'); if(co) co.remove();
+        var p=num(c.textContent); if(!(o>p&&p>0)) return;
+        var b=document.createElement('span'); b.className='gx-badge'; b.textContent='-'+Math.round((1-p/o)*100)+'%';
+        vis.appendChild(b);
+      });
+    }catch(e){}
+  }
+  var t; function later(){clearTimeout(t);t=setTimeout(run,120);}
+  if(document.readyState!=='loading') later(); else document.addEventListener('DOMContentLoaded',later);
+  try{new MutationObserver(later).observe(document.body,{childList:true,subtree:true});}catch(e){}
+})();
+</script>
+
+<style id="luxia-gift-no-details-v12">
+/* Pack cadeau : aucun choix couleur / taille dans la fenêtre produit ; ils apparaissent après « Ajouter au panier » */
+.gp-themed .product-detail-variant-picker,
+.gp-themed #detailColorGroup,
+.gp-themed #detailSizeGroup{display:none !important;}
+</style>
+<style id="luxia-gift-rose-section-v13">
+/* Pack cadeaux : fond rose poudré autour des cartes noires (cartes + fenêtres restent noir/bordeaux/or) */
+body.luxia-store-home .home-collection-section.gp-section{
+  background:linear-gradient(180deg,#f7e7e1 0%,#efd3cc 100%) !important;
+  box-shadow:inset 0 0 0 1px rgba(181,114,111,.35) !important;
+  border-radius:22px !important;padding:0 10px 22px !important;margin-top:6px !important;
+}
+body.luxia-store-home .home-collection-section.gp-section .home-collection-heading{
+  background:none !important;padding:14px 20px 8px !important;margin:0 auto 12px !important;
+}
+body.luxia-store-home .home-collection-section.gp-section .home-collection-heading h3{color:#5a1a2e !important;}
+body.luxia-store-home .home-collection-section.gp-section .home-collection-rule{background:#b5726f !important;opacity:.7 !important;}
+body.luxia-store-home .product-grid .product-card.gp-card{
+  box-shadow:0 20px 34px -16px rgba(90,26,46,.6),0 0 0 1px rgba(216,189,123,.18),inset 0 1px 0 rgba(255,236,180,.28) !important;
+}
+</style>
+<style id="luxia-gift-cart-v14">
+.gx-cart-meta>div{line-height:1.45;}
+.gx-price-lines{margin-top:8px;padding-top:8px;border-top:1px dashed rgba(185,154,98,.45);display:grid;gap:3px;}
+.gx-price-lines>div{display:flex;justify-content:space-between;gap:12px;font-size:.95em;}
+.gx-price-lines>div span:last-child{color:#8f713d;font-weight:600;white-space:nowrap;}
+.order-summary .gx-sum-row{display:flex;justify-content:space-between;font-size:.95em;opacity:.85;margin-bottom:4px;}
+</style>
+<style id="luxia-cart-actions-v15">
+.gx-cart-actions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;}
+.gx-cart-actions button,.gx-lp-actions button{
+  font:600 calc(12.5px * var(--font-scale,1))/1 var(--font-body,sans-serif);letter-spacing:.03em;
+  padding:9px 16px;border-radius:999px;cursor:pointer;text-decoration:none !important;background:transparent;
+}
+.gx-cart-actions .cart-item-edit,.gx-lp-actions .lp-cart-edit{color:#5a1a2e !important;border:1.5px solid #b99a62 !important;}
+.gx-cart-actions .cart-item-remove,.gx-lp-actions .lp-cart-remove{
+  color:#fff !important;background:#c0392b !important;border:1.5px solid #c0392b !important;
+  box-shadow:0 4px 10px -4px rgba(192,57,43,.6);
+}
+.gx-lp-actions{display:flex;gap:8px;align-items:center;flex-shrink:0;}
+</style>
+<style id="luxia-toast-contrast-v17">
+/* Notification « produit ajouté » : lisible sur fond clair ET sur les cartes noires du pack */
+.toast.cart-success-toast{
+  background:linear-gradient(180deg,#3a1a26,#2a1119) !important;
+  border:1.5px solid rgba(216,189,123,.9) !important;
+  box-shadow:0 0 0 6px rgba(255,255,255,.14),0 22px 44px -10px rgba(0,0,0,.75) !important;
+  -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+  z-index:100010 !important;
+}
+.cart-success-toast .cart-success-title{color:#f0dba0 !important;}
+.cart-success-toast .cart-success-action{border-color:rgba(216,189,123,.55) !important;color:#f8f1e8 !important;}
+.cart-success-toast .cart-success-action.primary{
+  background:linear-gradient(135deg,#f0dba0,#c9a24f 60%,#a8853f) !important;
+  color:#1a0b12 !important;border-color:#f0dba0 !important;
+}
+</style>
+<style id="luxia-toast-compact-v18">
+.toast.cart-success-toast{
+  padding:12px 12px 12px !important;border-radius:16px !important;
+  box-shadow:0 0 0 3px rgba(255,255,255,.10),0 18px 36px -10px rgba(0,0,0,.7) !important;
+}
+.cart-success-toast .cart-success-title{display:flex;align-items:center;gap:8px;margin-bottom:9px !important;font-size:13px !important;}
+.cart-success-toast .cs-check{flex:0 0 auto;color:#f0dba0;}
+.cart-success-toast .cart-success-actions{flex-wrap:nowrap !important;gap:8px !important;}
+.cart-success-toast .cart-success-action{flex:1 1 0;min-width:0;padding:10px 8px !important;font-size:12px !important;white-space:nowrap;text-align:center;}
+</style>
+<script id="luxia-gift-theme-js">
+(function(){
+  window.luxiaIsGiftId=function(id){
+    try{
+      var p=PRODUCTS.find(function(x){return x.id===id}); if(!p) return false;
+      var v=(PRODUCT_VARIANTS[id]||{}); if(v.gift) return true;
+      var cid=getStoreProductCollection(p), c=(getLuxiaCollections().find(function(x){return x.id===cid})||{});
+      return /cadeau|gift|كادو|هدايا|هدية|hadaya|hdaya/i.test([cid,c.fr,c.ar].join(' '));
+    }catch(e){return false}
+  };
+  function mark(sel,id){
+    var m=document.querySelector(sel); if(!m) return;
+    m.classList.toggle('gp-themed', !!window.luxiaIsGiftId(id));
+  }
+  var _d=window.openProductDetailModal;
+  if(typeof _d==='function') window.openProductDetailModal=function(id){
+    var r=_d.apply(this,arguments); mark('#productDetailOverlay .product-detail-modal',id); return r;
+  };
+  var _v=window.openVariantModal;
+  if(typeof _v==='function') window.openVariantModal=function(id,mode){
+    var r=_v.apply(this,arguments); mark('#variantOverlay .modal',id); return r;
+  };
+})();
+</script>
+<script id="luxia-gift-pack-card-js">
+(function(){
+  var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var COLORS=['#f6dd9c','#ffffff','#f3a6b8','#e9c46a','#ffe9b0','#d9829b'];
+  function layer(){
+    var l=document.getElementById('gpGlitterLayer');
+    if(!l){l=document.createElement('div');l.id='gpGlitterLayer';document.body.appendChild(l);}
+    return l;
+  }
+  function burst(card){
+    var bow=card.querySelector('.gp-bow'); if(!bow) return;
+    var r=bow.getBoundingClientRect(), cx=r.left+r.width/2, cy=r.top+r.height/2, L=layer();
+    for(var i=0;i<34;i++){
+      var s=document.createElement('i'), ang=Math.random()*Math.PI*2, pow=40+Math.random()*130;
+      s.className='gp-glit g'+(i%3);
+      s.style.cssText='left:'+cx+'px;top:'+cy+'px;'+
+        '--dx:'+(Math.cos(ang)*pow).toFixed(0)+'px;'+
+        '--up:'+(-30-Math.random()*120).toFixed(0)+'px;'+
+        '--dn:'+(70+Math.random()*220).toFixed(0)+'px;'+
+        '--rot:'+((Math.random()*720-360)|0)+'deg;'+
+        '--sz:'+(5+Math.random()*8).toFixed(1)+'px;'+
+        '--c:'+COLORS[(Math.random()*COLORS.length)|0]+';'+
+        'animation-duration:'+(1.2+Math.random()*1.1).toFixed(2)+'s;'+
+        'animation-delay:'+((Math.random()*140)|0)+'ms';
+      L.appendChild(s);
+      (function(n){setTimeout(function(){n.remove();},2700);})(s);
+    }
+  }
+  function bloom(card){
+    var now=Date.now();
+    if(card.__gpT&&now-card.__gpT<1300) return;
+    card.__gpT=now;
+    card.classList.add('gp-open');
+    if(!reduce) burst(card);
+    clearTimeout(card.__gpC);
+    card.__gpC=setTimeout(function(){card.classList.remove('gp-open');},2000);
+  }
+  /* press on the box or lid: the bow blooms into a flower and glitter flies out */
+  document.addEventListener('pointerdown',function(e){
+    var el=e.target&&e.target.closest&&e.target.closest('.gp-card .gp-box, .gp-card .gp-lid');
+    if(el) bloom(el.closest('.gp-card'));
+  },{passive:true});
+  /* let the animation play, then open the product like every other card does */
+  document.addEventListener('click',function(e){
+    var t=e.target; if(!t||!t.closest) return;
+    var card=t.closest('.gp-card'); if(!card) return;
+    if(t.closest('.product-gallery-thumb')) return;
+    if(!t.closest('[data-detail-product], .btn-order')) return;
+    if(card.__gpGo){e.stopPropagation();e.preventDefault();return;}
+    e.stopPropagation(); e.preventDefault();
+    bloom(card);
+    card.__gpGo=true;
+    var id=card.dataset.productCard;
+    setTimeout(function(){card.__gpGo=false; if(typeof openProductDetailModal==='function') openProductDetailModal(id);},reduce?0:750);
+  },true);
+})();
+</script>
+
 </body>
 
 
