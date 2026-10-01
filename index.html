@@ -5701,7 +5701,7 @@ async function supabaseRequest(url, options={}){
   const usingAdminToken = !!(options.token || getAdminToken());
   if(onDiag) onDiag({phase:"request", method, url, usingAdminToken});
   const headers = {...supabaseHeaders(token), ...(options.headers||{})};
-  const res = await fetch(url, {...options, headers});
+  const res = await fetch(url, {cache:"no-store", ...options, headers});
   if(onDiag) onDiag({phase:"response", method, url, status:res.status, ok:res.ok});
   if(!res.ok){
     let detail = "";
@@ -6373,6 +6373,8 @@ async function loadProductsFromSupabase(){
     if(Array.isArray(rows) && rows.length){
       PRODUCT_BACKEND_ROWS={};
       rows.forEach(r=>PRODUCT_BACKEND_ROWS[r.id]=r);
+      /* Produit supprimé dans l'admin = absent de la base => on le retire aussi de la liste par défaut */
+      for(let __i=PRODUCTS.length-1;__i>=0;__i--){ if(!PRODUCT_BACKEND_ROWS[PRODUCTS[__i].id]) PRODUCTS.splice(__i,1); }
       rows.forEach(r=>{
         let p=PRODUCTS.find(x=>x.id===r.id);
         if(!p){
@@ -6408,6 +6410,7 @@ async function loadProductsFromSupabase(){
 async function ensureProductsInSupabase(){
   try{
     const existing=await supabaseRequest(`${SUPABASE_PRODUCTS_URL}?select=id`,{token:getAdminToken()});
+    if(Array.isArray(existing) && existing.length) return; /* table déjà initialisée : ne jamais recréer un produit supprimé */
     const have=new Set((Array.isArray(existing)?existing:[]).map(r=>r.id));
     const missing=PRODUCTS.filter(p=>!have.has(p.id)).map(p=>({
       id:p.id,name_fr:I18N.fr[p.nameKey],name_ar:I18N.ar[p.nameKey],desc_fr:I18N.fr[p.descKey],desc_ar:I18N.ar[p.descKey],
@@ -10112,7 +10115,12 @@ async function addNewProductAdmin(){
 async function deleteProductAdmin(id){
   if(!confirm("متأكد بغيتي تحذف هاد المنتج؟ ما يمكنش ترجعه من بعد.")) return;
   try{
-    await supabaseRequest(`${SUPABASE_PRODUCTS_URL}?id=eq.${encodeURIComponent(id)}`, {method:"DELETE", headers:{"Prefer":"return=minimal"}, token:getAdminToken()});
+    const __deleted = await supabaseRequest(`${SUPABASE_PRODUCTS_URL}?id=eq.${encodeURIComponent(id)}&select=id`, {method:"DELETE", headers:{"Prefer":"return=representation"}, token:getAdminToken()});
+    if(!Array.isArray(__deleted) || !__deleted.length){
+      throw new Error("La suppression a été refusée par Supabase (aucune ligne supprimée). Ajoutez une policy DELETE sur la table products.");
+    }
+    try{ const __ov=loadProductOverrides(); delete __ov[id]; saveProductOverrides(__ov); }catch(e){}
+    try{ const __pv=loadProductVariants(); delete __pv[id]; saveProductVariants(__pv); }catch(e){}
     const idx = PRODUCTS.findIndex(x=>x.id===id);
     if(idx>-1) PRODUCTS.splice(idx,1);
     delete PRODUCT_VARIANTS[id]; delete PRODUCT_IMAGE_GALLERY[id]; delete PRODUCT_IMAGES[id];
