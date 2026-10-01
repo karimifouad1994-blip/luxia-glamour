@@ -11,7 +11,7 @@
   try{
     var path=location.pathname.replace(/\/+$/,'');
     var q=new URLSearchParams(location.search);
-    var isLanding=!!q.get('landing') || path==='/offre' || path==='/pyjamastyle' || path.indexOf('/p/')===0;
+    var isLanding=!!q.get('landing') || path.indexOf('/p/')===0;
     if(isLanding) document.documentElement.classList.add('landing-route-pending');
   }catch(e){}
 })();
@@ -30,8 +30,6 @@ html.landing-route-pending::before{content:"LUXIA";position:fixed;inset:0;z-inde
     var path=location.pathname.replace(/\/+$/,'');
     var q=new URLSearchParams(location.search);
     var slug=q.get('landing');
-    if(!slug && path==='/offre') slug='offre';
-    if(!slug && path==='/pyjamastyle') slug='pyjamastyle';
     if(!slug && path.indexOf('/p/')===0) slug=decodeURIComponent(path.slice(3));
     if(!slug || slug==='preview') return;
     var key='lunea_public_landing_cache_v2_'+slug;
@@ -69,7 +67,12 @@ html{scroll-behavior:smooth;}
 body{background:var(--bg-deep);color:var(--ivory);font-family:var(--font-body);font-weight:300;line-height:1.6;overflow-x:hidden;-webkit-font-smoothing:antialiased;}
 html[dir="rtl"] body{font-family:'Amiri',var(--font-body);}
 img,svg{display:block;max-width:100%;}
-button{font-family:inherit;cursor:pointer;border:none;background:none;}
+button{font-family:inherit;cursor:pointer;border:none;background:none;transition:transform .45s cubic-bezier(.22,.7,.2,1),box-shadow .45s ease,filter .45s ease;filter:drop-shadow(0 2px 2px rgba(0,0,0,.12));animation:luxiaButtonBreath 5.2s ease-in-out infinite;}
+@keyframes luxiaButtonBreath{0%,100%{filter:drop-shadow(0 2px 2px rgba(0,0,0,.12));}50%{filter:drop-shadow(0 4px 6px rgba(0,0,0,.18));}}
+button:hover{filter:drop-shadow(0 5px 8px rgba(0,0,0,.20));}
+button:active{filter:drop-shadow(0 1px 2px rgba(0,0,0,.10));transform:translateY(1px);}
+/* Tiny navigation indicators stay visually discreet; they do not need a button pulse. */
+.lp-main-image-dot,.lp-landing-gallery-dot,.lp-lightbox-dot{animation:none!important;filter:none!important;}
 a{color:inherit;text-decoration:none;}
 ::selection{background:var(--rose);color:var(--bg-deep);}
 :focus-visible{outline:2px solid var(--gold-soft);outline-offset:3px;}
@@ -386,11 +389,18 @@ body.has-lunea-custom-bg{background-image:linear-gradient(rgba(20,10,15,.72),rgb
 .lp-landing-gallery-dot.active{background:var(--gold-soft);transform:scale(1.45)}
 .lp-landing-gallery-dot[aria-hidden="true"]{display:none}
 .lp-gallery{display:flex;flex-wrap:nowrap;gap:8px;overflow-x:auto;overflow-y:hidden;padding:3px 2px 7px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;touch-action:pan-x;overscroll-behavior-x:contain;scrollbar-width:none}.lp-gallery::-webkit-scrollbar{display:none}.lp-gallery-hint{display:flex;align-items:center;justify-content:flex-end;gap:6px;margin:1px 2px 10px;font-size:11px;letter-spacing:.2px;color:var(--muted);white-space:nowrap}.lp-gallery-hint::before{content:"";width:18px;height:1px;background:currentColor;opacity:.35}.lp-gallery-hint span{opacity:.85}
-.lp-lightbox{position:fixed;inset:0;z-index:970;background:rgba(0,0,0,.9);display:none;align-items:flex-start;justify-content:center;overflow:auto;padding:60px 16px}
+.lp-lightbox{position:fixed;inset:0;z-index:970;background:rgba(0,0,0,.92);display:none;align-items:center;justify-content:center;overflow:hidden;padding:56px 52px 76px}
 .lp-lightbox.open{display:flex}
-.lp-lightbox-imgs{width:min(680px,100%);display:flex;flex-direction:column;gap:14px}
-.lp-lightbox-imgs img{width:100%;border-radius:12px;display:block}
-.lp-lightbox-close{position:fixed;top:14px;right:14px;z-index:975;width:38px;height:38px;border-radius:50%;background:#1c0f16cc;border:1px solid #ffffff33;color:#f8f1e8;font-size:calc(15px * var(--font-scale));display:flex;align-items:center;justify-content:center;cursor:pointer}
+.lp-lightbox-imgs{width:min(680px,100%);height:min(78vh,820px);display:flex;align-items:center;justify-content:center;position:relative}
+.lp-lightbox-imgs img{width:100%;height:100%;object-fit:contain;border-radius:14px;display:none;user-select:none}
+.lp-lightbox-imgs img.active{display:block}
+.lp-lightbox-nav{position:fixed;top:50%;transform:translateY(-50%);z-index:976;width:44px;height:44px;border-radius:50%;background:rgba(28,15,22,.78);border:1px solid rgba(224,198,144,.85);color:#f4dfad;font-size:28px;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 0 18px rgba(199,161,92,.16)}
+.lp-lightbox-prev{left:12px}
+.lp-lightbox-next{right:12px}
+.lp-lightbox-dots{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);display:flex;align-items:center;justify-content:center;gap:8px;z-index:976}
+.lp-lightbox-dot{width:7px;height:7px;padding:0;border:1px solid rgba(224,198,144,.72);border-radius:50%;background:rgba(255,255,255,.18);cursor:pointer}
+.lp-lightbox-dot.active{background:#e0c690;box-shadow:0 0 8px rgba(224,198,144,.45);transform:scale(1.35)}
+.lp-lightbox-close{position:fixed;top:14px;right:14px;z-index:977;width:38px;height:38px;border-radius:50%;background:#1c0f16cc;border:1px solid rgba(224,198,144,.75);color:#f8f1e8;font-size:calc(15px * var(--font-scale));display:flex;align-items:center;justify-content:center;cursor:pointer}
 .lp-gallery img{flex:0 0 calc((100% - 16px)/3);width:calc((100% - 16px)/3);aspect-ratio:1/1;object-fit:cover;border-radius:14px;border:1px solid rgba(0,0,0,.08);box-shadow:0 4px 14px rgba(0,0,0,.07);scroll-snap-align:start;cursor:pointer;transition:transform .2s ease,box-shadow .2s ease}.lp-gallery img:active{transform:scale(.98);box-shadow:0 2px 8px rgba(0,0,0,.06)}.lp-gallery img:first-child{border-color:var(--gold-soft);box-shadow:0 5px 16px rgba(199,161,92,.18)}
 .lp-benefits{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}.lp-product-details{margin:14px 0 4px;padding:4px 0 0;border:0;border-radius:0;background:transparent}.lp-product-details-title{font-family:var(--font-display);font-size:calc(14px * var(--font-scale));color:var(--gold-soft);margin-bottom:7px}.lp-product-desc p{margin:0;color:var(--ivory-dim);font-size:calc(13px * var(--font-scale));line-height:1.65}.lp-product-benefits{margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}.lp-product-benefits ul{margin:0;padding:0 18px 0 0;color:var(--ivory-dim);font-size:calc(13px * var(--font-scale));line-height:1.7}.lp-product-benefits li{margin:3px 0}html[dir="ltr"] .lp-product-benefits ul{padding:0 0 0 18px}
 .lp-card{background:#ffffff08;border:1px solid var(--line);border-radius:18px;padding:22px;text-align:center}
@@ -1723,87 +1733,7 @@ body.luxia-store-home .product-card .product-info {
 </style>
 
 
-<style id="luxia-v11-card-frame-exact">
-/* === EXACT CARD FRAME REQUEST ===
-   The black border belongs ONLY to the outside of the product card.
-   The main image touches the inner limits of that frame.
-   No separator line between main image and gallery.
-*/
-body.luxia-store-home .product-grid .product-card,
-body.luxia-store-home .product-grid > .product-card{
-  border:1.5px solid #292622 !important;
-  outline:none !important;
-  box-shadow:none !important;
-  overflow:hidden !important;
-  background:#faf8f3 !important;
-}
 
-/* Remove the old inner spacing around the main image. */
-body.luxia-store-home .product-card .product-visual{
-  display:flex !important;
-  flex-direction:column !important;
-  align-items:stretch !important;
-  position:relative !important;
-  width:100% !important;
-  height:auto !important;
-  min-height:0 !important;
-  aspect-ratio:auto !important;
-  padding:0 !important;
-  margin:0 !important;
-  overflow:visible !important;
-  border:0 !important;
-  background:#faf8f3 !important;
-}
-
-/* Main image: full card width, natural height, no crop, no zoom, no rounded inset. */
-body.luxia-store-home .product-card .product-visual > .product-photo{
-  position:relative !important;
-  inset:auto !important;
-  display:block !important;
-  width:100% !important;
-  height:auto !important;
-  max-width:none !important;
-  max-height:none !important;
-  aspect-ratio:auto !important;
-  object-fit:contain !important;
-  object-position:center center !important;
-  transform:none !important;
-  margin:0 !important;
-  padding:0 !important;
-  border:0 !important;
-  border-radius:0 !important;
-  background:#eee9e0 !important;
-  z-index:1 !important;
-}
-
-/* Disable the old image overlay so no internal edge/line appears. */
-body.luxia-store-home .product-card .product-visual::after{
-  display:none !important;
-  content:none !important;
-}
-
-/* Badge stays inside the image/card corner. */
-body.luxia-store-home .product-card .product-visual .badge{
-  top:14px !important;
-  inset-inline-start:14px !important;
-  z-index:5 !important;
-}
-
-/* Gallery: directly follows the image, with no separator border. */
-body.luxia-store-home .product-card .product-visual .product-gallery-strip{
-  border:0 !important;
-  border-top:0 !important;
-  margin:0 !important;
-  padding:10px 1px 5px !important;
-  background:#faf8f3 !important;
-}
-
-/* Keep all product information inside the same single outer frame. */
-body.luxia-store-home .product-card .product-info{
-  border:0 !important;
-  margin:0 !important;
-}
-</style>
 
 
 <style id="luxia-v12-main-photo-fill">
@@ -1852,136 +1782,7 @@ body.luxia-store-home .product-card .product-gallery-strip{
 </style>
 
 
-<style id="luxia-v13-unified-image-frames">
-/* =========================================================
-   LUXIA — UNIFIED PRODUCT IMAGE SYSTEM
-   Every product image gets the same frame size.
-   The complete source image is always visible: contain, never crop.
-   The black border is ONLY the outer product-card border.
-   ========================================================= */
 
-/* ONE outer black frame for the complete product card */
-body.luxia-store-home .product-grid .product-card,
-body.luxia-store-home .product-grid > .product-card{
-  border:1.5px solid #292622!important;
-  outline:none!important;
-  box-shadow:none!important;
-  overflow:hidden!important;
-  background:#faf8f3!important;
-}
-
-/* Main-photo frame: same dimensions for every product */
-body.luxia-store-home .product-card .product-visual{
-  position:relative!important;
-  display:block!important;
-  width:100%!important;
-  height:auto!important;
-  aspect-ratio:4 / 3!important;
-  min-height:0!important;
-  margin:0!important;
-  padding:0!important;
-  overflow:hidden!important;
-  border:0!important;
-  border-radius:0!important;
-  background:#eee9e0!important;
-}
-
-/* Every uploaded main image automatically adapts to that frame.
-   contain = the WHOLE photo remains visible, whatever its original ratio. */
-body.luxia-store-home .product-card .product-visual > .product-photo{
-  position:absolute!important;
-  inset:0!important;
-  display:block!important;
-  width:100%!important;
-  height:100%!important;
-  max-width:none!important;
-  max-height:none!important;
-  margin:0!important;
-  padding:0!important;
-  border:0!important;
-  border-radius:0!important;
-  object-fit:contain!important;
-  object-position:center center!important;
-  transform:none!important;
-  background:#eee9e0!important;
-}
-
-/* No internal line / overlay between main image and gallery */
-body.luxia-store-home .product-card .product-visual::after{
-  display:none!important;
-  content:none!important;
-}
-body.luxia-store-home .product-card .product-gallery-strip{
-  margin:0!important;
-  border:0!important;
-  border-top:0!important;
-  background:#faf8f3!important;
-}
-
-/* All gallery thumbnails use the same frame and show their full image */
-body.luxia-store-home .product-card .product-gallery-thumb{
-  flex:0 0 50px!important;
-  width:50px!important;
-  height:50px!important;
-  padding:0!important;
-  overflow:hidden!important;
-  border-radius:8px!important;
-  background:#eee9e0!important;
-}
-body.luxia-store-home .product-card .product-gallery-thumb img{
-  display:block!important;
-  width:100%!important;
-  height:100%!important;
-  object-fit:contain!important;
-  object-position:center!important;
-  background:#eee9e0!important;
-}
-
-/* Product detail opened after clicking title/main image:
-   same image-frame principle, with the entire photo visible. */
-body.luxia-store-home .product-detail-main-image{
-  width:100%!important;
-  height:auto!important;
-  aspect-ratio:4 / 3!important;
-  min-height:0!important;
-  margin:0!important;
-  padding:0!important;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:center!important;
-  overflow:hidden!important;
-  background:#eee9e0!important;
-  border-radius:12px!important;
-}
-body.luxia-store-home .product-detail-main-image img{
-  display:block!important;
-  width:100%!important;
-  height:100%!important;
-  max-width:none!important;
-  max-height:none!important;
-  object-fit:contain!important;
-  object-position:center center!important;
-  transform:none!important;
-  border:0!important;
-}
-
-/* Detail gallery thumbnails: same consistent size */
-body.luxia-store-home .product-detail-thumb{
-  flex:0 0 72px!important;
-  width:72px!important;
-  height:72px!important;
-  padding:0!important;
-  overflow:hidden!important;
-  background:#eee9e0!important;
-}
-body.luxia-store-home .product-detail-thumb img{
-  width:100%!important;
-  height:100%!important;
-  object-fit:contain!important;
-  object-position:center!important;
-  display:block!important;
-}
-</style>
 
 
 <style id="luxia-v14-natural-image-frame">
@@ -2372,9 +2173,10 @@ body.luxia-store-home .home-collection-heading{
   margin:0 auto 18px!important;
   padding:18px 32px 16px!important;
   text-align:center!important;
-  background:linear-gradient(180deg, rgba(185,154,98,.08), rgba(185,154,98,0) 85%)!important;
-  border-radius:3px!important;
+  background:linear-gradient(180deg, rgba(185,154,98,.22), rgba(185,154,98,.07) 85%)!important;
+  border-radius:6px!important;
   border:0!important;
+  box-shadow:0 8px 22px -18px rgba(42,36,30,.28)!important;
   opacity:1!important;
 }
 body.luxia-store-home .home-collection-heading::before,
@@ -3024,67 +2826,7 @@ body.luxia-store-home .product-info .btn-order{
   margin-top:0!important;
 }
 </style>
-<style id="luxia-3d-product-frame">
-/* =========================================================
-   LUXIA — ELEGANT 3D PRODUCT FRAME
-   Only visual card-frame styling. No product functionality touched.
-   ========================================================= */
-body.luxia-store-home .product-grid .product-card,
-body.luxia-store-home .product-grid > .product-card {
-  /* Fixed, unified frame geometry */
-  border: 1px solid rgba(174, 151, 112, 0.92) !important;
-  outline: 0 !important;
-  border-radius: 22px !important;
-  overflow: hidden !important;
-  background: #faf8f3 !important;
 
-  /* Layered depth: soft outer shadow + subtle lower lift */
-  box-shadow:
-    0 1px 0 rgba(255,255,255,.95) inset,
-    0 0 0 1px rgba(255,255,255,.55) inset,
-    0 2px 0 rgba(151,128,91,.22),
-    0 7px 14px rgba(91,72,48,.10),
-    0 14px 24px rgba(91,72,48,.07) !important;
-
-  /* Keeps the frame itself independent from image dimensions */
-  box-sizing: border-box !important;
-  position: relative !important;
-}
-
-/* Fine inner highlight gives the border a restrained 3D edge. */
-body.luxia-store-home .product-grid .product-card::before,
-body.luxia-store-home .product-grid > .product-card::before {
-  content: "" !important;
-  position: absolute !important;
-  inset: 0 !important;
-  border-radius: inherit !important;
-  pointer-events: none !important;
-  z-index: 20 !important;
-  border: 1px solid rgba(255,255,255,.62) !important;
-  box-shadow:
-    inset 1px 1px 0 rgba(255,255,255,.42),
-    inset -1px -1px 0 rgba(137,111,72,.16) !important;
-}
-
-/* Slightly deeper lower/right edge: the requested 3D side feeling. */
-body.luxia-store-home .product-grid .product-card::after,
-body.luxia-store-home .product-grid > .product-card::after {
-  content: "" !important;
-  position: absolute !important;
-  inset: 1px !important;
-  border-radius: 21px !important;
-  pointer-events: none !important;
-  z-index: 19 !important;
-  box-shadow:
-    inset -2px -2px 0 rgba(120,94,57,.08),
-    inset 2px 2px 0 rgba(255,255,255,.18) !important;
-}
-
-/* Preserve the existing unified image dimensions and behavior. */
-body.luxia-store-home .product-card .product-visual {
-  box-sizing: border-box !important;
-}
-</style>
 <style id="luxia-v7-exact-title-price-layout">
 /* Exact visual treatment requested: unified creamy title area, centered title,
    compact framed price directly underneath. Presentation only. */
@@ -3402,18 +3144,7 @@ body.luxia-store-home .product-info .btn-order:hover{background:#403a34!importan
 #variantOverlay .pill.color-pill.selected{background:#faf8f3!important;border-color:#967644!important;box-shadow:0 0 0 2px #967644!important;}
 #variantOverlay .variant-color-circle{display:block!important;width:22px!important;height:22px!important;border-radius:50%!important;border:1px solid rgba(80,70,60,.22)!important;box-shadow:inset 0 0 0 2px #faf8f3!important;}
 </style>
-<style id="luxia-v7-black-product-frame">
-body.luxia-store-home .product-card{
-  border:1.5px solid #292622!important;
-  box-shadow:none!important;
-}
-body.luxia-store-home .product-visual{
-  border-bottom:1px solid #ded6ca!important;
-}
-body.luxia-store-home .product-info .btn-order{
-  border:1px solid #292622!important;
-}
-</style>
+
 <style id="luxia-v7-admin-category-ui">
 .admin-catalog-type{
   display:flex;gap:8px;flex-wrap:wrap;
@@ -3422,23 +3153,7 @@ body.luxia-store-home .product-info .btn-order{
   display:block;margin-top:6px;font-size:11px;color:#8a8178;
 }
 </style>
-<style id="luxia-v8-black-frame-final">
-/* Final override: the whole product card gets a clearly visible thin black frame. */
-body.luxia-store-home .product-grid .product-card,
-body.luxia-store-home .product-grid > .product-card{
-  border:1.5px solid #292622!important;
-  outline:1px solid rgba(41,38,34,.12)!important;
-  box-shadow:none!important;
-}
 
-/* Keep the image and content inside the black frame; no inner cream border. */
-body.luxia-store-home .product-card .product-visual{
-  border-bottom:1px solid #292622!important;
-}
-body.luxia-store-home .product-card .product-info{
-  border:0!important;
-}
-</style>
 <style id="luxia-v14-only-remove-separator">
 /* ONLY correction: remove the internal line below the main product image. */
 body.luxia-store-home .product-card .product-visual{
@@ -4684,81 +4399,7 @@ body.lp-pyjama-active .lp-attention-signal::after{
 .checkout-products-name span:first-child{line-height:1.55;text-align:left;}
 [dir="rtl"] .checkout-products-name span:first-child{text-align:right;}
 </style>
-<style id="luxia-3d-product-frame-final">
-/* FINAL OVERRIDE — Luxia product cards: elegant unified 3D frame */
-body.luxia-store-home .product-grid .product-card,
-body.luxia-store-home .product-grid > .product-card {
-  position:relative!important;
-  box-sizing:border-box!important;
-  overflow:hidden!important;
-  border:1px solid #bda77e!important;
-  border-radius:22px!important;
-  outline:none!important;
-  background:#faf8f3!important;
-  /* top/left highlight + lower/right depth */
-  box-shadow:
-    inset 1px 1px 0 rgba(255,255,255,.96),
-    inset -1px -1px 0 rgba(156,126,78,.20),
-    0 1px 0 rgba(255,255,255,.90),
-    2px 2px 0 rgba(186,158,112,.38),
-    4px 4px 0 rgba(153,124,78,.18),
-    0 9px 18px rgba(74,58,39,.10)!important;
-  transform:none!important;
-  transition:none!important;
-}
 
-/* A very subtle inner bevel: no black line and no effect on layout. */
-body.luxia-store-home .product-grid .product-card::before,
-body.luxia-store-home .product-grid > .product-card::before {
-  content:""!important;
-  position:absolute!important;
-  inset:0!important;
-  z-index:30!important;
-  pointer-events:none!important;
-  border-radius:inherit!important;
-  border:1px solid rgba(255,255,255,.68)!important;
-  box-shadow:
-    inset 2px 2px 0 rgba(255,255,255,.28),
-    inset -2px -2px 0 rgba(139,108,62,.10)!important;
-}
-
-/* Gives the lower/right side a little more 3D presence, matching the reference. */
-body.luxia-store-home .product-grid .product-card::after,
-body.luxia-store-home .product-grid > .product-card::after {
-  content:""!important;
-  position:absolute!important;
-  inset:2px!important;
-  z-index:29!important;
-  pointer-events:none!important;
-  border-radius:20px!important;
-  border-right:1px solid rgba(143,111,66,.16)!important;
-  border-bottom:1px solid rgba(143,111,66,.18)!important;
-  box-shadow:
-    inset -1px -1px 0 rgba(127,97,54,.08),
-    inset 1px 1px 0 rgba(255,255,255,.16)!important;
-}
-
-/* Keep the unified image frame exactly as it is. */
-body.luxia-store-home .product-card .product-visual {
-  box-sizing:border-box!important;
-}
-<style id="luxia-hero-visual-final">
-/* Requested hero-only visual adjustments: no dark overlay, clearer supporting text, black CTA. */
-.hero p.pitch{
-  color:#fff8ee !important;
-  font-weight:500 !important;
-  text-shadow:0 2px 10px rgba(0,0,0,.55);
-}
-.hero .btn-primary{
-  background:#1c1c1a !important;
-  color:#fff !important;
-  box-shadow:0 10px 28px -10px rgba(0,0,0,.45) !important;
-}
-.hero .btn-primary:hover{
-  background:#11110f !important;
-  box-shadow:0 16px 34px -10px rgba(0,0,0,.55) !important;
-}
-</style>
 
 <style id="luxia-hero-final-adjustments">
 .hero p.pitch{color:#fff !important;font-weight:400 !important;text-shadow:0 2px 10px rgba(0,0,0,.55);}
@@ -5105,22 +4746,20 @@ body,
 </style>
 
 <style id="luxia-landing-discover-final">
-/* Final: Landing Discover button matches the current site beige theme, with black text. */
+/* Keep the existing site palette for the landing/store Discover CTA; no color replacement. */
 .lp-preview .lp-cta{
-  background:#f7f4ee !important;
-  color:#292622 !important;
-  border:1px solid #292622 !important;
-  box-shadow:none !important;
+  background:linear-gradient(135deg,var(--gold-soft),var(--gold)) !important;
+  color:var(--bg-deep) !important;
+  border:1px solid rgba(199,161,92,.72) !important;
 }
 .lp-preview .lp-cta:hover{
-  background:#f7f4ee !important;
-  color:#292622 !important;
-  border-color:#292622 !important;
-  box-shadow:none !important;
+  background:linear-gradient(135deg,var(--gold-soft),var(--gold)) !important;
+  color:var(--bg-deep) !important;
+  border-color:rgba(199,161,92,.86) !important;
 }
 .lp-preview .lp-cta:active{
-  background:#f7f4ee !important;
-  color:#292622 !important;
+  background:linear-gradient(135deg,var(--gold-soft),var(--gold)) !important;
+  color:var(--bg-deep) !important;
 }
 </style>
 
@@ -5294,6 +4933,55 @@ body:not(.lp-pyjama-active) .lp-preview .lp-product-card:not(.lp-order-success) 
   border-radius:16px !important;
   box-shadow:0 10px 22px -12px rgba(40,28,20,.35) !important;
 }
+
+/* Pack Cadeau on landing: keep the exact matte-black + luxury-gold identity.
+   This class is added only when the selected source product is a gift-pack product. */
+body .lp-preview .lp-product-card.lp-gift-pack:not(.lp-order-success){
+  background:#151515 !important;
+  background-color:#151515 !important;
+  color:#f1ece2 !important;
+  border:1px solid #b99a62 !important;
+  border-radius:20px !important;
+  box-shadow:0 14px 30px rgba(0,0,0,.28),0 0 0 1px rgba(255,255,255,.025) inset !important;
+}
+body .lp-preview .lp-product-card.lp-gift-pack .lp-product-title-price-frame,
+body .lp-preview .lp-product-card.lp-gift-pack .lp-product-details,
+body .lp-preview .lp-product-card.lp-gift-pack .lp-picker{
+  background:transparent !important;
+  background-color:transparent !important;
+  color:#f1ece2 !important;
+}
+body .lp-preview .lp-product-card.lp-gift-pack .lp-product-title-price-frame.lp-product-head-top b{
+  background:#151515 !important;
+  color:#d8bd7b !important;
+  border:1px solid #b99a62 !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 6px 14px rgba(0,0,0,.22) !important;
+}
+body .lp-preview .lp-product-card.lp-gift-pack .lp-product-price-below{
+  background:#111 !important;
+  color:#d8bd7b !important;
+  border-color:#b99a62 !important;
+}
+body .lp-preview .lp-product-card.lp-gift-pack .lp-product-card-img{
+  border:1px solid rgba(185,154,98,.72) !important;
+  border-radius:6px !important;
+  box-shadow:0 10px 20px rgba(0,0,0,.28),inset 0 0 0 1px rgba(255,255,255,.025) !important;
+}
+body .lp-preview .lp-product-card.lp-gift-pack .lp-choose-btn,
+body .lp-preview .lp-product-card.lp-gift-pack .lp-submit,
+body .lp-preview .lp-product-card.lp-gift-pack .lp-cta{
+  background:#111 !important;
+  color:#d8bd7b !important;
+  border:1px solid #b99a62 !important;
+  box-shadow:0 6px 14px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.04) !important;
+}
+body .lp-preview .lp-product-card.lp-gift-pack .lp-choose-btn:hover,
+body .lp-preview .lp-product-card.lp-gift-pack .lp-submit:hover,
+body .lp-preview .lp-product-card.lp-gift-pack .lp-cta:hover{
+  background:#181818 !important;
+  color:#ead7a8 !important;
+  border-color:#d8bd7b !important;
+}
 </style>
 <style id="luxia-pack-banner-css">
 .lx-pack-banner{position:relative;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;background:linear-gradient(135deg,#fffdf9,#f1ede5);border:1px solid #ddd6cc;border-radius:18px;box-shadow:0 14px 38px -24px rgba(42,36,30,.28);padding:12px 14px;margin:16px 0 12px;cursor:pointer;color:#292622;text-align:start;}
@@ -5401,6 +5089,95 @@ body .lp-preview.lp-preview .lp-picker .lp-picker-pills .pill.selected{backgroun
   .lx-offer-cta{width:100%;justify-content:center;padding:10px 14px;font-size:13px;}
 }
 @media (prefers-reduced-motion:reduce){.lx-offer,.lx-offer::after,.lx-offer-badge,.lx-offer-dot{animation:none!important;}}
+</style>
+
+<style id="luxia-landing-fixed-main-gallery-carousel-final">
+/* Final landing-gallery behavior: main image stays fixed; only lower gallery auto-scrolls. */
+.lp-main-image-dots{display:none!important;}
+.lp-main-gallery-wrap #lp-main-gallery-img{cursor:default!important;}
+.lp-landing-thumbs{scroll-behavior:smooth!important;}
+.lp-lightbox-imgs{border:1px solid rgba(199,161,92,.38);border-radius:16px;padding:6px;box-sizing:border-box;box-shadow:0 10px 35px rgba(199,161,92,.12);}
+</style>
+
+<style id="luxia-customer-button-breath-v2">
+/* LUXIA — customer CTAs: keep each button's existing color; add only soft physical 3D depth. */
+button{animation:none;}
+@keyframes luxiaCustomerButtonBreath{
+  0%,100%{scale:1;filter:drop-shadow(0 3px 3px rgba(0,0,0,.12));}
+  50%{scale:1.025;filter:drop-shadow(0 7px 11px rgba(0,0,0,.24));}
+}
+.hero .btn-primary,
+.product-info .btn-order:not(:disabled),
+.product-detail-add:not(:disabled),
+#addToCartBtn:not(:disabled),
+#cartCheckoutBtn:not(:disabled),
+#submitOrder:not(:disabled),
+#gfAdd:not(:disabled),
+.lp-preview .lp-cta,
+.lp-preview .lp-choose-btn:not(:disabled),
+.lp-preview .lp-submit:not(:disabled){
+  animation:luxiaCustomerButtonBreath 2s ease-in-out infinite;
+}
+
+/* 3D: no palette replacement — the original background/color of every button stays intact. */
+.hero .btn-primary,
+.product-detail-add:not(:disabled),
+#addToCartBtn:not(:disabled),
+#cartCheckoutBtn:not(:disabled),
+#submitOrder:not(:disabled),
+#gfAdd:not(:disabled),
+body.luxia-store-home .product-info .btn-order:not(:disabled),
+.lp-preview .lp-cta,
+.lp-preview .lp-choose-btn:not(:disabled),
+.lp-preview .lp-submit:not(:disabled){
+  position:relative;
+  transform-style:preserve-3d;
+  box-shadow:
+    0 4px 8px rgba(0,0,0,.18),
+    0 9px 19px rgba(0,0,0,.13),
+    inset 0 1px 0 rgba(255,255,255,.22),
+    inset 0 -1px 0 rgba(0,0,0,.08) !important;
+}
+
+/* Slightly stronger depth only where the existing button is already dark. */
+body.luxia-store-home .product-info .btn-order:not(:disabled){
+  box-shadow:
+    0 3px 7px rgba(0,0,0,.18),
+    0 8px 17px rgba(0,0,0,.10),
+    inset 0 1px 0 rgba(255,255,255,.14),
+    inset 0 -1px 0 rgba(0,0,0,.16) !important;
+}
+
+/* Landing Gift Pack keeps its own existing palette; only depth is added. */
+body .lp-preview .lp-product-card.lp-gift-pack .lp-choose-btn:not(:disabled),
+body .lp-preview .lp-product-card.lp-gift-pack .lp-submit:not(:disabled),
+body .lp-preview .lp-product-card.lp-gift-pack .lp-cta{
+  box-shadow:
+    0 4px 9px rgba(0,0,0,.18),
+    0 10px 21px rgba(0,0,0,.12),
+    inset 0 1px 0 rgba(255,255,255,.25),
+    inset 0 -1px 0 rgba(0,0,0,.07) !important;
+}
+
+/* Press = physical compression, without changing the button's color. */
+.hero .btn-primary:active,
+.product-detail-add:active,
+#addToCartBtn:active,
+#cartCheckoutBtn:active,
+#submitOrder:active,
+#gfAdd:active,
+body.luxia-store-home .product-info .btn-order:active,
+.lp-preview .lp-cta:active,
+.lp-preview .lp-choose-btn:active,
+.lp-preview .lp-submit:active{
+  transform:translateY(3px) !important;
+  scale:.985;
+  box-shadow:
+    0 1px 0 rgba(35,28,20,.16),
+    0 5px 10px rgba(0,0,0,.10),
+    inset 0 1px 0 rgba(255,255,255,.24),
+    inset 0 -1px 0 rgba(0,0,0,.10) !important;
+}
 </style>
 </head>
 <body class="luxia-store-home">
@@ -5737,17 +5514,22 @@ const PRODUCT_BENEFITS = {
   chemise:{fr:["Matière soyeuse et douce","Coupe élégante qui épouse la silhouette","Confort idéal pour la nuit"],ar:["خامة حريرية وناعمة","قصة أنيقة تنساب مع القوام","راحة مثالية أثناء النوم"]},
   packchemise:{fr:["Pack de 2 pièces","Deux modèles raffinés","Matière douce et confortable"],ar:["باك من قطعتين","تصميمان راقيان","خامة ناعمة ومريحة"]}
 };
-function getProductDescription(prod,lang){ const b=prod?(PRODUCT_BACKEND_ROWS[prod.id]||{}):{}; return lang==='ar'?(b.desc_ar||I18N.ar[prod?.descKey]||''):(b.desc_fr||I18N.fr[prod?.descKey]||''); }
+function getProductDescription(prod,lang){ const b=prod?(PRODUCT_BACKEND_ROWS[prod.id]||{}):{}, v=prod?(PRODUCT_VARIANTS[prod.id]||{}):{}; const gen=v.generatedContent||(function(){try{return lxLegacyGen(prod);}catch(e){return null;}})()||{}; if(lang==='ar'?(gen.ar&&!gen.manualAr):(gen.fr&&!gen.manualFr)) return lang==='ar'?gen.ar:gen.fr; return lang==='ar'?(b.desc_ar||I18N.ar[prod?.descKey]||gen.ar||''):(b.desc_fr||I18N.fr[prod?.descKey]||gen.fr||''); }
+/* Sécurité : si un texte saisi à la main contient un titre « Avantages / المميزات » seul sur sa ligne, on ne l'affiche pas. */
+function lxStripBenefitsHeading(t){
+  return String(t==null?'':t).split(/\r?\n/).filter(l=>!/^\s*[^\p{L}\p{N}]*\s*(?:les\s+)?avantages?(?:\s+du\s+produit)?\s*[:：-]?\s*$/iu.test(l) && !/^\s*[^\p{L}\p{N}]*\s*(?:ال)?(?:مميزات|مزايا)(?:\s+المنتج)?\s*[:：-]?\s*$/u.test(l)).join('\n').trim();
+}
 function getProductBenefits(prod,lang){
   if(!prod) return []; const b=PRODUCT_BACKEND_ROWS[prod.id]||{}; const raw=lang==='ar'?b.benefits_ar:b.benefits_fr;
-  if(Array.isArray(raw)) return raw.filter(Boolean); if(typeof raw==='string'&&raw.trim()) return raw.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
-  return (PRODUCT_BENEFITS[prod.id]?.[lang]||[]).slice();
+  if(Array.isArray(raw)){ const __r=raw.filter(Boolean); if(__r.length) return __r; } if(typeof raw==='string'&&raw.trim()) return raw.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
+  const gen=((PRODUCT_VARIANTS[prod.id]||{}).generatedContent)||(function(){try{return lxLegacyGen(prod);}catch(e){return null;}})()||{};
+  const generated=lang==='ar'?gen.benefitsAr:gen.benefitsFr; if(Array.isArray(generated)&&generated.length) return generated.slice(); return (PRODUCT_BENEFITS[prod.id]?.[lang]||[]).slice();
 }
 function renderProductDetails(prod,lang){
-  if(!prod) return ''; const d=getProductDescription(prod,lang), bs=getProductBenefits(prod,lang);
-  const dhtml=d?`<div class="lp-product-desc"><div class="lp-product-details-title">${lang==='ar'?'الوصف':'Description'}</div><p>${escHtml(d)}</p></div>`:'';
-  const bhtml=bs.length?`<div class="lp-product-benefits"><div class="lp-product-details-title">${lang==='ar'?'المميزات':'Les avantages'}</div><ul>${bs.map(x=>`<li>${escHtml(String(x))}</li>`).join('')}</ul></div>`:'';
-  return (dhtml||bhtml)?`<div class="lp-product-details">${dhtml}${bhtml}</div>`:'';
+  if(!prod) return ''; const d=lxStripBenefitsHeading(getProductDescription(prod,lang)), bs=getProductBenefits(prod,lang);
+  const bhtml=bs.length?`<ul>${bs.map(x=>`<li>${escHtml(String(x))}</li>`).join('')}</ul>`:'';
+  const dhtml=(d||bhtml)?`<div class="lp-product-desc"><div class="lp-product-details-title">${lang==='ar'?'الوصف':'Description'}</div>${d?`<p>${escHtml(d)}</p>`:''}${bhtml}</div>`:'';
+  return dhtml?`<div class="lp-product-details">${dhtml}</div>`:'';
 }
 /* ============================================================
    PRODUCT VARIANTS (colors/sizes) + PACK INFO + QUANTITY
@@ -6724,9 +6506,7 @@ function renderProducts(){
         ${out?`<span class="lx-soldout-badge">${t('variant.outOfStock')}</span>`:''}
       </div>
       ${gift?'</div>':''}
-      ${gallery.length>1?`<div class="product-gallery-strip" aria-label="صور إضافية للمنتج">
-        ${gallery.map((src,i)=>`<button type="button" class="product-gallery-thumb ${i===0?'active':''}" data-gallery-thumb="${escAttr(p.id)}:${i}" aria-label="الصورة ${i+1}"><img src="${escAttr(src)}" alt="${escAttr(t(p.nameKey))} — ${i+1}" loading="lazy"></button>`).join('')}
-      </div>`:''}
+      ${gallery.length>1?`<div class="lx-card-gal" data-card-thumbs="${escAttr(p.id)}"><div class="lx-card-thumbs" style="grid-template-columns:repeat(${Math.min(3,gallery.length)},1fr)" aria-hidden="true">${gallery.slice(0,3).map(src=>`<span class="lx-card-thumb"><img src="${escAttr(src)}" alt="" loading="lazy" draggable="false"></span>`).join('')}</div><div class="lx-card-dots" aria-hidden="true">${gallery.map((_,i)=>`<i class="${i===0?'on':''}"></i>`).join('')}</div></div>`:''}
       <div class="product-info">
         ${colors.length?`<div class="swatch-row"><span class="swatch-label">${t("product.colors")}</span>${colors.map(c=>`<span class="swatch" style="background:${c.hex||'#c9a877'}" title="${escAttr(currentLang==='ar'?c.ar:c.fr)}"></span>`).join('')}</div>`:''}
         ${sizes.length?`<div class="product-sizes-row"><span class="product-variants-label">${currentLang==='ar'?'المقاسات':'Tailles'}</span>${sizes.map(sz=>`<span class="product-size-chip">${escHtml(sz)}</span>`).join('')}</div>`:''}
@@ -6778,38 +6558,28 @@ function renderProducts(){
 
   grid.querySelectorAll('[data-product-card]').forEach(card=>{
     const id=card.dataset.productCard;
+    /* Un clic n'importe où sur la carte ouvre la fenêtre du produit */
+    card.addEventListener('click',e=>{
+      if(e.target.closest('.btn-order')||e.target.closest('[data-detail-product]')) return; /* déjà gérés */
+      openProductDetailModal(id);
+    });
     const gallery=PRODUCT_IMAGE_GALLERY[id]&&PRODUCT_IMAGE_GALLERY[id].length?PRODUCT_IMAGE_GALLERY[id]:[PRODUCT_IMAGES[id]];
+    if(productGalleryTimers[id]){ clearInterval(productGalleryTimers[id]); delete productGalleryTimers[id]; }
+    /* Photo principale FIXE. Les miniatures rondes défilent toujours en boucle (dès 2 photos). */
     if(gallery.length<2) return;
-    let idx=0, sx=0, sy=0, moved=false;
-    const visual=card.querySelector('.product-visual');
-    const show=(n)=>{
-      idx=(n+gallery.length)%gallery.length;
-      visual?.setAttribute('data-gallery-index',String(idx));
-      const img=visual?.querySelector('.product-photo');
-      if(img) img.src=gallery[idx];
-      card.querySelectorAll('.product-gallery-thumb').forEach((t,i)=>t.classList.toggle('active',i===idx));
+    const thumbs=card.querySelectorAll('.lx-card-thumb img');
+    const dots=card.querySelectorAll('.lx-card-dots i');
+    if(!thumbs.length) return;
+    let start=0;
+    const paint=()=>{
+      thumbs.forEach((img,k)=>{ img.src=gallery[(start+k)%gallery.length]; });
+      dots.forEach((d,i)=>d.classList.toggle('on',i===start));
     };
-    const startAutoGallery=()=>{
-      if(productGalleryTimers[id]) clearInterval(productGalleryTimers[id]);
-      if(gallery.length<2) return;
-      productGalleryTimers[id]=setInterval(()=>show(idx+1),2800);
-    };
-    card.querySelectorAll('[data-gallery-thumb]').forEach(btn=>btn.addEventListener('click',e=>{
-      e.preventDefault(); e.stopPropagation();
-      show(parseInt(btn.dataset.galleryThumb.split(':')[1],10));
-      startAutoGallery();
-    }));
-    visual?.addEventListener('touchstart',e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY;moved=false;},{passive:true});
-    visual?.addEventListener('touchmove',()=>{moved=true;},{passive:true});
-    visual?.addEventListener('touchend',e=>{
-      const dx=e.changedTouches[0].clientX-sx,dy=e.changedTouches[0].clientY-sy;
-      if(Math.abs(dx)>35&&Math.abs(dx)>Math.abs(dy)*1.15){
-        moved=true;
-        show(idx+(dx<0?1:-1));
-        startAutoGallery();
-      }
-    },{passive:true});
-    startAutoGallery();
+    productGalleryTimers[id]=setInterval(()=>{
+      const row=card.querySelector('.lx-card-thumbs'); if(!row) return;
+      row.classList.add('is-fading');
+      setTimeout(()=>{ start=(start+1)%gallery.length; paint(); row.classList.remove('is-fading'); },260);
+    },2800);
   });
 }
 
@@ -6853,7 +6623,7 @@ function openProductDetailModal(id){
   const m=ensureProductDetailModal(), lang=currentLang;
   const gallery=PRODUCT_IMAGE_GALLERY[id]&&PRODUCT_IMAGE_GALLERY[id].length?PRODUCT_IMAGE_GALLERY[id]:[PRODUCT_IMAGES[id]];
   const colors=getProductColors(id), sizes=getProductSizes(id);
-  const title=t(p.nameKey), desc=getProductDescription(p,lang), benefits=getProductBenefits(p,lang);
+  const title=t(p.nameKey), desc=lxStripBenefitsHeading(getProductDescription(p,lang)), benefits=getProductBenefits(p,lang);
   const hasPack=!!getPackConfig(id);
   m.querySelector('#productDetailTitle').textContent=title;
   m.querySelector('#productDetailBody').innerHTML=`
@@ -6862,8 +6632,7 @@ function openProductDetailModal(id){
       ${gallery.length>1?`<div class="product-detail-thumbs">${gallery.map((src,i)=>`<button type="button" class="product-detail-thumb ${i===0?'active':''}" data-detail-image="${i}"><img src="${escAttr(src)}" alt="${escAttr(title)} — ${i+1}"></button>`).join('')}</div>`:''}
     </div>
     <div class="product-detail-content">
-      ${desc?`<section class="product-detail-section"><h4>${lang==='ar'?'الوصف':'Description'}</h4><p>${escHtml(desc)}</p></section>`:''}
-      ${benefits.length?`<section class="product-detail-section"><h4>${lang==='ar'?'المميزات':'Les avantages'}</h4><ul>${benefits.map(x=>`<li>${escHtml(String(x))}</li>`).join('')}</ul></section>`:''}
+      ${(desc||benefits.length)?`<section class="product-detail-section"><h4>${lang==='ar'?'الوصف':'Description'}</h4>${desc?`<p>${escHtml(desc)}</p>`:''}${benefits.length?`<ul style="margin-top:${desc?'10px':'0'}!important">${benefits.map(x=>`<li>${escHtml(String(x))}</li>`).join('')}</ul>`:''}</section>`:''}
       ${(!hasPack&&(colors.length||sizes.length))?`<div class="product-detail-variant-picker">
         ${colors.length?`<section class="product-detail-variant-group" id="detailColorGroup"><h4>${lang==='ar'?'اللون':'Couleur'}</h4><div class="product-detail-color-options">${colors.map(c=>`<button type="button" class="product-detail-color-option" data-detail-color="${escAttr(c.id)}" disabled aria-disabled="true"><span class="color-name">${escHtml(lang==='ar'?c.ar:c.fr)}</span><span class="variant-color-circle" style="background:${escAttr(c.hex||'#c9a877')}"></span></button>`).join('')}</div></section>`:''}
         ${sizes.length?`<section class="product-detail-variant-group" id="detailSizeGroup"><h4>${lang==='ar'?'المقاس':'Taille'}</h4><div class="product-detail-size-options">${sizes.map(sz=>`<button type="button" class="product-detail-size-option" data-detail-size="${escAttr(sz)}" disabled aria-disabled="true">${escHtml(sz)}</button>`).join('')}</div></section>`:''}
@@ -8888,6 +8657,16 @@ function renderLandingPublic(p, isPreview){
     const title=pick('title'), subtitle=(p.sourceProductId ? '' : pick('subtitle')), description=pick('description'), cta=pick('cta');
     const isArabicText = (value)=>/[\u0600-\u06FF]/.test(String(value||''));
     const mainSourceProduct = p.sourceProductId ? PRODUCTS.find(x=>String(x.id)===String(p.sourceProductId)) : null;
+    const isLandingGiftProduct = product => {
+      try{
+        if(!product) return false;
+        const v=PRODUCT_VARIANTS[product.id]||{};
+        if(v.gift) return true;
+        const cid=getStoreProductCollection(product);
+        const c=getLuxiaCollections().find(x=>x.id===cid)||{};
+        return /cadeau|gift|كادو|هدايا|هدية|hadaya|hdaya/i.test([cid,c.fr,c.ar].join(' '));
+      }catch(e){ return false; }
+    };
     const mainProductName = mainSourceProduct
       ? (lang==='ar'
           ? ((isArabicText(p.titleAr) ? p.titleAr : '') ||
@@ -9060,11 +8839,12 @@ function renderLandingPublic(p, isPreview){
       <div class="lp-success-icon">✓</div>
       <div class="lp-success-title">${lang==='ar'?'تم تسجيل طلبك بنجاح ❤️':'Votre commande a été enregistrée avec succès ❤️'}</div>
       <p class="lp-success-text">${lang==='ar'?'شكراً لك! غادي نتاصلو بيك قريباً باش نأكدو معاك الطلب.':'Merci ! Nous vous contacterons bientôt pour confirmer votre commande.'}</p>
-    </div>` : `<div id="lp-main-product" class="lp-card lp-product-card" style="text-align:${dir==='rtl'?'right':'left'};padding:18px;margin-bottom:14px;">
+    </div>` : `<div id="lp-main-product" class="lp-card lp-product-card${isLandingGiftProduct(mainSourceProduct)?' lp-gift-pack':''}" style="text-align:${dir==='rtl'?'right':'left'};padding:18px;margin-bottom:14px;">
       <div class="lp-product-title-price-frame lp-product-head-top"><b>${escHtml(mainProductName)}</b></div>
-      <div class="lp-product-price-below">${mainPrice} DH</div>
+      <div class="lp-product-price-below">${mainPrice} DH${(mainSourceProduct&&isLandingGiftProduct(mainSourceProduct)&&typeof oldPriceHTML==='function')?oldPriceHTML(mainSourceProduct.id):''}</div>
       ${mainImageURL?`<div class="lp-main-gallery-wrap">
         <img id="lp-main-gallery-img" src="${escAttr(mainImageURL)}" alt="${escAttr(mainProductName)}" class="lp-product-card-img">
+        ${(mainSourceProduct&&isLandingGiftProduct(mainSourceProduct)&&mainGalleryImages.length>1)?`<div class="gx-lp-thumbs-row" data-gx-target="lp-main-gallery-img"><button type="button" class="gx-arrow gx-prev" aria-label="${lang==='ar'?'السابق':'Précédent'}">&#8249;</button><div class="gx-lp-thumbs">${mainGalleryImages.slice(0,12).map((u,i)=>`<button type="button" class="gx-lp-thumb ${i===0?'active':''}" data-gx-src="${escAttr(u)}" aria-label="${lang==='ar'?'الصورة':'Image'} ${i+1}"><img src="${escAttr(u)}" alt="" loading="lazy"></button>`).join('')}</div><button type="button" class="gx-arrow gx-next" aria-label="${lang==='ar'?'التالي':'Suivant'}">&#8250;</button></div>`:''}
         ${mainGalleryImages.length>1 ? `<div class="lp-main-image-dots" id="lp-main-image-dots">${mainGalleryImages.map((u,i)=>`<button type="button" class="lp-main-image-dot ${i===0?'active':''}" data-lp-main-image="${i}" aria-label="${lang==='ar'?'الصورة':'Image'} ${i+1}"></button>`).join('')}</div>` : ''}
         ${p.showGallery && mainAdditionalImages.length ? `<div class="lp-landing-gallery" data-lp-gallery="main">
           <div class="lp-landing-thumbs" id="lp-main-thumbs">
@@ -9093,10 +8873,11 @@ function renderLandingPublic(p, isPreview){
       p2ActionHTML = `<button type="button" id="lp-p2-toggle" class="lp-choose-btn">${lang==='ar'?'اختاري المقاس واللون':'Choisir taille & couleur'}</button>`;
     }
     const p2RequiredNotice = (p2Added && !mainAdded) ? `<p class="lp-main-required">${lang==='ar'?'أضيفي المنتج الرئيسي إلى السلة لإكمال الطلب':'Ajoutez le produit principal au panier pour finaliser la commande'}</p>` : '';
-    const p2CardHTML = orderPlaced ? '' : ((product2Name && p2price) ? `<div class="lp-card lp-product-card" style="text-align:${dir==='rtl'?'right':'left'};padding:18px;margin-bottom:14px;">
+    const p2CardHTML = orderPlaced ? '' : ((product2Name && p2price) ? `<div class="lp-card lp-product-card${isLandingGiftProduct(product2SourceProduct)?' lp-gift-pack':''}" style="text-align:${dir==='rtl'?'right':'left'};padding:18px;margin-bottom:14px;">
       <div class="lp-product-title-price-frame lp-product-head-top"><b>${escHtml(product2Name)}</b></div>
-      <div class="lp-product-price-below">${p2price} DH</div>
+      <div class="lp-product-price-below">${p2price} DH${(product2SourceProduct&&isLandingGiftProduct(product2SourceProduct)&&typeof oldPriceHTML==='function')?oldPriceHTML(product2SourceProduct.id):''}</div>
       ${p2ImageURL?`<div class="lp-p2-gallery-wrap"><img id="lp-p2-gallery-img" src="${escAttr(p2ImageURL)}" alt="${escAttr(product2Name)}" class="lp-product-card-img">
+        ${(product2SourceProduct&&isLandingGiftProduct(product2SourceProduct)&&p2AdditionalImages.length>0)?`<div class="gx-lp-thumbs-row" data-gx-target="lp-p2-gallery-img"><button type="button" class="gx-arrow gx-prev" aria-label="${lang==='ar'?'السابق':'Précédent'}">&#8249;</button><div class="gx-lp-thumbs">${[p2ImageURL,...p2AdditionalImages].filter(Boolean).slice(0,12).map((u,i)=>`<button type="button" class="gx-lp-thumb ${i===0?'active':''}" data-gx-src="${escAttr(u)}" aria-label="${lang==='ar'?'الصورة':'Image'} ${i+1}"><img src="${escAttr(u)}" alt="" loading="lazy"></button>`).join('')}</div><button type="button" class="gx-arrow gx-next" aria-label="${lang==='ar'?'التالي':'Suivant'}">&#8250;</button></div>`:''}
         ${p.showGallery && p2AdditionalImages.length ? `<div class="lp-landing-gallery" data-lp-gallery="p2">
           <div class="lp-landing-thumbs" id="lp-p2-thumbs">
             ${p2AdditionalImages.map((u,i)=>`<button type="button" class="lp-landing-thumb" data-lp-thumb="p2:${i+1}" aria-label="${lang==='ar'?'الصورة':'Image'} ${i+2}"><img src="${escAttr(u)}" alt=""></button>`).join('')}
@@ -9147,8 +8928,8 @@ function renderLandingPublic(p, isPreview){
     const langSwitchHTML='';
     const closeBtnHTML = isPreview ? `<button type="button" id="lp-preview-close" title="${lang==='ar'?'رجوع للتعديل':"Retour à l'édition"}" style="position:fixed;top:${lsTop}px;${sideSame}:14px;z-index:900;width:38px;height:38px;border-radius:50%;background:${lsBg};backdrop-filter:blur(10px);border:1px solid ${lsBorder};color:${isPyjama?'#3a2530':'#f8f1e8'};font-size:calc(15px * var(--font-scale));display:flex;align-items:center;justify-content:center;">✖️</button>` : '';
 
-    const lightboxHTML = mainGalleryImages.length>1 ? `<div id="lp-lightbox" class="lp-lightbox" aria-hidden="true"><button type="button" id="lp-lightbox-close" class="lp-lightbox-close">✕</button><div class="lp-lightbox-imgs">${mainGalleryImages.map(u=>`<img src="${escAttr(u)}">`).join('')}</div></div>` : '';
-    const p2LightboxHTML = p2GalleryImages.length>1 ? `<div id="lp-lightbox-p2" class="lp-lightbox" aria-hidden="true"><button type="button" id="lp-lightbox-p2-close" class="lp-lightbox-close">✕</button><div class="lp-lightbox-imgs">${p2GalleryImages.map(u=>`<img src="${escAttr(u)}">`).join('')}</div></div>` : '';
+    const lightboxHTML = mainGalleryImages.length>1 ? `<div id="lp-lightbox" class="lp-lightbox" aria-hidden="true"><button type="button" id="lp-lightbox-close" class="lp-lightbox-close">✕</button><button type="button" id="lp-lightbox-prev" class="lp-lightbox-nav lp-lightbox-prev" aria-label="Previous">‹</button><div class="lp-lightbox-imgs">${mainGalleryImages.map((u,i)=>`<img src="${escAttr(u)}" class="${i===0?'active':''}" data-lp-lightbox-index="${i}" alt="">`).join('')}</div><button type="button" id="lp-lightbox-next" class="lp-lightbox-nav lp-lightbox-next" aria-label="Next">›</button><div class="lp-lightbox-dots">${mainGalleryImages.map((u,i)=>`<button type="button" class="lp-lightbox-dot ${i===0?'active':''}" data-lp-lightbox-dot="${i}" aria-label="${i+1}"></button>`).join('')}</div></div>` : '';
+    const p2LightboxHTML = p2GalleryImages.length>1 ? `<div id="lp-lightbox-p2" class="lp-lightbox" aria-hidden="true"><button type="button" id="lp-lightbox-p2-close" class="lp-lightbox-close">✕</button><button type="button" id="lp-lightbox-p2-prev" class="lp-lightbox-nav lp-lightbox-prev" aria-label="Previous">‹</button><div class="lp-lightbox-imgs">${p2GalleryImages.map((u,i)=>`<img src="${escAttr(u)}" class="${i===0?'active':''}" data-lp-lightbox-index="${i}" alt="">`).join('')}</div><button type="button" id="lp-lightbox-p2-next" class="lp-lightbox-nav lp-lightbox-next" aria-label="Next">›</button><div class="lp-lightbox-dots">${p2GalleryImages.map((u,i)=>`<button type="button" class="lp-lightbox-dot ${i===0?'active':''}" data-lp-lightbox-dot="${i}" aria-label="${i+1}"></button>`).join('')}</div></div>` : '';
     document.documentElement.classList.toggle('lp-pyjama-active', isPyjama);
     document.body.classList.toggle('lp-pyjama-active', isPyjama);
     document.body.style.background = isPyjama ? '#fdf1f1' : '';
@@ -9281,8 +9062,7 @@ ${sizesSectionHTML}
     const bindLandingGallery=(imgId,thumbsId,dotsId,images)=>{
       const img=document.getElementById(imgId);
       if(img){
-        img.style.cursor='zoom-in';
-        img.addEventListener('click',()=>openProductImageLightbox(images,0));
+        img.style.cursor='default';
       }
       const thumbs=document.getElementById(thumbsId);
       if(!thumbs || images.length<2) return;
@@ -9307,33 +9087,44 @@ ${sizesSectionHTML}
         thumbs.scrollTo({left:page*thumbs.clientWidth,behavior:'smooth'});
       }));
       updateDots();
+      let galleryTimer=null;
+      const startAuto=()=>{
+        clearInterval(galleryTimer);
+        galleryTimer=setInterval(()=>{
+          const max=thumbs.scrollWidth-thumbs.clientWidth;
+          if(max<=2) return;
+          const next=thumbs.scrollLeft+thumbs.clientWidth;
+          thumbs.scrollTo({left:next>max+2?0:next,behavior:'smooth'});
+        },3200);
+      };
+      const stopAuto=()=>clearInterval(galleryTimer);
+      startAuto();
+      thumbs.addEventListener('mouseenter',stopAuto);
+      thumbs.addEventListener('mouseleave',startAuto);
+      thumbs.addEventListener('touchstart',stopAuto,{passive:true});
+      thumbs.addEventListener('touchend',startAuto,{passive:true});
     };
     bindLandingGallery('lp-main-gallery-img','lp-main-thumbs','lp-main-gallery-dots',mainGalleryImages);
-    (() => {
-      const img=document.getElementById('lp-main-gallery-img');
-      const dots=document.querySelectorAll('#lp-main-image-dots [data-lp-main-image]');
-      if(!img || mainGalleryImages.length<2 || !dots.length) return;
-      let current=0, timer=null;
+    bindLandingGallery('lp-p2-gallery-img','lp-p2-thumbs','lp-p2-gallery-dots',p2GalleryImages);
+    const bindLightboxCarousel=(id,images)=>{
+      const box=document.getElementById(id);
+      if(!box || images.length<2) return;
+      const imgs=[...box.querySelectorAll('[data-lp-lightbox-index]')];
+      const dots=[...box.querySelectorAll('[data-lp-lightbox-dot]')];
+      let current=0;
       const show=(index)=>{
-        current=(index+mainGalleryImages.length)%mainGalleryImages.length;
-        img.style.opacity='0.72';
-        setTimeout(()=>{ img.src=mainGalleryImages[current]; img.style.opacity='1'; },140);
+        current=(index+images.length)%images.length;
+        imgs.forEach((im,i)=>im.classList.toggle('active',i===current));
         dots.forEach((d,i)=>d.classList.toggle('active',i===current));
       };
-      const start=()=>{ clearInterval(timer); timer=setInterval(()=>show(current+1),2800); };
-      dots.forEach(dot=>dot.addEventListener('click',e=>{
-        e.preventDefault(); e.stopPropagation();
-        show(Number(dot.dataset.lpMainImage)||0); start();
-      }));
-      img.style.transition='opacity .25s ease';
-      start();
-      const wrap=img.closest('.lp-main-gallery-wrap');
-      wrap?.addEventListener('mouseenter',()=>clearInterval(timer));
-      wrap?.addEventListener('mouseleave',start);
-      wrap?.addEventListener('touchstart',()=>clearInterval(timer),{passive:true});
-      wrap?.addEventListener('touchend',start,{passive:true});
-    })();
-    bindLandingGallery('lp-p2-gallery-img','lp-p2-thumbs','lp-p2-gallery-dots',p2GalleryImages);
+      box.querySelector('.lp-lightbox-prev')?.addEventListener('click',e=>{e.stopPropagation();show(current-1);});
+      box.querySelector('.lp-lightbox-next')?.addEventListener('click',e=>{e.stopPropagation();show(current+1);});
+      dots.forEach(d=>d.addEventListener('click',e=>{e.stopPropagation();show(Number(d.dataset.lpLightboxDot)||0);}));
+      box.addEventListener('click',e=>{if(e.target===box) box.classList.remove('open');});
+      show(0);
+    };
+    bindLightboxCarousel('lp-lightbox',mainGalleryImages);
+    bindLightboxCarousel('lp-lightbox-p2',p2GalleryImages);
     document.getElementById('lp-lightbox-close')?.addEventListener('click',()=>document.getElementById('lp-lightbox')?.classList.remove('open'));
     document.getElementById('lp-lightbox')?.addEventListener('click',e=>{ if(e.target.id==='lp-lightbox') e.currentTarget.classList.remove('open'); });
     document.getElementById('lp-lightbox-p2-close')?.addEventListener('click',()=>document.getElementById('lp-lightbox-p2')?.classList.remove('open'));
@@ -9642,8 +9433,6 @@ async function bootLandingRoute(){
   const diagLines=[];
   const onDiag=(info)=>{ diagLines.push(JSON.stringify(info)); };
   let slug=params.get('landing');
-  if(!slug && path==='/offre') slug='offre';
-  if(!slug && path==='/pyjamastyle') slug='pyjamastyle';
   if(!slug && path.startsWith('/p/')) slug=decodeURIComponent(path.slice(3));
   if(!slug){ document.documentElement.classList.remove('landing-route-pending'); return false; }
   if(slug==='preview'){try{const p=JSON.parse(localStorage.getItem('lunea_lp_preview')||'null');if(p){localStorage.removeItem('lunea_lp_preview');renderLandingPublic(p,true);document.documentElement.classList.remove('landing-route-pending');return true;}}catch(e){}}
@@ -9718,6 +9507,116 @@ function renderProductImagesHTML(p){
   `;
 }
 
+/* ============================================================
+   LUXIA — SMART PRODUCT CONTENT
+   Source of truth for auto-copy: Collection + Type de tissu.
+   Type de tissu is ADMIN ONLY and is never rendered to customers.
+   ============================================================ */
+const LX_FABRIC_TYPES=[
+  {id:'satin',fr:'Satin',ar:'ساتان'},
+  {id:'coton',fr:'Coton',ar:'قطن'},
+  {id:'dentelle',fr:'Dentelle',ar:'دانتيل'},
+  {id:'velours',fr:'Velours',ar:'مخمل'},
+  {id:'soie',fr:'Soie',ar:'حرير'},
+  {id:'lin',fr:'Lin',ar:'كتان'},
+  {id:'mousseline',fr:'Mousseline',ar:'شيفون'},
+  {id:'polyester',fr:'Polyester',ar:'بوليستر'},
+  {id:'viscose',fr:'Viscose',ar:'فيسكوز'},
+  {id:'modal',fr:'Modal',ar:'مودال'},
+  {id:'jersey',fr:'Jersey',ar:'جيرسي'},
+  {id:'microfibre',fr:'Microfibre',ar:'ألياف دقيقة'},
+  {id:'tulle',fr:'Tulle',ar:'تول'},
+  {id:'lycra_elastane',fr:'Lycra / Élasthanne',ar:'ليكرا / إيلاستان'},
+  {id:'polaire',fr:'Polaire',ar:'صوف قطبي'},
+  {id:'laine',fr:'Laine',ar:'صوف'},
+  {id:'denim',fr:'Denim',ar:'دنيم'},
+  {id:'flanelle',fr:'Flanelle',ar:'فلانيل'},
+  {id:'bambou',fr:'Bambou',ar:'بامبو'},
+  {id:'acrylique',fr:'Acrylique',ar:'أكريليك'},
+  {id:'polyamide',fr:'Polyamide',ar:'بولي أميد'},
+  {id:'none',fr:'Aucun / Non précisé',ar:'بدون تحديد'}
+];
+function lxFabricById(id){return LX_FABRIC_TYPES.find(x=>x.id===id)||LX_FABRIC_TYPES.find(x=>x.id==='none');}
+function lxCollectionLabel(id){
+  if(!id) return '';
+  const c=getLuxiaCollections().find(x=>String(x.id)===String(id));
+  return c?String(c.fr||c.ar||c.id):String(id);
+}
+function lxCollectionKind(id){
+  const x=lxN(lxCollectionLabel(id));
+  if(/pyjama|pijama/.test(x)) return 'pyjama';
+  if(/nuisette|chemise de nuit|chemise/.test(x)) return 'nuisette';
+  if(/lingerie|soutien|ensemble/.test(x)) return 'lingerie';
+  if(/pantouf|chausson|chaussure/.test(x)) return 'pantoufles';
+  if(/peignoir|robe de chambre/.test(x)) return 'robechambre';
+  if(/\b(short|shorts|bas|culottes?|slips?|strings?|boxers?)\b/.test(x)) return 'sousvetement';
+  return 'generic';
+}
+function lxSmartContent(collectionId,fabricId){
+  const f=lxFabricById(fabricId), fabric=f.id==='none'?'':f.fr.toLowerCase();
+  const kind=lxCollectionKind(collectionId);
+  const has=(x)=>!!fabric && fabric===x;
+  let fr='', ar='', benefitsFr=[], benefitsAr=[];
+  const withFabric=(baseFr,baseAr, fabFr, fabAr)=> fabric ? [baseFr.replace('{fabric}',fabFr),baseAr.replace('{fabric}',fabAr)] : [baseFr.replace(' en {fabric}','').replace(' en {fabric}',''),baseAr.replace(' من {fabric}','')];
+  if(kind==='pyjama'){
+    [fr,ar]=withFabric(
+      fabric?`Un pyjama en {fabric}, pensé pour offrir une sensation de douceur et de confort tout en apportant une touche raffinée à vos moments de détente.`:`Un pyjama confortable et élégant, conçu pour accompagner vos moments de détente avec douceur et simplicité.`,
+      fabric?`بيجامة من {fabric}، مصممة لتمنح إحساساً بالنعومة والراحة مع لمسة راقية للحظات الاسترخاء.`:`بيجامة مريحة وأنيقة، مصممة لمرافقة لحظات الاسترخاء بنعومة وبساطة.`,f.fr.toLowerCase(),f.ar);
+    benefitsFr=fabric?[`Toucher doux et agréable`,`Confort pensé pour les moments de détente`,`Style élégant et féminin`,`Une pièce agréable à porter`]:[`Confort agréable au quotidien`,`Style féminin et soigné`,`Agréable à porter pendant les moments de détente`,`Une pièce facile à adopter à la maison`];
+    benefitsAr=fabric?[`ملمس ناعم ومريح`,`راحة مصممة للحظات الاسترخاء`,`ستايل أنثوي وأنيق`,`قطعة مريحة للارتداء`]:[`راحة مريحة للاستخدام اليومي`,`ستايل أنثوي وأنيق`,`مريحة خلال لحظات الاسترخاء`,`قطعة سهلة للاعتماد في المنزل`];
+  }else if(kind==='nuisette'){
+    [fr,ar]=fabric?[`Une nuisette en ${f.fr.toLowerCase()} au style élégant et féminin, idéale pour créer une allure raffinée tout en profitant d’un moment de confort.`,`قميص نوم من ${f.ar} بتصميم أنيق وأنثوي، مثالي لإطلالة راقية مع الحفاظ على الراحة.`]:[`Une nuisette au style élégant et féminin, idéale pour créer une allure raffinée tout en profitant d’un moment de confort.`,`قميص نوم أنيق وأنثوي، مثالي لإطلالة راقية مع الحفاظ على الراحة.`];
+    benefitsFr=[`Finition élégante`,`Toucher agréable`,`Silhouette féminine et raffinée`,`Parfaite pour les moments de détente`];
+    benefitsAr=[`لمسة أنيقة وراقية`,`ملمس مريح`,`إطلالة أنثوية وراقية`,`مثالية للحظات الاسترخاء`];
+  }else if(kind==='lingerie'){
+    [fr,ar]=fabric?[`Un ensemble de lingerie en ${f.fr.toLowerCase()} au style féminin et raffiné, pensé pour sublimer votre silhouette avec élégance.`,`طقم لانجري من ${f.ar} بتصميم أنثوي وراقي، مصمم لإبراز القوام بأناقة.`]:[`Un ensemble de lingerie au style féminin et raffiné, pensé pour sublimer votre silhouette avec élégance.`,`طقم لانجري بتصميم أنثوي وراقي، مصمم لإبراز القوام بأناقة.`];
+    benefitsFr=f.id==='dentelle'?[`Détails en dentelle`,`Style féminin et raffiné`,`Design élégant`,`Pensé pour mettre en valeur la silhouette`]:[`Finition élégante`,`Style féminin et raffiné`,`Design soigné`,`Pensé pour mettre en valeur la silhouette`];
+    benefitsAr=f.id==='dentelle'?[`تفاصيل من الدانتيل`,`ستايل أنثوي وراقي`,`تصميم أنيق`,`مصمم لإبراز القوام`]:[`لمسة نهائية أنيقة`,`ستايل أنثوي وراقي`,`تصميم متناسق`,`مصمم لإبراز القوام`];
+  }else if(kind==='pantoufles'){
+    [fr,ar]=fabric?[`Des pantoufles en ${f.fr.toLowerCase()}, pensées pour apporter confort et douceur à vos moments de détente à la maison.`,`خفاف من ${f.ar} مصممة لتوفير الراحة والنعومة خلال لحظات الاسترخاء في المنزل.`]:[`Des pantoufles pensées pour apporter confort et douceur à vos moments de détente à la maison.`,`خفاف مصممة لتوفير الراحة والنعومة خلال لحظات الاسترخاء في المنزل.`];
+    benefitsFr=[`Confort agréable`,`Douceur au quotidien`,`Idéales pour la maison`,`Style soigné`];
+    benefitsAr=[`راحة مريحة`,`نعومة للاستخدام اليومي`,`مثالية للمنزل`,`ستايل أنيق`];
+  }else if(kind==='robechambre'){
+    [fr,ar]=fabric?[`Un modèle pensé pour les moments de détente, confectionné en ${f.fr.toLowerCase()} pour associer confort et allure soignée.`,`قطعة مخصصة للحظات الاسترخاء، من ${f.ar} لتجمع بين الراحة والإطلالة الأنيقة.`]:[`Un modèle pensé pour les moments de détente, conçu pour associer confort et allure soignée.`,`قطعة مخصصة للحظات الاسترخاء، مصممة للجمع بين الراحة والإطلالة الأنيقة.`];
+    benefitsFr=[`Confort agréable`,`Style soigné`,`Idéal pour les moments de détente`,`Agréable à porter à la maison`];
+    benefitsAr=[`راحة مريحة`,`ستايل أنيق`,`مثالية للحظات الاسترخاء`,`مريحة للارتداء في المنزل`];
+  }else if(kind==='sousvetement'){
+    [fr,ar]=fabric?[`Une pièce pensée pour offrir confort et douceur au quotidien, avec une finition soignée en ${f.fr.toLowerCase()}.`,`قطعة مصممة لتوفير الراحة والنعومة يومياً، مع لمسة نهائية متناسقة من ${f.ar}.`]:[`Une pièce pensée pour offrir confort et douceur au quotidien, avec une finition soignée.`,`قطعة مصممة لتوفير الراحة والنعومة يومياً، مع لمسة نهائية متناسقة.`];
+    benefitsFr=[`Confort agréable au quotidien`,`Toucher agréable`,`Finition soignée`,`Style féminin et élégant`];
+    benefitsAr=[`راحة مريحة يومياً`,`ملمس مريح`,`لمسة نهائية متناسقة`,`ستايل أنثوي وأنيق`];
+  }else{
+    [fr,ar]=fabric?[`Une pièce au style soigné, pensée pour offrir confort et douceur avec une finition en ${f.fr.toLowerCase()}.`,`قطعة بتصميم أنيق، مصممة لتوفير الراحة والنعومة مع لمسة من ${f.ar}.`]:[`Une pièce au style soigné, pensée pour offrir confort et douceur au quotidien.`,`قطعة بتصميم أنيق، مصممة لتوفير الراحة والنعومة في الاستعمال اليومي.`];
+    benefitsFr=[`Confort agréable`,`Toucher agréable`,`Finition soignée`,`Style élégant`];
+    benefitsAr=[`راحة مريحة`,`ملمس مريح`,`لمسة نهائية متناسقة`,`ستايل أنيق`];
+  }
+  return {fr,ar,benefitsFr,benefitsAr,fabricId:f.id};
+}
+function lxSmartFabricHTML(p){
+  const v=PRODUCT_VARIANTS[p.id]||{}; const fabricId=v.fabricType||'none';
+  return `<div class="field lx-smart-fabric-field"><label>Type de tissu · نوع القماش</label><select id="pf-fabric-${escAttr(p.id)}">${LX_FABRIC_TYPES.map(f=>`<option value="${f.id}" ${f.id===fabricId?'selected':''}>${escHtml(f.fr)} · ${escHtml(f.ar)}</option>`).join('')}</select><small style="display:block;margin-top:4px;color:#8a8178;font-size:11px">Admin uniquement · Invisible pour le client</small></div>`;
+}
+function lxSmartContentPreviewHTML(p){
+  const v=PRODUCT_VARIANTS[p.id]||{}; const c=v.collectionId||''; const f=v.fabricType||'none'; const g=lxSmartContent(c,f);
+  return `<div class="lx-smart-content-preview" id="lx-smart-preview-${escAttr(p.id)}"><div><b>Texte automatique · النص التلقائي</b><span>Basé sur Collection + Type de tissu</span></div><p><strong>Description :</strong> ${escHtml(g.fr)}</p><p><strong>Avantages :</strong> ${g.benefitsFr.map(escHtml).join(' · ')}</p></div>`;
+}
+/* Produits déjà existants (sans generatedContent) : même texte automatique (Collection + Type de tissu),
+   calculé à la lecture avec la collection actuelle. Dès que l'admin enregistre le produit, generatedContent est stocké. */
+function lxLegacyGen(prod){
+  if(!prod) return null;
+  const v=PRODUCT_VARIANTS[prod.id]; if(!v||v.gift) return null;
+  const col=v.unassigned?'':(v.collectionId||(typeof getStoreProductCollection==='function'?getStoreProductCollection(prod):''));
+  const g=lxSmartContent(col,v.fabricType||'none');
+  return {fr:g.fr,ar:g.ar,benefitsFr:g.benefitsFr,benefitsAr:g.benefitsAr};
+}
+function lxAdminDescriptionValue(p,lang){
+  const v=PRODUCT_VARIANTS[p.id]||{}, g=v.generatedContent||{};
+  const existing=lang==='ar'?(I18N.ar[p.descKey]||''):(I18N.fr[p.descKey]||'');
+  if(!v.generatedContent){ const lg=lxLegacyGen(p); if(lg) return lang==='ar'?lg.ar:lg.fr; }
+  if(existing) return existing;
+  const auto=lang==='ar'?g.ar:g.fr;
+  return auto||lxSmartContent(v.collectionId||'',v.fabricType||'none')[lang==='ar'?'ar':'fr'];
+}
+
 function renderAdminProducts(){
   let html=adminLanguageSwitcherHTML();
   html+=adminTabsHTML('products');
@@ -9740,18 +9639,14 @@ function renderAdminProducts(){
           <section class="admin-section-card"><div class="admin-section-title"><span>01</span><div><h3>${t('admin.productIdentity')}</h3><p>${t('admin.productIdentityHint')}</p></div></div>
             ${renderProductImagesHTML(p)}
             <div class="admin-two-col"><div class="field"><label>${t('admin.field.nameFr')}</label><input type="text" id="pf-name-fr-${p.id}" value="${escAttr(I18N.fr[p.nameKey]||'')}"></div><div class="field"><label>${t('admin.field.nameAr')}</label><input type="text" id="pf-name-ar-${p.id}" value="${escAttr(I18N.ar[p.nameKey]||'')}"></div></div>
+            ${lxSmartFabricHTML(p)}
+            <div class="field"><label>${t('admin.catalogTypeLabel')}</label><select id="pf-catalog-type-${p.id}"><option value="" ${!collectionId?'selected':''}>${t('admin.chooseCollection')}</option>${collections.map(c=>`<option value="${escAttr(c.id)}" ${c.id===collectionId?'selected':''}>${escHtml(c[currentLang]||c.fr||c.ar||c.id)}</option>`).join('')}</select></div>
+            ${lxSmartContentPreviewHTML(p)}
             <div class="admin-three-col">
               <div class="field"><label>${t('admin.field.price')}</label><input type="number" min="0" step="0.01" id="pf-price-${p.id}" value="${p.price??0}"></div>
               <div class="field"><label>Ancien prix — automatique (optionnel : écrire pour forcer une valeur) — السعر القديم تلقائي</label><input type="number" min="0" step="0.01" id="pf-oldprice-${p.id}" value="${(PRODUCT_VARIANTS[p.id]&&PRODUCT_VARIANTS[p.id].oldPrice)??''}" placeholder="Auto"></div>
-              <div class="field">
-                <label>${t('admin.catalogTypeLabel')}</label>
-                <select id="pf-catalog-type-${p.id}">
-                  <option value="" ${!collectionId?'selected':''}>${t('admin.chooseCollection')}</option>
-                  ${collections.map(c=>`<option value="${escAttr(c.id)}" ${c.id===collectionId?'selected':''}>${escHtml(c[currentLang]||c.fr||c.ar||c.id)}</option>`).join('')}
-                </select>
-              </div>
             </div>
-            <div class="admin-two-col"><div class="field"><label>${t('admin.field.descFr')}</label><textarea id="pf-desc-fr-${p.id}">${escHtml(I18N.fr[p.descKey]||'')}</textarea></div><div class="field"><label>${t('admin.field.descAr')}</label><textarea id="pf-desc-ar-${p.id}">${escHtml(I18N.ar[p.descKey]||'')}</textarea></div></div>
+            <div class="admin-two-col"><div class="field"><label>${t('admin.field.descFr')}</label><textarea id="pf-desc-fr-${p.id}" data-lx-manual="${(PRODUCT_VARIANTS[p.id]?.generatedContent?.manualFr)?'1':''}">${escHtml(lxAdminDescriptionValue(p,'fr'))}</textarea></div><div class="field"><label>${t('admin.field.descAr')}</label><textarea id="pf-desc-ar-${p.id}" data-lx-manual="${(PRODUCT_VARIANTS[p.id]?.generatedContent?.manualAr)?'1':''}">${escHtml(lxAdminDescriptionValue(p,'ar'))}</textarea></div></div>
             <div class="admin-two-col"><div class="field"><label>${t('admin.field.badgeFr')}</label><input type="text" id="pf-badge-fr-${p.id}" value="${escAttr(I18N.fr[p.badgeKey]||'')}"></div><div class="field"><label>${t('admin.field.badgeAr')}</label><input type="text" id="pf-badge-ar-${p.id}" value="${escAttr(I18N.ar[p.badgeKey]||'')}"></div></div>
             <div class="field"><label>${t('admin.field.video')}</label><input type="text" id="pf-video-${p.id}" value="${escAttr(p.video||'')}" placeholder="https://.../video.mp4" style="direction:ltr;text-align:left;"></div>
             <div class="field"><label>${t('admin.videoUploadLabel')}</label><input type="file" accept="video/*" id="pf-video-file-${p.id}"><span id="pf-video-status-${p.id}" class="admin-upload-status"></span></div>
@@ -9800,9 +9695,23 @@ function renderAdminProducts(){
   document.querySelectorAll('[data-deleteproduct]').forEach(btn=>btn.addEventListener('click',async e=>{e.preventDefault();e.stopPropagation();await deleteProductAdmin(String(btn.dataset.deleteproduct));}));
   document.getElementById('addProductBtn')?.addEventListener('click',addNewProductAdmin);
   document.getElementById('adminLogoutBtn')?.addEventListener('click',()=>signOutAdmin());
-  bindProductImageEvents(); bindProductVariantEvents(); bindAdminPackEvents(); bindAdminCatalogTypeEvents(); bindAdminOfferCard(); bindAdminDirectLinks();
+  bindProductImageEvents(); bindProductVariantEvents(); bindAdminPackEvents(); bindAdminCatalogTypeEvents(); bindAdminSmartContent(); bindAdminOfferCard(); bindAdminDirectLinks();
 }
 
+
+function bindAdminSmartContent(){
+  const refresh=(id,applyText)=>{
+    const v=PRODUCT_VARIANTS[id]||(PRODUCT_VARIANTS[id]={colors:[],sizes:[],stock:null,pack:null});
+    const fabric=document.getElementById(`pf-fabric-${id}`)?.value||'none';
+    const collection=document.getElementById(`pf-catalog-type-${id}`)?.value||'';
+    v.fabricType=fabric; const g=lxSmartContent(collection,fabric); v.generatedContent={fr:g.fr,ar:g.ar,benefitsFr:g.benefitsFr,benefitsAr:g.benefitsAr,fabricType:fabric};
+    const box=document.getElementById(`lx-smart-preview-${id}`); if(box){box.outerHTML=lxSmartContentPreviewHTML(PRODUCTS.find(x=>String(x.id)===String(id))||{id});}
+    if(applyText){ const fr=document.getElementById(`pf-desc-fr-${id}`), ar=document.getElementById(`pf-desc-ar-${id}`); if(fr && !fr.dataset.lxManual) fr.value=g.fr; if(ar && !ar.dataset.lxManual) ar.value=g.ar; }
+  };
+  document.querySelectorAll('[id^="pf-fabric-"]').forEach(sel=>sel.addEventListener('change',()=>refresh(sel.id.replace('pf-fabric-',''),true)));
+  document.querySelectorAll('[id^="pf-catalog-type-"]').forEach(sel=>sel.addEventListener('change',()=>refresh(sel.id.replace('pf-catalog-type-',''),true)));
+  document.querySelectorAll('[id^="pf-desc-fr-"],[id^="pf-desc-ar-"]').forEach(inp=>inp.addEventListener('input',()=>{inp.dataset.lxManual='1'; const id=inp.id.replace(/^pf-desc-(?:fr|ar)-/,''); const v=PRODUCT_VARIANTS[id]||(PRODUCT_VARIANTS[id]={colors:[],sizes:[],stock:null,pack:null}); v.generatedContent=v.generatedContent||{}; if(inp.id.indexOf('pf-desc-fr-')===0)v.generatedContent.manualFr=true; else v.generatedContent.manualAr=true;}));
+}
 
 function bindAdminCatalogTypeEvents(){
   document.querySelectorAll('[id^="pf-catalog-type-"]').forEach(sel=>{
@@ -10021,6 +9930,7 @@ async function saveProductEdits(id){
   const nameFr=val('name-fr'),nameAr=val('name-ar'),priceRaw=val('price'),descFr=val('desc-fr'),descAr=val('desc-ar'),badgeFr=val('badge-fr'),badgeAr=val('badge-ar'),video=val('video');
   const enabled=!!el('enabled')?.checked, stockRaw=val('stock'),stock=stockRaw===''?null:Math.max(0,parseInt(stockRaw,10));
   const catalogType=val('catalog-type');
+  const fabricType=val('fabric');
   const customCollectionId=val('custom-collection');
   const collectionId=catalogType==='custom'?(customCollectionId||null):catalogType||null;
   /* No product field is mandatory. The admin can save a partial product and
@@ -10035,7 +9945,9 @@ async function saveProductEdits(id){
   if(nameFr)I18N.fr[p.nameKey]=nameFr;if(nameAr)I18N.ar[p.nameKey]=nameAr;
   try{luxiaProductSlugMap();}catch(e){}
   const price=parseFloat(priceRaw);if(!Number.isNaN(price)&&price>=0)p.price=price;
-  I18N.fr[p.descKey]=descFr;I18N.ar[p.descKey]=descAr;I18N.fr[p.badgeKey]=badgeFr;I18N.ar[p.badgeKey]=badgeAr;p.video=video;p.enabled=enabled;v.stock=stock;v.collectionId=collectionId||null;v.unassigned=!collectionId;v.oldPrice=(__oldRaw!==''&&Number.isFinite(__oldParsed))?__oldParsed:null;
+  I18N.fr[p.descKey]=descFr;I18N.ar[p.descKey]=descAr;I18N.fr[p.badgeKey]=badgeFr;I18N.ar[p.badgeKey]=badgeAr;p.video=video;p.enabled=enabled;v.stock=stock;v.collectionId=collectionId||null;v.unassigned=!collectionId;v.fabricType=fabricType||'none';
+  const __smart=lxSmartContent(collectionId,v.fabricType); const __oldGen=v.generatedContent||{}; v.generatedContent={fr:__smart.fr,ar:__smart.ar,benefitsFr:__smart.benefitsFr,benefitsAr:__smart.benefitsAr,fabricType:v.fabricType,manualFr:!!document.getElementById(`pf-desc-fr-${id}`)?.dataset.lxManual||!!__oldGen.manualFr,manualAr:!!document.getElementById(`pf-desc-ar-${id}`)?.dataset.lxManual||!!__oldGen.manualAr};
+  v.oldPrice=(__oldRaw!==''&&Number.isFinite(__oldParsed))?__oldParsed:null;
   const packEnabled=!!document.getElementById(`pf-pack-enabled-${id}`)?.checked;
   const packPiecesRaw=val('pack-pieces'),packPieces=packPiecesRaw===''?null:Math.max(2,parseInt(packPiecesRaw,10));
   const packPriceRaw=val('pack-price'),packPrice=packPriceRaw===''?null:parseFloat(packPriceRaw);
@@ -10093,7 +10005,7 @@ async function addNewProductAdmin(){
   const p = { id, nameKey, descKey, badgeKey, price:0, enabled:true, video:"" };
   const giftNew=!!window.__luxiaNewGift; window.__luxiaNewGift=false;
   if(giftNew){ I18N.fr[nameKey]="Pack Cadeau"; I18N.ar[nameKey]="باك كادو"; }
-  PRODUCT_VARIANTS[id] = { colors: [], sizes: [], stock:null, pack:null, collectionId:null, unassigned:true };
+  PRODUCT_VARIANTS[id] = { colors: [], sizes: [], stock:null, pack:null, collectionId:null, fabricType:'none', generatedContent:lxSmartContent(null,'none'), unassigned:true };
   if(giftNew) PRODUCT_VARIANTS[id].gift={items:[{name:"",type:"cloth"}],msg:true,hide:true,wrap:true,wrapPrice:15};
   PRODUCT_IMAGE_GALLERY[id] = [];
   PRODUCT_IMAGES[id] = "";
@@ -10316,7 +10228,7 @@ const luneaInitPromise = (async function initLunea(){
 window.addEventListener("DOMContentLoaded",()=>{
   const path=location.pathname.replace(/\/+$/,'');
   const q=new URLSearchParams(location.search);
-  const isLanding=!!q.get('landing') || path==='/offre' || path==='/pyjamastyle' || path.indexOf('/p/')===0;
+  const isLanding=!!q.get('landing') || path.indexOf('/p/')===0;
   if(isLanding){
     /* Do not wait for the full product/settings initialization before fetching
        and rendering the landing page. This removes the blank ~2s startup gap. */
@@ -10755,16 +10667,21 @@ function highlightProductFromUrl(){
 .gf-box{background:#fffdf8;color:#292622;max-width:480px;margin:auto;border-radius:20px;padding:18px;position:relative}.gf-box>img{width:100%;border-radius:14px}
 .gf-x{position:absolute;top:10px;right:10px;background:#fff;border:0;border-radius:50%;width:32px;height:32px;z-index:2}.gf-it{margin:10px 0}.gf-it select,.gf-box textarea{width:100%;padding:10px;margin-top:6px;border:1px solid #d6cdc2;border-radius:10px}
 .gf-ck{display:flex;gap:8px;align-items:center;margin:8px 0}.gf-box .btn{margin-top:12px}.gf-pr{font-size:20px;margin:6px 0}
-.gf-itrow{display:grid;gap:6px;border-top:1px dashed #d6cdc2;padding:10px 0}.gf-lb{font-size:12px;letter-spacing:.04em;opacity:.75;margin-top:4px}.gf-itrow input,.gf-itrow select{width:100%}
+.gf-itrow{display:grid;gap:6px;border-top:1px dashed #d6cdc2;padding:10px 0}.gf-lb{font-size:12px;letter-spacing:.04em;opacity:.75;margin-top:4px}.gf-itrow input,.gf-itrow select{width:100%}.gf-auto-preview{margin:0 0 14px;padding:12px 13px;background:#fffdf8;border:1px solid #e1d7c8;border-radius:12px}.gf-auto-copy{font-size:12px;line-height:1.55;color:#514a43}.gf-auto-copy p{margin:3px 0 8px}.gf-auto-copy ul{margin:0 0 10px;padding-left:18px}.gf-auto-copy .ar{border-top:1px solid #e8e0d5;padding-top:8px}.gf-auto-lang{font-size:10px;letter-spacing:.16em;color:#9a7847;font-weight:700}.gf-auto-empty{font-size:12px;color:#8a8178}.gf-customer-content{margin:8px 0 12px;padding:10px 12px;border:1px solid rgba(201,162,79,.28);border-radius:12px;background:rgba(255,253,248,.75);color:#514a43}.gf-customer-content p{margin:0 0 7px;font-size:13px;line-height:1.55}.gf-customer-content ul{margin:0;padding-left:18px;font-size:12px;line-height:1.6}.gf-customer-content li{margin:2px 0}
 </style>
 <script>
 (function(){
 const $=id=>document.getElementById(id),E=s=>escHtml(s||''),A=s=>escAttr(s||''),csv=s=>String(s||'').split(',').map(x=>x.trim()).filter(Boolean);
-const TY=[['cloth','Vêtements'],['shoes','Chaussures']];
+const TY=[['cloth','Vêtements'],['shoes','Chaussures / Pantoufles'],['other','Autre article']];
+const GIFT_FABRICS=[['none','Aucun / non précisé'],['satin','Satin'],['coton','Coton'],['dentelle','Dentelle'],['velours','Velours'],['soie','Soie'],['lin','Lin'],['mousseline','Mousseline'],['polyester','Polyester'],['viscose','Viscose'],['modal','Modal'],['jersey','Jersey'],['microfibre','Microfibre'],['tulle','Tulle'],['lycra','Lycra / Élasthanne'],['polaire','Polaire'],['laine','Laine'],['denim','Denim'],['flanelle','Flanelle'],['bambou','Bambou'],['acrylique','Acrylique'],['polyamide','Polyamide']];
+const GIFT_SHOE_USES=[['pantoufles','Pantoufles de maison'],['chaussons','Chaussons confort'],['chaussures-legeres','Chaussures légères']];
 const isShoes=t=>['shoes','shoe','pantoufles','pantoufle','chaussons','chausson'].includes(String(t||'').toLowerCase());
+const giftItemType=t=>['shoes','shoe','pantoufles','pantoufle','chaussons','chausson'].includes(String(t||'').toLowerCase())?'shoes':(String(t||'').toLowerCase()==='other'?'other':'cloth');
+const giftSelectOptions=(arr,val)=>arr.map(([k,l])=>`<option value="${A(k)}" ${String(val||'none')===k?'selected':''}>${E(l)}</option>`).join('');
 const prevHTML=(items,o)=>{
-  const vis=items.map(x=>{const sh=isShoes(x.type);return{sh,name:String(x.name||'').trim(),colors:sh?[]:csv(x.colors),sizes:csv(x.sizes||x.pointures)}}).filter(x=>x.name);
+  const vis=items.map(x=>{const type=giftItemType(x.type),sh=type==='shoes',other=type==='other';return{type,sh,other,name:String(x.name||'').trim(),colors:sh||other?[]:csv(x.colors),sizes:other?[]:csv(x.sizes||x.pointures)}}).filter(x=>x.name);
   let h=vis.map(x=>{
+    if(x.other) return `<div class="gf-pv-it"><b>${E(x.name)}</b><div class="gf-pv-sel"><span>Article cadeau</span><i>Inclus dans le coffret — aucun choix demandé à la cliente</i></div></div>`;
     const ok=x.colors.length||x.sizes.length,chips=[];
     if(x.colors.length)chips.push(['Couleur',x.colors]);
     if(x.sizes.length)chips.push([x.sh?'Pointure':'Taille',x.sizes]);
@@ -10782,19 +10699,44 @@ const readCard=c=>({
   items:[...c.querySelectorAll('[data-git]')].map(r=>{const o={};r.querySelectorAll('[data-gi]').forEach(x=>o[x.dataset.gi]=x.value);return o}),
   opts:{msg:!!c.querySelector('[data-gk="msg"]')?.checked,hide:!!c.querySelector('[data-gk="hide"]')?.checked,wrap:!!c.querySelector('[data-gk="wrap"]')?.checked,wrapPrice:Math.max(0,Number(c.querySelector('[data-gk="wrapPrice"]')?.value)||0)}
 });
+const giftAutoContent=(items)=>{
+  const clean=items.filter(x=>String(x.name||'').trim());
+  const parts=[];
+  clean.forEach(x=>{
+    const type=giftItemType(x.type), name=String(x.name||'').trim();
+    if(type==='cloth'){
+      const f=GIFT_FABRICS.find(a=>a[0]===String(x.fabric||'none'))?.[1];
+      parts.push(f&&f!=='Aucun / non précisé'?`${name} en ${f.toLowerCase()}`:name);
+    }else if(type==='shoes'){
+      const u=GIFT_SHOE_USES.find(a=>a[0]===String(x.shoeUse||'pantoufles'))?.[1];
+      parts.push(`${name}${u?' · '+u.toLowerCase():''}`);
+    }else{
+      const d=String(x.detail||'').trim(); parts.push(d?`${name} · ${d}`:name);
+    }
+  });
+  const fr=clean.length?`Un coffret cadeau soigneusement composé avec ${parts.join(', ')}. Une attention élégante pensée pour faire plaisir et créer un joli moment.`:'';
+  const ar=clean.length?`باقة هدية أنيقة ومنسقة بعناية تضم ${clean.map(x=>String(x.name||'').trim()).join('، ')}. اختيار جميل لتقديم لحظة مميزة وإسعاد من تحبين.`:'';
+  const bf=clean.length?['Coffret complet et prêt à offrir','Articles choisis avec soin','Un mélange de confort et d’élégance']:[];
+  const ba=clean.length?['هدية متكاملة وجاهزة للإهداء','اختيارات منسقة بعناية','مزيج من الراحة والأناقة']:[];
+  return {fr,ar,benefitsFr:bf,benefitsAr:ba};
+};
+const giftAutoPreviewHTML=d=>!d.fr?`<div class="gf-auto-empty">Ajoutez un ou plusieurs articles pour générer automatiquement le contenu du cadeau.</div>`:`<div class="gf-auto-copy"><div class="gf-auto-lang">FR</div><p>${E(d.fr)}</p><ul>${d.benefitsFr.map(x=>`<li>${E(x)}</li>`).join('')}</ul><div class="gf-auto-lang ar">AR</div><p dir="rtl">${E(d.ar)}</p></div>`;
+const refreshAuto=c=>{if(!c)return;const box=c.querySelector('[data-gauto-preview]');if(!box)return;const d=giftAutoContent(readCard(c).items);box.innerHTML=giftAutoPreviewHTML(d);c.__giftAuto=d};
 const refreshPrev=c=>{if(!c)return;const box=c.querySelector('[data-gprev]');if(!box)return;const d=readCard(c);box.innerHTML=prevHTML(d.items,d.opts)};
 const rowH=it=>{
-  const type=isShoes(it.type)?'shoes':'cloth',sh=type==='shoes';
+  const type=giftItemType(it.type),sh=type==='shoes',other=type==='other';
   const value=it.sizes||it.pointures||'';
+  const detail=other?(it.detail||''):(sh?(it.shoeUse||'pantoufles'):(it.fabric||'none'));
   return `<div class="gf-itrow" data-git data-gtype="${type}">
     <label class="gf-lb">Type d’article</label>
-    <select data-gi="type"><option value="cloth" ${sh?'':'selected'}>Vêtement (couleur + taille)</option><option value="shoes" ${sh?'selected':''}>Chaussures (pointure)</option></select>
+    <select data-gi="type">${TY.map(([k,l])=>`<option value="${k}" ${type===k?'selected':''}>${l}</option>`).join('')}</select>
     <label class="gf-lb">Nom affiché à la cliente</label>
-    <input data-gi="name" placeholder="${sh?'Ex : Pantouf':'Ex : Pyjama'}" value="${A(it.name)}">
-    <label class="gf-lb gf-colors">Couleurs proposées (séparées par une virgule)</label>
-    <input class="gf-colors" data-gi="colors" placeholder="Ex : Rouge, Noir, Rose" value="${A(sh?'':(it.colors||''))}">
-    <label class="gf-lb" data-gl="sizes">${sh?'Pointures proposées (séparées par une virgule)':'Tailles proposées (séparées par une virgule)'}</label>
-    <input data-gi="sizes" placeholder="${sh?'Ex : 36, 37, 38, 39, 40':'Ex : S, M, L, XL'}" value="${A(value)}">
+    <input data-gi="name" placeholder="${sh?'Ex : Pantouf':other?'Ex : Bougie parfumée':'Ex : Pyjama'}" value="${A(it.name)}">
+    ${!other&&!sh?`<label class="gf-lb">Type de tissu</label><select data-gi="fabric">${giftSelectOptions(GIFT_FABRICS,detail)}</select>`:''}
+    ${sh?`<label class="gf-lb">Type / usage</label><select data-gi="shoeUse">${giftSelectOptions(GIFT_SHOE_USES,detail)}</select>`:''}
+    ${other?`<label class="gf-lb">Détail pour le texte cadeau <small>(optionnel)</small></label><input data-gi="detail" placeholder="Ex : parfum floral, bougie vanille..." value="${A(detail)}">`:''}
+    ${!sh&&!other?`<label class="gf-lb gf-colors">Couleurs proposées (séparées par une virgule)</label><input class="gf-colors" data-gi="colors" placeholder="Ex : Rouge, Noir, Rose" value="${A(it.colors||'')}">`:''}
+    ${!other?`<label class="gf-lb" data-gl="sizes">${sh?'Pointures proposées (séparées par une virgule)':'Tailles proposées (séparées par une virgule)'}</label><input data-gi="sizes" placeholder="${sh?'Ex : 36, 37, 38, 39, 40':'Ex : S, M, L, XL'}" value="${A(value)}">`:''}
     <button type="button" class="btn btn-ghost" data-grm>✕ Retirer l’article</button>
   </div>`;
 };
@@ -10802,6 +10744,7 @@ window.luxiaGiftCardHTML=function(p){const g=(PRODUCT_VARIANTS[p.id]||{}).gift;i
 const wp=g.wrapPrice??15;
 const ck=(k,l)=>`<label class="gf-ck"><input type="checkbox" data-gk="${k}" ${g[k]!==false?'checked':''} style="width:auto"> ${l}</label>`;
 const o={msg:g.msg!==false,hide:g.hide!==false,wrap:g.wrap!==false,wrapPrice:wp};
+const gc=g.autoContent||{};
 return `<section class="admin-section-card gf-admin" data-gift-card="${A(p.id)}">
   <div class="admin-section-title"><span>🎁</span><div><h3>Contenu du Pack Cadeau</h3><p>Vous décidez de tout ce que la cliente voit. Ce qui n’est pas rempli n’apparaît pas.</p></div></div>
 
@@ -10809,23 +10752,27 @@ return `<section class="admin-section-card gf-admin" data-gift-card="${A(p.id)}"
   <div data-gitems>${(g.items||[]).map(rowH).join('')}</div>
   <button type="button" class="btn btn-ghost" data-gadd="${A(p.id)}">+ Ajouter un article</button>
 
-  <div class="gf-step"><i>2</i><div><b>Options du pack</b><small>Proposées à la cliente après le choix des tailles / pointures.</small></div></div>
+  <div class="gf-step"><i>2</i><div><b>Contenu automatique du cadeau</b><small>Le texte est généré à partir des articles ci-dessus. Court, élégant et orienté cadeau.</small></div></div>
+  <div class="gf-auto-preview" data-gauto-preview>${giftAutoPreviewHTML(g.autoContent&&g.autoContent.fr?g.autoContent:giftAutoContent(g.items||[]))}</div>
+
+  <div class="gf-step"><i>3</i><div><b>Options du pack</b><small>Proposées à la cliente après le choix des tailles / pointures.</small></div></div>
   ${ck('msg','Carte message')}
   ${ck('hide','Option « ne pas afficher le prix »')}
   ${ck('wrap','Emballage premium')}
   <label class="gf-lb">Prix de l’emballage premium (DH)</label>
   <input type="number" min="0" step="1" data-gk="wrapPrice" value="${wp}">
 
-  <div class="gf-step"><i>3</i><div><b>Aperçu côté cliente</b><small>Exactement ce qu’elle verra dans la fenêtre du pack (se met à jour en direct).</small></div></div>
+  <div class="gf-step"><i>4</i><div><b>Aperçu côté cliente</b><small>Exactement ce qu’elle verra dans la fenêtre du pack (se met à jour en direct).</small></div></div>
   <div class="gf-prev" data-gprev>${prevHTML(g.items||[],o)}</div>
 </section>`};
-document.addEventListener('change',e=>{const sel=e.target.closest('[data-gi="type"]');if(!sel)return;const row=sel.closest('[data-git]');const sh=sel.value==='shoes';row.dataset.gtype=sh?'shoes':'cloth';row.querySelector('[data-gl]').textContent=sh?'Pointures proposées (séparées par une virgule)':'Tailles proposées (séparées par une virgule)';const si=row.querySelector('[data-gi="sizes"]');si.placeholder=sh?'Ex : 36, 37, 38, 39, 40':'Ex : S, M, L, XL';row.querySelector('[data-gi="name"]').placeholder=sh?'Ex : Pantouf':'Ex : Pyjama';if(sh)row.querySelector('[data-gi="colors"]').value='';refreshPrev(sel.closest('[data-gift-card]'))});
-['input','change'].forEach(ev=>document.addEventListener(ev,e=>{const c=e.target.closest&&e.target.closest('[data-gift-card]');if(c)refreshPrev(c)}));
-document.addEventListener('click',e=>{const a=e.target.closest('[data-gadd]');if(a){const c=a.closest('[data-gift-card]'),w=c.querySelector('[data-gitems]');w.insertAdjacentHTML('beforeend',rowH({name:'',type:'cloth',sizes:''}));refreshPrev(c);return}
-const r=e.target.closest('[data-grm]');if(r){const cc=r.closest('[data-gift-card]');r.closest('[data-git]').remove();refreshPrev(cc);return}
+document.addEventListener('change',e=>{const sel=e.target.closest('[data-gi="type"]');if(!sel)return;const row=sel.closest('[data-git]'),c=sel.closest('[data-gift-card]');const data={};row.querySelectorAll('[data-gi]').forEach(x=>data[x.dataset.gi]=x.value);row.outerHTML=rowH({...data,type:sel.value});refreshPrev(c);refreshAuto(c)});
+['input','change'].forEach(ev=>document.addEventListener(ev,e=>{const c=e.target.closest&&e.target.closest('[data-gift-card]');if(c){refreshPrev(c);refreshAuto(c)}}));
+document.addEventListener('click',e=>{const a=e.target.closest('[data-gadd]');if(a){const c=a.closest('[data-gift-card]'),w=c.querySelector('[data-gitems]');w.insertAdjacentHTML('beforeend',rowH({name:'',type:'cloth',sizes:''}));refreshPrev(c);refreshAuto(c);return}
+const r=e.target.closest('[data-grm]');if(r){const cc=r.closest('[data-gift-card]');r.closest('[data-git]').remove();refreshPrev(cc);refreshAuto(cc);return}
 if(e.target.closest('#addGiftPackBtn')){window.__luxiaNewGift=true;addNewProductAdmin()}});
 function collectGift(id){const c=document.querySelector(`[data-gift-card="${CSS.escape(id)}"]`);const v=PRODUCT_VARIANTS[id];if(!c||!v||!v.gift)return;
 v.gift.items=[...c.querySelectorAll('[data-git]')].map(r=>{const o={};r.querySelectorAll('[data-gi]').forEach(x=>o[x.dataset.gi]=x.value);if(o.type==='shoes')o.colors='';return o}).filter(o=>o.name.trim());
+v.gift.autoContent=giftAutoContent(v.gift.items);
 c.querySelectorAll('[data-gk]').forEach(x=>v.gift[x.dataset.gk]=x.type==='checkbox'?x.checked:(+x.value||0))}
 const _sp=window.saveProductEdits;window.saveProductEdits=function(id){try{collectGift(id)}catch(e){console.warn(e)}return _sp.apply(this,arguments)};
 /* storefront: options modal for gift products */
@@ -10846,6 +10793,7 @@ const sel=(k,i,l,a)=>{
 const giftItemKind=(it)=>{
   const type=String(it?.type||'').toLowerCase();
   if(type==='shoes'||type==='shoe'||type==='pantoufles'||type==='pantoufle'||type==='chaussons'||type==='chausson') return 'pantouf';
+  if(type==='other') return 'other';
   if(type==='cloth'||type==='pyjama'||type==='vetement') return 'pyjama';
   const raw=String(it?.name||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
   if(/pantouf|chausson|slipper|chaussure/.test(raw)) return 'pantouf';
@@ -10855,7 +10803,7 @@ const giftItemKind=(it)=>{
 const giftVisibleItems=(g)=>(Array.isArray(g&&g.items)?g.items:[]).map(it=>{
   const kind=giftItemKind(it);
   return {it,kind,name:String(it.name||'').trim(),colors:kind==='pantouf'?[]:csv(it.colors),sizes:csv(it.sizes)};
-}).filter(x=>x.name&&(x.colors.length||x.sizes.length));
+}).filter(x=>x.name&&(x.kind==='other'||x.colors.length||x.sizes.length));
 
 const opt=(it,i)=>{
   const kind=giftItemKind(it);
@@ -10888,13 +10836,14 @@ function openGift(id){
     <img src="${A(PRODUCT_IMAGES[id])}">
     <h3>${E(t(p.nameKey))}</h3>
     <div class="gf-pr" id="gfPrice">${p.price} DH</div>
+    ${(()=>{const ac=g.autoContent&&g.autoContent.fr?g.autoContent:giftAutoContent(g.items||[]);return ac.fr?`<div class="gf-customer-content"><p>${E(currentLang==='ar'?ac.ar:ac.fr)}</p><ul>${(currentLang==='ar'?ac.benefitsAr:ac.benefitsFr).map(x=>`<li>${E(x)}</li>`).join('')}</ul></div>`:''})()}
 
     ${its.map((it,i)=>{
       const kind=giftItemKind(it);
       return `<div class="gf-it" data-gift-item="${i}">
         <b>${E(String(it.name).trim())}</b>
-        ${kind==='pantouf'?'':sel('c',i,'Couleur',csv(it.colors))}
-        ${kind==='pantouf'?sel('p',i,'Pointure',csv(it.sizes)):sel('s',i,'Taille',csv(it.sizes))}
+        ${kind==='other'?'':kind==='pantouf'?'':sel('c',i,'Couleur',csv(it.colors))}
+        ${kind==='other'?'':kind==='pantouf'?sel('p',i,'Pointure',csv(it.sizes)):sel('s',i,'Taille',csv(it.sizes))}
       </div>`;
     }).join('')}
 
@@ -11285,11 +11234,11 @@ body.luxia-store-home .home-collection-section.gp-section .home-collection-kicke
 
 <style id="luxia-gift-pack-visual-fixes">
 /* LUXIA — GIFT PACK CARD: visual fixes (photo fill, badge vs bow, dark strip, price, CTA) */
-body.luxia-store-home .product-grid .product-card.gp-card .gp-lid{height:84px !important;}
+body.luxia-store-home .product-grid .product-card.gp-card .gp-lid{height:68px !important;}
 /* bow moved up + a bit smaller, badge sits under it on the ribbon: nothing overlaps */
-body.luxia-store-home .gp-card .gp-bow{top:7px !important;margin:0 0 0 -46px !important;transform:scale(.74);transform-origin:50% 0;}
+body.luxia-store-home .gp-card .gp-bow{top:2px !important;margin:0 0 0 -46px !important;transform:scale(.66);transform-origin:50% 0;}
 body.luxia-store-home .gp-card .gp-tag{
-  top:auto !important;bottom:7px !important;inset-inline-start:50% !important;
+  top:auto !important;bottom:4px !important;inset-inline-start:50% !important;
   transform:translateX(-50%);
   inset-inline-end:auto !important;
   font-size:calc(10px * var(--font-scale,1)) !important;letter-spacing:.06em !important;white-space:nowrap;
@@ -11810,12 +11759,12 @@ body.luxia-store-home .store-heading{padding-top:0 !important;}
   /* press on the box or lid: the bow blooms into a flower and glitter flies out */
   document.addEventListener('pointerdown',function(e){
     var el=e.target&&e.target.closest&&e.target.closest('.gp-card .gp-box, .gp-card .gp-lid');
-    if(el) bloom(el.closest('.gp-card'));
+    if(el){ var c=el.closest('.gp-card'); if(c && c.getAttribute('data-gift-pack')==='1') bloom(c); }
   },{passive:true});
   /* let the animation play, then open the product like every other card does */
   document.addEventListener('click',function(e){
     var t=e.target; if(!t||!t.closest) return;
-    var card=t.closest('.gp-card'); if(!card) return;
+    var card=t.closest('.gp-card'); if(!card || card.getAttribute('data-gift-pack')!=='1') return;
     if(t.closest('.product-gallery-thumb')) return;
     if(!t.closest('[data-detail-product], .btn-order')) return;
     if(card.__gpGo){e.stopPropagation();e.preventDefault();return;}
@@ -11940,6 +11889,607 @@ body.luxia-store-home .product-card.is-soldout.gp-card .btn-order:disabled,
   #variantOverlay .field{margin-bottom:5px!important;}
   #variantOverlay #variantSummary .row:not(.total){display:none!important;}
 }
+</style>
+
+<style id="luxia-card-thumbs">
+/* Carte produit : photo principale fixe + 3 photos visibles (grandes) + petits points indicateurs */
+body .product-card .lx-card-gal{margin:8px 0 2px;width:100%;box-sizing:border-box;}
+body .product-card .lx-card-thumbs{display:grid!important;gap:6px;width:100%;transition:opacity .26s ease;}
+body .product-card .lx-card-thumbs.is-fading{opacity:.2;}
+body .product-card .lx-card-thumb{display:block;aspect-ratio:1/1;border-radius:10px;overflow:hidden;background:#eee7dc;border:1px solid #e3dbcf;pointer-events:none;}
+body .product-card .lx-card-thumb img{width:100%;height:100%;object-fit:cover;object-position:center;display:block;}
+body .product-card .lx-card-dots{display:flex;justify-content:center;align-items:center;gap:5px;margin-top:7px;}
+body .product-card .lx-card-dots i{display:block;width:6px;height:6px;border-radius:50%;background:#d6cdbf;transition:all .25s ease;}
+body .product-card .lx-card-dots i.on{background:#b99a62;transform:scale(1.35);}
+body .product-card{cursor:pointer;}
+body .product-card .product-photo{cursor:pointer;}
+</style>
+<style id="luxia-card-square">
+/* Carte produit : cadre carré 1:1 (photos 1024x1024) + espaces réduits => carte plus courte */
+body.luxia-store-home .product-grid .product-card.product-card .product-visual,
+body.luxia-store-home .product-grid .product-card.product-card .product-title-price-head + .product-visual{
+  aspect-ratio:1 / 1!important;margin-top:0!important;
+}
+body.luxia-store-home .product-grid .product-card.product-card .product-visual > .product-photo{
+  object-fit:cover!important;object-position:center center!important;
+}
+body.luxia-store-home .product-grid .product-card.product-card .product-title-above{min-height:0!important;padding:0!important;margin:0!important;border:0!important;border-radius:0!important;background:transparent!important;}
+body.luxia-store-home .product-grid .product-card.product-card .product-title-price-head{margin:0!important;padding:0!important;gap:0!important;}
+body.luxia-store-home .product-grid .product-card.product-card .product-title-above-text{margin:0!important;width:100%!important;padding:8px 8px!important;border-radius:0!important;}
+body.luxia-store-home .product-grid .product-card.product-card .product-title-price-head + .product-visual{margin-top:0!important;border-top:0!important;}
+body.luxia-store-home .product-grid .product-card.product-card{padding-bottom:0!important;background:#faf8f3!important;}
+body.luxia-store-home .product-grid .product-card.product-card .product-title-price-head{border:0!important;box-shadow:none!important;background:transparent!important;}
+body.luxia-store-home .product-grid .product-card.product-card .product-visual,
+body.luxia-store-home .product-grid .product-card.product-card .product-visual::before,
+body.luxia-store-home .product-grid .product-card.product-card .product-visual::after{border:0!important;box-shadow:none!important;outline:0!important;}
+body.luxia-store-home .product-grid .product-card.product-card .product-visual::after{display:none!important;}
+body.luxia-store-home .product-grid .product-card.product-card .product-title-price-head + .product-visual{margin-top:-1px!important;}
+body.luxia-store-home .product-grid .product-card.product-card .product-info{height:auto!important;min-height:0!important;gap:0!important;justify-content:flex-start!important;padding:2px 8px 8px!important;}
+body.luxia-store-home .product-grid .product-card.product-card .product-info::before,
+body.luxia-store-home .product-grid .product-card.product-card .product-info::after{display:none!important;content:none!important;}
+body.luxia-store-home .product-grid .product-card.product-card .product-price-only{margin:0!important;}
+body.luxia-store-home .product-grid .product-card.product-card{min-height:0!important;height:auto!important;align-self:start!important;}
+body.luxia-store-home .product-grid .product-card.product-card .product-info{flex:0 0 auto!important;}
+body.luxia-store-home .product-grid .product-card.product-card .btn-order{margin:3px 0 0!important;}
+body.luxia-store-home .product-grid .product-card.product-card .lx-card-gal{margin:5px 0 0!important;padding:0 5px!important;box-sizing:border-box!important;}
+body.luxia-store-home .product-grid .product-card.product-card .lx-card-thumbs{gap:4px!important;}
+body.luxia-store-home .product-grid .product-card.product-card .lx-card-thumb{border-radius:8px!important;}
+body.luxia-store-home .product-grid .product-card.product-card .lx-card-dots{margin-top:4px!important;gap:4px!important;}
+body.luxia-store-home .product-grid .product-card.product-card .lx-card-dots i{width:5px!important;height:5px!important;}
+body.luxia-store-home .product-grid .product-card.product-card .product-info{padding:4px 8px 8px!important;}
+body.luxia-store-home .product-grid .product-card.product-card .product-price-only{padding:3px 6px 4px!important;font-size:15px!important;}
+body.luxia-store-home .product-grid .product-card.product-card .btn-order{padding:7px 0!important;margin-top:4px!important;min-height:0!important;}
+</style>
+<style id="luxia-detail-square">
+/* Fenêtre produit : la photo principale remplit tout son cadre carré (1024x1024) */
+#productDetailOverlay .product-detail-modal .product-detail-gallery .product-detail-main-image{position:relative!important;width:100%!important;height:auto!important;min-height:0!important;max-height:none!important;aspect-ratio:1 / 1!important;overflow:hidden!important;border-radius:14px!important;background:#eee9e1!important;}
+#productDetailOverlay .product-detail-modal .product-detail-gallery .product-detail-main-image img{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;object-fit:cover!important;object-position:center center!important;display:block!important;}
+#productDetailOverlay .product-detail-modal .product-detail-thumb img{object-fit:cover!important;width:100%!important;height:100%!important;background:transparent!important;}
+</style>
+<style id="luxia-square-everywhere">
+/* Landing pages : toutes les photos en format carre 1:1 (1024x1024), remplissant leur cadre */
+body .lp-product-card .lp-main-gallery-wrap .lp-product-card-img,
+body .lp-product-card .lp-p2-gallery-wrap .lp-product-card-img,
+body .lp-product-card-img.lp-product-card-img{
+  aspect-ratio:1 / 1!important;height:auto!important;max-height:none!important;width:100%!important;
+  object-fit:cover!important;object-position:center center!important;
+}
+body .lp-landing-thumbs .lp-landing-thumb.lp-landing-thumb{aspect-ratio:1 / 1!important;height:auto!important;}
+body .lp-landing-thumbs .lp-landing-thumb.lp-landing-thumb img{object-fit:cover!important;width:100%!important;height:100%!important;}
+body .lp-gallery.lp-gallery img{aspect-ratio:1 / 1!important;object-fit:cover!important;}
+body .lp-color-item.lp-color-item img{aspect-ratio:1 / 1!important;object-fit:cover!important;}
+/* Panier : miniature carree */
+.cart-item-photo img{object-fit:cover!important;width:100%!important;height:100%!important;}
+</style>
+
+<style id="luxia-fix-v21-spacing-and-pack-readability">
+/* ============================================================
+   FIX 1 — Espace entre les collections (accueil)
+   Cause : la règle globale  section{padding:88px 0}  s'appliquait
+   aussi à .home-collection-section  (88px haut + 88px bas + 40px de marge).
+   ============================================================ */
+body.luxia-store-home .home-collection-section{
+  padding:0 !important;
+  margin:0 0 30px !important;
+}
+body.luxia-store-home .home-collection-section:last-child{margin-bottom:0 !important;}
+/* le bloc rose « Pack cadeaux » garde son propre cadre */
+body.luxia-store-home .home-collection-section.gp-section{
+  padding:0 10px 22px !important;
+  margin:6px 0 30px !important;
+}
+body.luxia-store-home .home-collection-section.gp-section:last-child{margin-bottom:0 !important;}
+/* moins de vide avant le bloc sombre « L'expérience » */
+body.luxia-store-home .collection{padding-bottom:44px !important;}
+
+/* ============================================================
+   FIX 2 — Pack cadeaux : titre + prix bien lisibles
+   Cause : .product-card.product-card{background:#faf8f3} (luxia-card-square)
+   écrasait le fond noir des cartes pack → texte doré sur fond crème,
+   et le prix était réduit à 15px.
+   On restaure le fond noir/bordeaux + texte or clair, plus grand.
+   ============================================================ */
+body.luxia-store-home .product-grid .product-card.product-card.gp-card{
+  background:linear-gradient(180deg,#141014 0%,#141014 58%,#2a1119 100%) !important;
+  border:1px solid rgba(216,189,123,.75) !important;
+  box-shadow:0 20px 34px -16px rgba(90,26,46,.6),0 0 0 1px rgba(216,189,123,.18),inset 0 1px 0 rgba(255,236,180,.28) !important;
+}
+/* bandeau du titre */
+body.luxia-store-home .product-grid .product-card.product-card.gp-card .product-title-price-head{
+  background:#151215 !important;
+  border:0 !important;
+  border-bottom:1px solid rgba(216,189,123,.35) !important;
+}
+body.luxia-store-home .product-grid .product-card.product-card.gp-card .product-title-above-text{
+  display:block !important;
+  color:#f6e7b8 !important;
+  font-size:15.5px !important;
+  font-weight:700 !important;
+  line-height:1.3 !important;
+  letter-spacing:.02em !important;
+  text-align:center !important;
+  padding:11px 10px !important;
+  text-shadow:0 1px 2px rgba(0,0,0,.55) !important;
+  white-space:normal !important;
+}
+/* zone prix */
+body.luxia-store-home .product-grid .product-card.product-card.gp-card .product-info{
+  background:transparent !important;
+}
+body.luxia-store-home .product-grid .product-card.product-card.gp-card .product-price-bottom{
+  display:block !important;
+  background:transparent !important;
+  color:#f6e7b8 !important;
+  font-size:clamp(21px,6.2vw,26px) !important;
+  font-weight:700 !important;
+  line-height:1.2 !important;
+  text-align:center !important;
+  padding:8px 4px 6px !important;
+  white-space:nowrap !important;
+  text-shadow:0 1px 10px rgba(216,189,123,.28) !important;
+}
+body.luxia-store-home .product-grid .product-card.product-card.gp-card .product-price-bottom .lx-old-price{
+  color:#cfbf9b !important;
+  opacity:1 !important;
+  font-size:.6em !important;
+  font-weight:400 !important;
+  margin-inline-start:8px !important;
+  text-decoration-line:line-through !important;
+  text-decoration-color:rgba(216,189,123,.85) !important;
+}
+/* miniatures + points : assortis au fond sombre */
+body.luxia-store-home .product-grid .product-card.product-card.gp-card .lx-card-thumb{
+  background:#1c1517 !important;
+  border:1px solid rgba(216,189,123,.4) !important;
+}
+body.luxia-store-home .product-grid .product-card.product-card.gp-card .lx-card-dots i{background:rgba(216,189,123,.35) !important;}
+body.luxia-store-home .product-grid .product-card.product-card.gp-card .lx-card-dots i.on{background:#f0dba0 !important;}
+</style>
+<style id="luxia-product-card-gold-3d-final">
+/* LUXIA — final standard product-card frame. Pack cadeau is intentionally excluded. */
+body.luxia-store-home .product-grid .product-card:not(.gp-card),
+body.luxia-store-home .product-grid > .product-card:not(.gp-card){
+  position:relative!important;
+  box-sizing:border-box!important;
+  overflow:hidden!important;
+  border:1.5px solid #c9a75f!important;
+  border-radius:22px!important;
+  outline:none!important;
+  background:#faf8f3!important;
+  box-shadow:
+    inset 1px 1px 0 rgba(255,255,255,.96),
+    inset -1px -1px 0 rgba(139,105,48,.22),
+    0 1px 0 rgba(255,255,255,.9),
+    2px 2px 0 rgba(201,167,95,.38),
+    5px 5px 0 rgba(154,119,56,.18),
+    0 11px 20px rgba(72,53,28,.12)!important;
+}
+
+/* Bevel highlight: gives the gold border a physical, raised edge. */
+body.luxia-store-home .product-grid .product-card:not(.gp-card)::before,
+body.luxia-store-home .product-grid > .product-card:not(.gp-card)::before{
+  content:""!important;
+  position:absolute!important;
+  inset:0!important;
+  z-index:30!important;
+  pointer-events:none!important;
+  border-radius:inherit!important;
+  border:1px solid rgba(255,248,220,.72)!important;
+  box-shadow:
+    inset 2px 2px 0 rgba(255,255,255,.28),
+    inset -2px -2px 0 rgba(126,91,36,.12)!important;
+}
+
+/* Lower/right edge creates the requested visible 3D side depth. */
+body.luxia-store-home .product-grid .product-card:not(.gp-card)::after,
+body.luxia-store-home .product-grid > .product-card:not(.gp-card)::after{
+  content:""!important;
+  position:absolute!important;
+  inset:2px!important;
+  z-index:29!important;
+  pointer-events:none!important;
+  border-radius:20px!important;
+  border-right:1px solid rgba(132,96,38,.18)!important;
+  border-bottom:1px solid rgba(132,96,38,.22)!important;
+  box-shadow:
+    inset -1px -1px 0 rgba(117,83,30,.08),
+    inset 1px 1px 0 rgba(255,255,255,.18)!important;
+}
+</style>
+<style id="luxia-gift-card-reference-match">
+/* LUXIA — carte Pack cadeau : rendu identique à l'image de référence (noir + bordure or, nœud doré en haut à droite,
+   badge -% rose, photo, 3 miniatures + points, prix à gauche, bouton or). Titre aminci = même épaisseur que les autres cartes.
+   Ne touche que .gp-card : logique, clic, animation du nœud et paillettes inchangés. */
+body.luxia-store-home .product-grid.home-collection-grid{gap:14px 12px !important;}
+body.luxia-store-home .product-grid .product-card.product-card.gp-card{
+  position:relative !important;overflow:visible !important;
+  background:linear-gradient(180deg,#151115 0%,#0f0c0e 100%) !important;
+  border:2px solid #d9b96b !important;border-radius:22px !important;
+  box-shadow:0 0 0 1px rgba(255,236,180,.28) inset,0 16px 26px -14px rgba(60,18,30,.7),0 0 12px rgba(217,185,107,.22) !important;
+}
+/* nœud doré : coin haut droit, déborde un peu de la carte */
+body.luxia-store-home .product-grid .product-card.product-card.gp-card .gp-lid{
+  position:absolute !important;top:-12px !important;inset-inline-end:-7px !important;inset-inline-start:auto !important;
+  width:30% !important;max-width:98px !important;height:auto !important;
+  background:none !important;border:0 !important;box-shadow:none !important;overflow:visible !important;z-index:7 !important;
+}
+body.luxia-store-home .product-grid .product-card.product-card.gp-card .gp-lid::before,
+body.luxia-store-home .product-grid .product-card.product-card.gp-card .gp-tag{display:none !important;}
+body.luxia-store-home .product-grid .product-card.product-card.gp-card .gp-bow{
+  position:relative !important;left:auto !important;right:auto !important;top:auto !important;
+  width:100% !important;height:auto !important;aspect-ratio:140/92;margin:0 !important;
+  transform:rotate(7deg) !important;transform-origin:50% 42% !important;
+}
+html[dir="rtl"] body.luxia-store-home .product-grid .product-card.product-card.gp-card .gp-bow{transform:scaleX(-1) rotate(7deg) !important;}
+/* titre : bande fine (comme les autres cartes), serif crème + filet or */
+body.luxia-store-home .product-grid .product-card.product-card.gp-card .product-title-price-head{
+  background:#141014 !important;border:0 !important;border-radius:20px 20px 0 0 !important;margin:0 !important;padding:0 !important;
+}
+body.luxia-store-home .product-grid .product-card.product-card.gp-card .product-title-above{padding:0 !important;margin:0 !important;background:transparent !important;border:0 !important;}
+body.luxia-store-home .product-grid .product-card.product-card.gp-card .product-title-above-text{
+  position:relative !important;display:block !important;margin:0 !important;width:100% !important;
+  font-family:var(--font-display) !important;font-size:15px !important;font-weight:500 !important;line-height:1.2 !important;letter-spacing:.01em !important;
+  color:#f6efe2 !important;text-align:start !important;text-shadow:none !important;
+  padding:8px 27% 11px 12px !important;white-space:normal !important;background:transparent !important;
+}
+html[dir="rtl"] body.luxia-store-home .product-grid .product-card.product-card.gp-card .product-title-above-text{padding:8px 12px 11px 27% !important;}
+body.luxia-store-home .product-grid .product-card.product-card.gp-card .product-title-above-text::after{
+  content:"" !important;display:block !important;position:absolute;bottom:5px;inset-inline:12px 27%;height:1px;
+  background:linear-gradient(90deg,#e8cf8e,rgba(232,207,142,.2));
+}
+html[dir="rtl"] body.luxia-store-home .product-grid .product-card.product-card.gp-card .product-title-above-text::after{background:linear-gradient(270deg,#e8cf8e,rgba(232,207,142,.2));}
+/* photo : plein cadre, sans cadre ni rubans */
+body.luxia-store-home .product-grid .product-card.product-card.gp-card .gp-box{
+  margin:0 !important;padding:0 !important;background:transparent !important;border:0 !important;box-shadow:none !important;border-radius:0 !important;
+}
+body.luxia-store-home .product-grid .product-card.product-card.gp-card .gp-rb,
+body.luxia-store-home .product-grid .product-card.product-card.gp-card .gp-tw{display:none !important;}
+body.luxia-store-home .product-grid .product-card.product-card.gp-card .gp-box .product-visual{
+  aspect-ratio:8/7 !important;border-radius:0 !important;background:#111 !important;
+}
+body.luxia-store-home .product-grid .product-card.product-card.gp-card .gp-box .product-visual > .product-photo{object-fit:cover !important;object-position:center 40% !important;}
+/* badge -% rose */
+body.luxia-store-home .product-grid .product-card.product-card.gp-card .gx-badge{
+  top:9px !important;inset-inline-start:8px !important;
+  background:linear-gradient(135deg,#f6cfcf,#e8a7ad) !important;color:#4a1a26 !important;
+  font:600 clamp(12px,3.7vw,15px)/1 var(--font-body,sans-serif) !important;letter-spacing:.03em !important;
+  padding:.5em 1em !important;border-radius:999px !important;
+  box-shadow:0 5px 12px -4px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.6) !important;
+}
+/* miniatures + points : bloc noir arrondi qui chevauche le bas de la photo */
+body.luxia-store-home .product-grid .product-card.product-card.gp-card .lx-card-gal{
+  position:relative !important;z-index:2;margin:-14px 0 0 !important;padding:10px 10px 2px !important;
+  background:#141014 !important;border-radius:18px 18px 0 0 !important;
+}
+body.luxia-store-home .product-grid .product-card.product-card.gp-card .lx-card-thumbs{gap:6px !important;}
+body.luxia-store-home .product-grid .product-card.product-card.gp-card .lx-card-thumb{
+  aspect-ratio:8/7 !important;border-radius:10px !important;background:#1c1517 !important;
+  border:1.5px solid rgba(232,207,142,.8) !important;box-shadow:0 0 0 1px rgba(0,0,0,.4) !important;
+}
+body.luxia-store-home .product-grid .product-card.product-card.gp-card .lx-card-dots{margin-top:7px !important;gap:5px !important;}
+body.luxia-store-home .product-grid .product-card.product-card.gp-card .lx-card-dots i{width:6px !important;height:6px !important;background:rgba(255,255,255,.28) !important;}
+body.luxia-store-home .product-grid .product-card.product-card.gp-card .lx-card-dots i.on{background:#e8cf8e !important;transform:scale(1.35);}
+/* prix à gauche, grand, serif ; bouton or */
+body.luxia-store-home .product-grid .product-card.product-card.gp-card .swatch-row,
+body.luxia-store-home .product-grid .product-card.product-card.gp-card .product-sizes-row{display:none !important;}
+body.luxia-store-home .product-grid .product-card.product-card.gp-card .product-info{background:transparent !important;padding:2px 11px 12px !important;gap:0 !important;}
+body.luxia-store-home .product-grid .product-card.product-card.gp-card .product-price-bottom{
+  font-family:var(--font-display) !important;font-size:clamp(20px,6vw,27px) !important;font-weight:600 !important;line-height:1.15 !important;
+  color:#f6efe2 !important;text-align:start !important;text-shadow:none !important;padding:6px 2px 8px !important;white-space:nowrap !important;
+}
+body.luxia-store-home .product-grid .product-card.product-card.gp-card .product-price-bottom .lx-old-price{
+  font-size:.62em !important;font-weight:400 !important;color:#a99a80 !important;margin-inline-start:8px !important;
+  text-decoration-line:line-through !important;text-decoration-color:rgba(232,207,142,.7) !important;
+}
+body.luxia-store-home .product-grid .product-card.product-card.gp-card .btn-order{
+  width:100% !important;margin:0 !important;padding:9px 0 !important;min-height:0 !important;border-radius:999px !important;
+  background:linear-gradient(180deg,#f3dd9f 0%,#dcbb6a 48%,#b9923f 100%) !important;border:1px solid #e8cf8e !important;
+  color:#1a1410 !important;font-size:12px !important;font-weight:600 !important;letter-spacing:.14em !important;text-transform:uppercase;
+  box-shadow:0 8px 16px -8px rgba(217,185,107,.7),inset 0 1px 0 rgba(255,255,255,.5) !important;
+}
+/* titre de la section : serif bordeaux, filet fin, sans petit libellé */
+body.luxia-store-home .home-collection-section.gp-section .home-collection-kicker{display:none !important;}
+body.luxia-store-home .home-collection-section.gp-section .home-collection-heading h3{font-family:var(--font-display) !important;color:#4a1426 !important;font-weight:500 !important;}
+body.luxia-store-home .home-collection-section.gp-section .home-collection-rule{background:linear-gradient(90deg,transparent,#4a1426 50%,transparent) !important;opacity:.85 !important;}
+</style>
+
+<script id="luxia-product-card-open-guard-v2">
+(function(){
+  /* Fallback click routing for normal product cards.
+     Gift cards keep their dedicated animation/click handler above. */
+  document.addEventListener('click',function(e){
+    var t=e.target;
+    if(!t || !t.closest) return;
+    var card=t.closest('[data-product-card]');
+    if(!card || (card.classList.contains('gp-card') && card.getAttribute('data-gift-pack')==='1')) return;
+    if(t.closest('.product-gallery-thumb,.lx-card-thumb,.lx-card-thumbs,.lx-card-dots')) return;
+    if(t.closest('.btn-order,[data-detail-product]')) return;
+    var id=card.getAttribute('data-product-card');
+    if(!id || typeof openProductDetailModal!=='function') return;
+    e.preventDefault();
+    e.stopPropagation();
+    openProductDetailModal(id);
+  },true);
+})();
+</script>
+<style id="luxia-gift-image-match-v2">
+/* LUXIA — Pack cadeau : carte + fenêtre produit + landing = image de référence (noir, bordure or, nœud doré en haut à gauche).
+   Ne touche que .gp-card / .gp-themed (fenêtre produit cadeau) / .lp-gift-pack. Aucune logique existante modifiée. */
+:root{--gx-gold:#d3ae5a;--gx-gold-hi:#ecd391;--gx-cream:#e9cf93;
+ --gx-heart:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 14'%3E%3Cdefs%3E%3ClinearGradient id='l' x1='0' x2='1'%3E%3Cstop offset='0' stop-color='%23d3ae5a' stop-opacity='0'/%3E%3Cstop offset='1' stop-color='%23d3ae5a'/%3E%3C/linearGradient%3E%3ClinearGradient id='r' x1='1' x2='0'%3E%3Cstop offset='0' stop-color='%23d3ae5a' stop-opacity='0'/%3E%3Cstop offset='1' stop-color='%23d3ae5a'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect x='0' y='6.5' width='107' height='1' fill='url(%23l)'/%3E%3Crect x='133' y='6.5' width='107' height='1' fill='url(%23r)'/%3E%3Cpath d='M120 11C115 7.6 113.2 5.8 113.2 4C113.2 2.6 114.2 1.8 115.4 1.8C116.6 1.8 117.6 2.5 120 4.6C122.4 2.5 123.4 1.8 124.6 1.8C125.8 1.8 126.8 2.6 126.8 4C126.8 5.8 125 7.6 120 11Z' fill='none' stroke='%23d3ae5a' stroke-width='1'/%3E%3C/svg%3E");
+ --gx-cart:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231b150f' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M2 3.5h3l2.4 11.2a1.2 1.2 0 0 0 1.2.9h8.6a1.2 1.2 0 0 0 1.2-.9L20 7H6'/%3E%3Ccircle cx='9.5' cy='20' r='1.3'/%3E%3Ccircle cx='17' cy='20' r='1.3'/%3E%3C/svg%3E");}
+
+/* ---------- nœud (partagé) : coin haut-gauche, retombe sur le côté ---------- */
+.gx-bow{position:absolute;left:0;top:0;width:41%;aspect-ratio:410/318;transform:translate(-22%,-26%);z-index:40;pointer-events:none;
+  filter:drop-shadow(0 7px 8px rgba(0,0,0,.55)) drop-shadow(0 0 9px rgba(211,174,90,.22));}
+.gx-bow svg,.gp-card .gp-bow[data-gx]{display:block;width:100%;height:auto;aspect-ratio:410/318;overflow:visible}
+.gx-bow .knot,.gp-bow[data-gx] .knot,.gp-bow[data-gx] .gx-loop{transform-box:fill-box;transform-origin:center}
+.gp-card.gp-open .gp-bow[data-gx] .gx-loop{animation:gxLoop .7s ease-out}
+@keyframes gxLoop{0%{transform:scale(1)}45%{transform:scale(1.2) rotate(-5deg)}100%{transform:scale(1)}}
+@media(prefers-reduced-motion:reduce){.gp-card.gp-open .gp-bow[data-gx] .gx-loop{animation:none}}
+
+/* ---------- miniatures + flèches (partagé) ---------- */
+.gx-thumbs-row,.gx-lp-thumbs-row{display:flex;align-items:center;gap:10px;margin:16px 0 0;}
+.gx-arrow{flex:0 0 36px;width:36px;height:36px;border-radius:50%;border:1.5px solid var(--gx-gold);background:transparent;color:var(--gx-cream);
+  font-size:24px;line-height:1;padding:0 0 3px;cursor:pointer;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;}
+.gx-arrow:active{background:rgba(211,174,90,.18);}
+.gx-lp-thumbs{flex:1;min-width:0;display:flex;gap:8px;overflow-x:auto;padding:4px 2px;position:relative;scrollbar-width:none;scroll-snap-type:x proximity;}
+.gx-lp-thumbs::-webkit-scrollbar{display:none;}
+.gx-lp-thumb{flex:0 0 calc((100% - 32px)/5);aspect-ratio:1/.92;padding:0;border-radius:12px;overflow:hidden;background:#1c1517;cursor:pointer;
+  border:1.5px solid rgba(211,174,90,.55);opacity:.92;scroll-snap-align:center;}
+.gx-lp-thumb img{width:100%;height:100%;object-fit:cover;display:block;}
+.gx-lp-thumb.active{border:2px solid var(--gx-gold-hi);opacity:1;box-shadow:0 0 0 1px rgba(236,211,145,.35),0 0 12px rgba(211,174,90,.35);}
+
+/* =====================================================================
+   1) FENÊTRE PRODUIT CADEAU
+   ===================================================================== */
+html body #productDetailOverlay:has(.product-detail-modal.gp-themed){background:rgba(8,5,7,.82)!important;-webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px);}
+html body #productDetailOverlay .product-detail-modal.gp-themed{
+  position:relative!important;overflow:visible!important;width:calc(100% - 28px)!important;max-width:500px!important;max-height:none!important;padding:0!important;
+  background:linear-gradient(180deg,#0f0c0e 0%,#0a0809 100%)!important;border:2px solid var(--gx-gold)!important;border-radius:26px!important;color:#f3ead8!important;
+  box-shadow:0 0 0 1px rgba(255,236,180,.16) inset,0 0 34px rgba(211,174,90,.24),0 30px 60px -20px rgba(0,0,0,.85)!important;}
+html body #productDetailOverlay .product-detail-modal.gp-themed .modal-head{
+  display:block!important;position:relative!important;margin:0!important;padding:40px 68px 12px 8%!important;border:0!important;background:transparent!important;text-align:center!important;}
+html body #productDetailOverlay .product-detail-modal.gp-themed .modal-head h3{
+  margin:0!important;text-align:center!important;font-family:'Cormorant Garamond','Amiri',Georgia,serif!important;font-weight:500!important;
+  font-size:clamp(23px,6.6vw,32px)!important;line-height:1.1!important;letter-spacing:.01em;color:var(--gx-cream)!important;}
+html body #productDetailOverlay .product-detail-modal.gp-themed .modal-head h3::after{
+  content:"";display:block;height:14px;width:min(240px,88%);margin:9px auto 0;background:var(--gx-heart) center/100% 100% no-repeat;}
+html body #productDetailOverlay .product-detail-modal.gp-themed .modal-close{
+  position:absolute!important;top:24px!important;right:20px!important;left:auto!important;inset-inline-start:auto!important;inset-inline-end:auto!important;
+  width:46px!important;height:46px!important;padding:0!important;border-radius:50%!important;border:1.5px solid var(--gx-gold)!important;background:transparent!important;
+  color:transparent!important;font-size:0!important;box-shadow:none!important;}
+html body #productDetailOverlay .product-detail-modal.gp-themed .modal-close svg{display:none!important;}
+html body #productDetailOverlay .product-detail-modal.gp-themed .modal-close::before,
+html body #productDetailOverlay .product-detail-modal.gp-themed .modal-close::after{
+  content:"";position:absolute;left:50%;top:50%;width:18px;height:1.5px;background:var(--gx-cream);transform:translate(-50%,-50%) rotate(45deg);}
+html body #productDetailOverlay .product-detail-modal.gp-themed .modal-close::after{transform:translate(-50%,-50%) rotate(-45deg);}
+html body #productDetailOverlay .product-detail-modal.gp-themed #productDetailBody{
+  max-height:calc(94svh - 128px)!important;overflow-y:auto!important;overscroll-behavior:contain;padding:4px 20px 22px!important;border-radius:0 0 24px 24px;}
+html body #productDetailOverlay .product-detail-modal.gp-themed .product-detail-gallery{margin:0!important;padding:0!important;background:transparent!important;border:0!important;}
+html body #productDetailOverlay .product-detail-modal.gp-themed .product-detail-main-image{
+  height:auto!important;aspect-ratio:4/3.05!important;border-radius:18px!important;overflow:hidden!important;background:#111!important;
+  border:1px solid rgba(211,174,90,.45)!important;box-shadow:0 12px 26px -14px rgba(0,0,0,.8)!important;}
+html body #productDetailOverlay .product-detail-modal.gp-themed .product-detail-main-image img,
+html body #productDetailOverlay .product-detail-modal.gp-themed #productDetailMainImage{
+  width:100%!important;height:100%!important;aspect-ratio:auto!important;object-fit:cover!important;border-radius:0!important;}
+html body #productDetailOverlay .product-detail-modal.gp-themed .product-detail-thumbs{
+  flex:1!important;min-width:0!important;gap:8px!important;padding:4px 2px!important;background:transparent!important;overflow-x:auto!important;position:relative!important;scroll-snap-type:x proximity;}
+html body #productDetailOverlay .product-detail-modal.gp-themed .product-detail-thumb{
+  flex:0 0 calc((100% - 32px)/5)!important;width:auto!important;height:auto!important;aspect-ratio:1/.92!important;border-radius:12px!important;
+  border:1.5px solid rgba(211,174,90,.55)!important;background:#1c1517!important;opacity:.92!important;scroll-snap-align:center;}
+html body #productDetailOverlay .product-detail-modal.gp-themed .product-detail-thumb img{width:100%!important;height:100%!important;object-fit:cover!important;border-radius:0!important;}
+html body #productDetailOverlay .product-detail-modal.gp-themed .product-detail-thumb.active{
+  border:2px solid var(--gx-gold-hi)!important;opacity:1!important;box-shadow:0 0 0 1px rgba(236,211,145,.35),0 0 12px rgba(211,174,90,.35)!important;}
+/* prix + bouton d'abord (comme l'image) ; description / bandeau pack restent disponibles dessous */
+html body #productDetailOverlay .product-detail-modal.gp-themed .product-detail-content{display:flex!important;flex-direction:column!important;padding:0!important;}
+html body #productDetailOverlay .product-detail-modal.gp-themed .product-detail-price{
+  order:1;display:flex!important;align-items:baseline;gap:14px;margin:16px 4px 14px!important;padding:14px 0 0!important;border-top:1px solid rgba(211,174,90,.22)!important;
+  font-family:'Cormorant Garamond','Amiri',Georgia,serif!important;font-size:clamp(30px,9vw,40px)!important;font-weight:500!important;line-height:1!important;
+  color:#ecd093!important;text-align:start!important;background:transparent!important;white-space:nowrap;}
+html body #productDetailOverlay .product-detail-modal.gp-themed .product-detail-price .lx-old-price{
+  font-size:.62em!important;font-weight:400!important;color:#a39378!important;text-decoration:line-through!important;text-decoration-color:rgba(211,174,90,.75)!important;}
+html body #productDetailOverlay .product-detail-modal.gp-themed .product-detail-add{
+  order:2;margin:0!important;width:100%!important;min-height:56px!important;display:flex!important;align-items:center;justify-content:center;gap:12px;border-radius:999px!important;
+  background:linear-gradient(180deg,#f2dc9d 0%,#dcbb6a 48%,#bd9640 100%)!important;border:1px solid var(--gx-gold-hi)!important;color:#1b150f!important;
+  font-size:clamp(13px,3.8vw,16px)!important;font-weight:700!important;letter-spacing:.08em!important;text-transform:uppercase!important;
+  box-shadow:0 0 22px rgba(211,174,90,.35),0 10px 20px -10px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,255,255,.55)!important;}
+html body #productDetailOverlay .product-detail-modal.gp-themed .product-detail-add::before{content:"";width:24px;height:24px;flex:none;background:var(--gx-cart) center/contain no-repeat;}
+html body #productDetailOverlay .product-detail-modal.gp-themed .product-detail-add.is-soldout{opacity:.55;filter:grayscale(.6);}
+html body #productDetailOverlay .product-detail-modal.gp-themed .lx-pack-banner{order:3;}
+html body #productDetailOverlay .product-detail-modal.gp-themed .product-detail-section{order:4;}
+
+/* =====================================================================
+   2) CARTE PACK CADEAU (accueil) — nœud de l'image, en haut à gauche
+   ===================================================================== */
+body.luxia-store-home .product-grid .product-card.product-card.gp-card .gp-lid{
+  left:-9px!important;right:auto!important;inset-inline-start:auto!important;inset-inline-end:auto!important;top:-14px!important;width:46%!important;max-width:150px!important;}
+body.luxia-store-home .product-grid .product-card.product-card.gp-card .gp-bow,
+html[dir="rtl"] body.luxia-store-home .product-grid .product-card.product-card.gp-card .gp-bow{transform:none!important;}
+body.luxia-store-home .product-grid .product-card.product-card.gp-card .product-title-above-text,
+html[dir="rtl"] body.luxia-store-home .product-grid .product-card.product-card.gp-card .product-title-above-text{
+  padding:21px 8px 12px 20%!important;text-align:center!important;}
+body.luxia-store-home .product-grid .product-card.product-card.gp-card .product-title-above-text::after,
+html[dir="rtl"] body.luxia-store-home .product-grid .product-card.product-card.gp-card .product-title-above-text::after{
+  inset-inline:auto!important;left:20%!important;right:8px!important;background:linear-gradient(90deg,rgba(232,207,142,.15),#e8cf8e 50%,rgba(232,207,142,.15))!important;}
+/* le badge -% passe à droite (le nœud occupe la gauche) */
+body.luxia-store-home .product-grid .product-card.product-card.gp-card .gx-badge{
+  left:auto!important;right:8px!important;inset-inline-start:auto!important;inset-inline-end:auto!important;}
+
+/* =====================================================================
+   3) PRODUIT CADEAU SUR LA LANDING PAGE
+   ===================================================================== */
+body .lp-preview .lp-product-card.lp-gift-pack:not(.lp-order-success){
+  position:relative!important;overflow:visible!important;display:flex!important;flex-direction:column!important;margin-top:46px!important;padding:46px 20px 22px!important;
+  background:linear-gradient(180deg,#0f0c0e 0%,#0a0809 100%)!important;border:2px solid var(--gx-gold)!important;border-radius:26px!important;color:#f3ead8!important;
+  box-shadow:0 0 0 1px rgba(255,236,180,.16) inset,0 0 34px rgba(211,174,90,.24),0 24px 50px -20px rgba(0,0,0,.8)!important;}
+body .lp-preview .lp-product-card.lp-gift-pack:not(.lp-order-success) > *{order:10;}
+body .lp-preview .lp-product-card.lp-gift-pack:not(.lp-order-success) > .gx-bow{order:0;}
+body .lp-preview .lp-product-card.lp-gift-pack .lp-product-title-price-frame.lp-product-head-top{
+  order:1;margin:0 0 4px!important;padding:0 0 0 16%!important;text-align:center!important;background:transparent!important;border:0!important;box-shadow:none!important;}
+body .lp-preview .lp-product-card.lp-gift-pack .lp-product-title-price-frame.lp-product-head-top::before{display:none!important;}
+body .lp-preview .lp-product-card.lp-gift-pack .lp-product-title-price-frame.lp-product-head-top::after{
+  content:"";display:block;height:14px;width:min(240px,88%);margin:9px auto 0;background:var(--gx-heart) center/100% 100% no-repeat;}
+body .lp-preview .lp-product-card.lp-gift-pack .lp-product-title-price-frame.lp-product-head-top b{
+  display:block!important;margin:0!important;padding:0!important;background:transparent!important;border:0!important;box-shadow:none!important;text-align:center!important;
+  font-family:'Cormorant Garamond','Amiri',Georgia,serif!important;font-weight:500!important;font-size:clamp(23px,6.6vw,32px)!important;line-height:1.15!important;color:var(--gx-cream)!important;}
+body .lp-preview .lp-product-card.lp-gift-pack .lp-main-gallery-wrap,
+body .lp-preview .lp-product-card.lp-gift-pack .lp-p2-gallery-wrap{order:2;margin-top:12px;}
+body .lp-preview .lp-product-card.lp-gift-pack .lp-product-card-img{
+  width:100%!important;height:auto!important;max-height:none!important;aspect-ratio:4/3.05!important;object-fit:cover!important;border-radius:18px!important;
+  border:1px solid rgba(211,174,90,.45)!important;box-shadow:0 12px 26px -14px rgba(0,0,0,.8)!important;}
+body .lp-preview .lp-product-card.lp-gift-pack .gx-lp-thumbs-row ~ .lp-landing-gallery,
+body .lp-preview .lp-product-card.lp-gift-pack .gx-lp-thumbs-row ~ .lp-main-image-dots{display:none!important;}
+body .lp-preview .lp-product-card.lp-gift-pack .lp-product-price-below{
+  order:3;display:flex!important;align-items:baseline;justify-content:flex-start;gap:14px;width:auto!important;max-width:none!important;margin:16px 4px 14px!important;padding:14px 0 0!important;
+  background:transparent!important;border:0!important;border-top:1px solid rgba(211,174,90,.22)!important;border-radius:0!important;box-shadow:none!important;
+  font-family:'Cormorant Garamond','Amiri',Georgia,serif!important;font-size:clamp(30px,9vw,40px)!important;font-weight:500!important;line-height:1!important;
+  color:#ecd093!important;text-align:start!important;white-space:nowrap;}
+body .lp-preview .lp-product-card.lp-gift-pack .lp-product-price-below .lx-old-price{
+  font-size:.62em!important;font-weight:400!important;color:#a39378!important;text-decoration:line-through!important;text-decoration-color:rgba(211,174,90,.75)!important;}
+body .lp-preview .lp-product-card.lp-gift-pack .lp-product-order-label{display:none!important;}
+body .lp-preview .lp-product-card.lp-gift-pack .lp-choose-btn{
+  display:flex!important;align-items:center;justify-content:center;gap:12px;min-height:56px;border-radius:999px!important;
+  background:linear-gradient(180deg,#f2dc9d 0%,#dcbb6a 48%,#bd9640 100%)!important;border:1px solid var(--gx-gold-hi)!important;color:#1b150f!important;
+  font-size:clamp(13px,3.8vw,16px)!important;font-weight:700!important;letter-spacing:.08em!important;text-transform:uppercase!important;
+  box-shadow:0 0 22px rgba(211,174,90,.35),0 10px 20px -10px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,255,255,.55)!important;}
+body .lp-preview .lp-product-card.lp-gift-pack .lp-choose-btn::before{content:"";width:24px;height:24px;flex:none;background:var(--gx-cart) center/contain no-repeat;}
+</style>
+
+<script id="luxia-gift-image-match-v2-js">
+(function(){
+  var N=0;
+  /* nœud doré (même dessin partout) */
+  function bow(cls){
+    var k='gx'+(++N);
+    return '<svg class="'+(cls||'')+'" viewBox="0 0 410 318" aria-hidden="true" focusable="false"><defs>'+
+      '<linearGradient id="'+k+'a" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff0b5"/><stop offset=".42" stop-color="#e3bf66"/><stop offset=".78" stop-color="#b98d36"/><stop offset="1" stop-color="#8d6620"/></linearGradient>'+
+      '<linearGradient id="'+k+'b" x1="1" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff0b5"/><stop offset=".42" stop-color="#e3bf66"/><stop offset=".78" stop-color="#b98d36"/><stop offset="1" stop-color="#8d6620"/></linearGradient>'+
+      '<linearGradient id="'+k+'t" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f3d684"/><stop offset=".55" stop-color="#c79a3f"/><stop offset="1" stop-color="#7d5a1b"/></linearGradient>'+
+      '<linearGradient id="'+k+'i" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7a5719"/><stop offset="1" stop-color="#c79a40"/></linearGradient>'+
+      '<linearGradient id="'+k+'k" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#8d6620"/><stop offset=".45" stop-color="#fff0b5"/><stop offset="1" stop-color="#9a7022"/></linearGradient>'+
+      '</defs>'+
+      '<path class="gx-tail" d="M150 112C118 160 66 220 14 304L54 284L70 312C118 252 170 192 196 126Z" fill="url(#'+k+'t)"/>'+
+      '<path class="gx-tail" d="M176 122C190 170 176 222 150 268L184 254L198 284C226 232 236 170 214 120Z" fill="url(#'+k+'t)"/>'+
+      '<path d="M60 262C92 222 130 176 150 138" stroke="#fff3c6" stroke-width="2.5" fill="none" opacity=".4" stroke-linecap="round"/>'+
+      '<path class="gx-loop gx-l" d="M168 96C150 52 108 14 66 22C26 30 14 74 44 98C74 120 138 122 168 96Z" fill="url(#'+k+'a)"/>'+
+      '<path d="M160 92C146 62 114 40 84 46C58 52 54 78 76 92C98 106 138 106 160 92Z" fill="url(#'+k+'i)" opacity=".85"/>'+
+      '<path d="M46 52C74 22 124 26 156 66" stroke="#fff4c8" stroke-width="3" fill="none" opacity=".6" stroke-linecap="round"/>'+
+      '<path class="gx-loop gx-r" d="M184 94C214 46 282 8 346 14C398 20 418 56 392 82C356 114 250 126 184 94Z" fill="url(#'+k+'b)"/>'+
+      '<path d="M192 90C216 62 268 38 318 40C356 42 366 62 346 78C318 100 246 108 192 90Z" fill="url(#'+k+'i)" opacity=".85"/>'+
+      '<path d="M200 70C240 26 310 12 368 28" stroke="#fff4c8" stroke-width="3" fill="none" opacity=".6" stroke-linecap="round"/>'+
+      '<g class="knot"><ellipse cx="180" cy="106" rx="26" ry="31" transform="rotate(-16 180 106)" fill="url(#'+k+'k)" stroke="#6e5019" stroke-width="1.2"/>'+
+      '<path d="M170 84C164 100 164 114 170 128" stroke="#fff3c6" stroke-width="2" fill="none" opacity=".6" stroke-linecap="round"/></g></svg>';
+  }
+  /* 1) cartes de l'accueil : on remplace seulement le dessin du nœud (classe gp-bow gardée => animation + paillettes inchangées) */
+  function swapCardBows(){
+    document.querySelectorAll('.gp-card .gp-lid .gp-bow:not([data-gx])').forEach(function(s){
+      var w=document.createElement('div'); w.innerHTML=bow('gp-bow'); var n=w.firstChild;
+      n.setAttribute('data-gx','1'); s.parentNode.replaceChild(n,s);
+    });
+  }
+  /* 2) landing : nœud + miniatures */
+  function initRow(row){
+    row.setAttribute('data-gx-init','1');
+    var img=document.getElementById(row.getAttribute('data-gx-target')), box=row.querySelector('.gx-lp-thumbs');
+    function list(){return [].slice.call(row.querySelectorAll('.gx-lp-thumb'));}
+    function sync(){ if(!img) return; var cur=img.getAttribute('src'); list().forEach(function(b){b.classList.toggle('active',b.getAttribute('data-gx-src')===cur);}); }
+    row.addEventListener('click',function(e){
+      var b=e.target.closest('.gx-lp-thumb'), a=e.target.closest('.gx-arrow');
+      if(b){ e.preventDefault(); e.stopPropagation(); if(img) img.setAttribute('src',b.getAttribute('data-gx-src')); sync(); return; }
+      if(a){
+        e.preventDefault(); e.stopPropagation();
+        var l=list(); if(l.length<2) return;
+        var i=l.findIndex(function(x){return x.classList.contains('active');}); if(i<0) i=0;
+        var j=(i+(a.classList.contains('gx-next')?1:-1)+l.length)%l.length;
+        l[j].click();
+        if(box&&box.scrollTo) box.scrollTo({left:l[j].offsetLeft-(box.clientWidth-l[j].clientWidth)/2,behavior:'smooth'});
+      }
+    });
+    if(img&&window.MutationObserver) new MutationObserver(sync).observe(img,{attributes:true,attributeFilter:['src']});
+    sync();
+  }
+  function decorateLanding(){
+    document.querySelectorAll('.lp-product-card.lp-gift-pack:not(.lp-order-success)').forEach(function(c){
+      if(!c.querySelector(':scope > .gx-bow')) c.insertAdjacentHTML('afterbegin','<div class="gx-bow" aria-hidden="true">'+bow()+'</div>');
+    });
+    document.querySelectorAll('.gx-lp-thumbs-row:not([data-gx-init])').forEach(initRow);
+  }
+  var raf=0;
+  function tick(){raf=0;swapCardBows();decorateLanding();}
+  function schedule(){ if(!raf) raf=requestAnimationFrame(tick); }
+  if(window.MutationObserver) new MutationObserver(schedule).observe(document.body,{childList:true,subtree:true});
+  document.addEventListener('DOMContentLoaded',schedule); schedule();
+
+  /* 3) fenêtre produit cadeau : nœud + flèches des miniatures (la logique d'ouverture/galerie/panier reste celle du site) */
+  function decorateDetail(){
+    var m=document.querySelector('#productDetailOverlay .product-detail-modal'); if(!m) return;
+    var old=m.querySelector(':scope > .gx-bow');
+    if(!m.classList.contains('gp-themed')){ if(old) old.remove(); return; }
+    if(!old) m.insertAdjacentHTML('afterbegin','<div class="gx-bow" aria-hidden="true">'+bow()+'</div>');
+    var th=m.querySelector('.product-detail-thumbs');
+    if(th && !(th.parentNode.classList&&th.parentNode.classList.contains('gx-thumbs-row'))){
+      var row=document.createElement('div'); row.className='gx-thumbs-row';
+      th.parentNode.insertBefore(row,th);
+      row.innerHTML='<button type="button" class="gx-arrow gx-prev" aria-label="Précédent">&#8249;</button>';
+      row.appendChild(th);
+      row.insertAdjacentHTML('beforeend','<button type="button" class="gx-arrow gx-next" aria-label="Suivant">&#8250;</button>');
+      var step=function(d){
+        var t=[].slice.call(m.querySelectorAll('.product-detail-thumb')); if(t.length<2) return;
+        var i=t.findIndex(function(b){return b.classList.contains('active');}); if(i<0) i=0;
+        var n=t[(i+d+t.length)%t.length]; n.click();
+        if(th.scrollTo) th.scrollTo({left:n.offsetLeft-(th.clientWidth-n.clientWidth)/2,behavior:'smooth'});
+      };
+      row.querySelector('.gx-prev').addEventListener('click',function(){step(-1);});
+      row.querySelector('.gx-next').addEventListener('click',function(){step(1);});
+    }
+  }
+  var _d=window.openProductDetailModal;
+  if(typeof _d==='function') window.openProductDetailModal=function(id){
+    var r=_d.apply(this,arguments); try{decorateDetail();}catch(e){} return r;
+  };
+})();
+</script>
+
+
+<style id="luxia-gift-modal-fix-v3">
+/* ===== Pack cadeau : fixes (X à droite, même taille que les autres produits, sans flèches <>) ===== */
+
+/* 1) Bouton fermer (X) : à droite. Cause du bug : "inset-inline-end:auto" annulait "right". */
+html body #productDetailOverlay .product-detail-modal.gp-themed .modal-head .modal-close{
+  position:absolute!important;top:20px!important;bottom:auto!important;
+  inset-inline-start:auto!important;inset-inline-end:auto!important;
+  left:auto!important;right:14px!important;margin:0!important;z-index:45!important;
+}
+html body #productDetailOverlay .product-detail-modal.gp-themed .modal-head{padding:40px 66px 12px 15%!important;}
+
+/* 2) Fenêtre : même largeur / même logique que les fenêtres des autres produits */
+html body #productDetailOverlay .product-detail-modal.gp-themed{
+  width:100%!important;max-width:760px!important;margin:0!important;
+  border-radius:26px 26px 0 0!important;border-bottom:0!important;
+}
+@media(min-width:720px){
+  html body #productDetailOverlay .product-detail-modal.gp-themed{border-radius:26px!important;border-bottom:2px solid var(--gx-gold)!important;}
+}
+html body #productDetailOverlay .product-detail-modal.gp-themed #productDetailBody{
+  max-height:calc(94svh - 112px)!important;padding:4px 15px 24px!important;
+}
+/* nœud : reste entièrement visible (la fenêtre prend maintenant toute la largeur) */
+html body #productDetailOverlay .product-detail-modal.gp-themed > .gx-bow{
+  left:10px!important;width:min(41%,170px)!important;transform:translate(-4%,-30%)!important;
+}
+
+/* 3) Photo principale : même carré 1:1 que les autres produits */
+html body #productDetailOverlay .product-detail-modal.gp-themed .product-detail-main-image{
+  aspect-ratio:1 / 1!important;height:auto!important;
+}
+html body #productDetailOverlay .product-detail-modal.gp-themed .product-detail-thumb{aspect-ratio:1 / 1!important;}
+body .lp-preview .lp-product-card.lp-gift-pack .lp-product-card-img{aspect-ratio:1 / 1!important;}
+body .lp-preview .lp-product-card.lp-gift-pack .gx-lp-thumb{aspect-ratio:1 / 1!important;}
+
+/* 4) Galerie des produits cadeau : plus de flèches < > (fenêtre + landing) */
+.gx-arrow,.gx-prev,.gx-next{display:none!important;}
+.gx-thumbs-row,.gx-lp-thumbs-row{gap:0!important;}
 </style>
 </body>
 
