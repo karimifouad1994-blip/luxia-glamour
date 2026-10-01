@@ -314,6 +314,20 @@ footer{background:var(--bg-deep); border-top:1px solid var(--line); padding:56px
 .admin-variant-pill{display:flex; align-items:center; gap:4px; border:1px solid var(--line); border-radius:20px; padding:4px 6px; background:#ffffff06;}
 .admin-variant-pill input.admin-variant-input{width:88px; font-size:calc(11.5px * var(--font-scale)); padding:5px 8px; border-radius:14px; background:#ffffff10; border:1px solid var(--line); color:var(--ivory);}
 .admin-variant-pill input[type="color"]{width:26px; height:26px; padding:0; border:1px solid var(--line); border-radius:50%; background:none; cursor:pointer;}
+
+/* LX presets : choix prêts à cocher (tailles / pointures / couleurs) */
+.lx-presets{border:1px solid rgba(128,128,128,.28);border-radius:16px;padding:14px 14px 6px;margin:0 0 16px;background:rgba(128,128,128,.05)}
+.lx-presets-hint{font-size:12px;opacity:.75;margin:0 0 12px;line-height:1.5}
+.lx-group{margin:0 0 14px}
+.lx-group-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 8px}
+.lx-group-head b{font-size:13px}
+.lx-group-actions button{background:none;border:0;color:inherit;opacity:.7;font-size:11.5px;text-decoration:underline;cursor:pointer;padding:2px 4px}
+.lx-chips{display:flex;flex-wrap:wrap;gap:7px}
+.lx-chip{display:inline-flex;align-items:center;gap:7px;min-width:42px;justify-content:center;padding:7px 13px;border-radius:999px;border:1px solid rgba(128,128,128,.4);background:transparent;color:inherit;font-size:12.5px;cursor:pointer;transition:.15s}
+.lx-chip:hover{border-color:#b8956a}
+.lx-chip.on{background:#b8956a;border-color:#b8956a;color:#fff;font-weight:600}
+.lx-chip .lx-dot{width:13px;height:13px;border-radius:50%;border:1px solid rgba(128,128,128,.55);flex:none}
+.lx-current-label{font-size:12px;opacity:.75;margin:2px 0 6px;font-weight:600}
 .admin-variant-remove{width:22px; height:22px; border-radius:50%; border:1px solid var(--line); color:var(--ivory-dim); font-size:calc(11px * var(--font-scale)); line-height:1;}
 .admin-variant-remove:hover{border-color:var(--rose-deep); color:var(--rose-deep);}
 .admin-variant-add{display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-top:4px;}
@@ -5448,7 +5462,6 @@ body .lp-preview.lp-preview .lp-picker .lp-picker-pills .pill.selected{backgroun
     <div class="store-toolbar">
       <span class="store-count" id="storeProductCount">0 PRODUITS</span>
       <div class="store-filter-pills" id="storeCategoryPills" role="tablist" aria-label="Catégories"></div>
-      <button type="button" class="store-sort-button" id="storeSortButton">FILTRER <span>⌄</span></button>
     </div>
     <div class="product-grid" id="productGrid"></div>
   </div>
@@ -5596,6 +5609,7 @@ body .lp-preview.lp-preview .lp-picker .lp-picker-pills .pill.selected{backgroun
       <div class="confirm-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
       <h3 class="confirm-title" data-i18n="confirm.title">Votre commande a été confirmée avec succès ❤️</h3>
       <p class="confirm-sub" data-i18n="confirm.subtitle">Merci pour votre confiance en LUXIA Luxury Collection</p>
+      <p class="confirm-contact" data-i18n="confirm.contact">Nous vous contacterons très prochainement pour confirmer votre commande.</p>
       <div class="order-summary" id="confirmSummary"></div>
       <div class="modal-actions">
         <button class="btn btn-ghost btn-block" id="closeAfterConfirm" data-i18n="confirm.close">Fermer</button>
@@ -5870,6 +5884,30 @@ function colorLabel(id, colorId){
   if(!c) return colorId || "";
   return (currentLang==="ar" ? c.ar : c.fr) || c.fr || c.id;
 }
+/* pastille de couleur (cercle) + nom, pour résumé / panier */
+function lxColorDotHTML(id, colorId){
+  try{
+    const v=PRODUCT_VARIANTS[id]||{};
+    const c=getProductColors(id).find(x=>x.id===colorId)||((v.pack&&v.pack.colors)||[]).find(x=>x.id===colorId);
+    const hex=(c&&c.hex)||'#c9a877';
+    return `<i class="lx-cdot" style="background:${String(hex).replace(/[^#a-zA-Z0-9(),.% ]/g,'')}"></i>`;
+  }catch(e){ return ''; }
+}
+function lxColorHexByLabel(label){
+  try{
+    const L=String(label||'').trim().toLowerCase(); if(!L) return '';
+    for(const id in PRODUCT_VARIANTS){
+      const v=PRODUCT_VARIANTS[id]||{};
+      const all=[].concat(v.colors||[],(v.pack&&v.pack.colors)||[]);
+      for(const c of all){
+        if(c&&c.hex&&((c.fr&&String(c.fr).trim().toLowerCase()===L)||(c.ar&&String(c.ar).trim().toLowerCase()===L)||(c.id&&String(c.id).toLowerCase()===L)))
+          return String(c.hex).replace(/[^#a-zA-Z0-9(),.% ]/g,'');
+      }
+    }
+  }catch(e){}
+  return '';
+}
+function lxColorChipHTML(id, colorId){ return colorId ? `<span class="lx-cchip">${lxColorDotHTML(id,colorId)}${escHtml(colorLabel(id,colorId))}</span>` : '—'; }
 
 const I18N = {
   fr: {
@@ -5908,7 +5946,7 @@ const I18N = {
     "cart.title":"Panier","cart.empty":"Votre panier est vide.","cart.emptyCta":"Découvrir la collection",
     "cart.remove":"Supprimer","cart.subtotal":"Sous-total","cart.checkout":"Passer la commande","cart.continue":"Continuer mes achats",
     "checkout.title":"Finaliser la commande","checkout.subtitle":"Complétez vos informations pour recevoir votre commande.",
-    "confirm.title":"Votre commande a été confirmée avec succès ❤️","confirm.subtitle":"Merci pour votre confiance en LUXIA Luxury Collection",
+    "confirm.title":"Votre commande a été confirmée avec succès ❤️","confirm.subtitle":"Merci pour votre confiance en LUXIA Luxury Collection","confirm.contact":"Nous vous contacterons très prochainement pour confirmer votre commande.",
     "confirm.send":"Envoyer les détails via WhatsApp (facultatif)","confirm.close":"Fermer",
     "toast.added":"Ajouté au panier","toast.removed":"Article supprimé","toast.emptyCart":"Votre panier est vide",
     "wa.header":"🛍️ Nouvelle commande LUXIA","wa.orderId":"N° de commande","wa.products":"Produits :","wa.total":"Total","wa.client":"Client :",
@@ -5999,7 +6037,7 @@ const I18N = {
     "cart.title":"السلة","cart.empty":"سلتك فارغة.","cart.emptyCta":"اكتشفي المجموعة",
     "cart.remove":"حذف","cart.subtotal":"المجموع الفرعي","cart.checkout":"إتمام الطلب","cart.continue":"متابعة التسوق",
     "checkout.title":"إتمام الطلب","checkout.subtitle":"أكملي معلوماتك لاستلام طلبك.",
-    "confirm.title":"تم تأكيد طلبك بنجاح ❤️","confirm.subtitle":"شكراً لثقتك بـ LUXIA Luxury Collection",
+    "confirm.title":"تم تأكيد طلبك بنجاح ❤️","confirm.subtitle":"شكراً لثقتك بـ LUXIA Luxury Collection","confirm.contact":"سنتواصل معك في أقرب وقت لتأكيد طلبك.",
     "confirm.send":"إرسال التفاصيل عبر واتساب (اختياري)","confirm.close":"إغلاق",
     "toast.added":"تمت الإضافة إلى السلة","toast.removed":"تم حذف المنتج","toast.emptyCart":"سلتك فارغة",
     "wa.header":"🛍️ طلب جديد من LUXIA","wa.orderId":"رقم الطلب","wa.products":"المنتجات:","wa.total":"المجموع","wa.client":"العميلة:",
@@ -6624,7 +6662,9 @@ function clearProductGalleryTimers(){
 function renderProducts(){
   clearProductGalleryTimers();
   try{ renderOfferBanner(); }catch(e){}
-  const products = getStoreFilteredProducts();
+  const __isOut = p => { const v=PRODUCT_VARIANTS[p.id]; return !!v && typeof v.stock==='number' && v.stock<=0; };
+  /* rupture de stock: le produit reste visible mais passe en fin de collection (tri stable) */
+  const products = getStoreFilteredProducts().slice().sort((a,b)=>__isOut(a)-__isOut(b));
   updateStoreCount(products.length);
 
   /* ---- gift pack cards: only products of a gift collection / with a gift config get the box look ---- */
@@ -6667,7 +6707,8 @@ function renderProducts(){
     const colors=getProductColors(p.id);
     const sizes=getProductSizes(p.id);
     const gift=isGiftProduct(p);
-    return `<article class="product-card${gift?' gp-card':''}" data-product-card="${escAttr(p.id)}"${gift?' data-gift-pack="1"':''}>
+    const out=__isOut(p);
+    return `<article class="product-card${gift?' gp-card':''}${out?' is-soldout':''}" data-product-card="${escAttr(p.id)}"${gift?' data-gift-pack="1"':''}>
       ${gift?giftLidHTML():''}
       <div class="product-title-price-head" data-detail-product="${escAttr(p.id)}">
         <div class="product-title-above">
@@ -6677,6 +6718,7 @@ function renderProducts(){
       ${gift?giftBoxOpen:''}
       <div class="product-visual product-main-click" data-detail-product="${escAttr(p.id)}" data-gallery-index="0" style="touch-action:pan-y;cursor:pointer;">
         <img class="product-photo" src="${escAttr(gallery[0])}" alt="${escAttr(t(p.nameKey))}" loading="lazy">
+        ${out?`<span class="lx-soldout-badge">${t('variant.outOfStock')}</span>`:''}
       </div>
       ${gift?'</div>':''}
       ${gallery.length>1?`<div class="product-gallery-strip" aria-label="صور إضافية للمنتج">
@@ -6686,7 +6728,7 @@ function renderProducts(){
         ${colors.length?`<div class="swatch-row"><span class="swatch-label">${t("product.colors")}</span>${colors.map(c=>`<span class="swatch" style="background:${c.hex||'#c9a877'}" title="${escAttr(currentLang==='ar'?c.ar:c.fr)}"></span>`).join('')}</div>`:''}
         ${sizes.length?`<div class="product-sizes-row"><span class="product-variants-label">${currentLang==='ar'?'المقاسات':'Tailles'}</span>${sizes.map(sz=>`<span class="product-size-chip">${escHtml(sz)}</span>`).join('')}</div>`:''}
         <div class="product-price-only product-price-bottom">${Number(p.price||0)} ${t("unit.dh")}${oldPriceHTML(p.id)}</div>
-        <button class="btn-order" data-product="${escAttr(p.id)}">${t("product.order")}</button>
+        <button class="btn-order" data-product="${escAttr(p.id)}"${out?' disabled aria-disabled="true"':''}>${out?t('variant.outOfStock'):t("product.order")}</button>
       </div>
     </article>`;
   };
@@ -6825,7 +6867,7 @@ function openProductDetailModal(id){
       </div>`:''}
       ${hasPack?packBannerHTML(id,'detail'):''}
       <div class="product-detail-price">${Number(p.price||0)} ${t('unit.dh')}${oldPriceHTML(id)}</div>
-      <button type="button" class="btn btn-primary btn-block product-detail-add" data-detail-add="${escAttr(id)}">${t('product.order')}</button>
+      ${(()=>{const __sv=PRODUCT_VARIANTS[id];return !!__sv&&typeof __sv.stock==='number'&&__sv.stock<=0;})()?`<button type="button" class="btn btn-primary btn-block product-detail-add is-soldout" disabled aria-disabled="true">${t('variant.outOfStock')}</button>`:`<button type="button" class="btn btn-primary btn-block product-detail-add" data-detail-add="${escAttr(id)}">${t('product.order')}</button>`}
     </div>`;
   m.querySelectorAll('[data-detail-image]').forEach(btn=>btn.addEventListener('click',()=>{
     const i=Number(btn.dataset.detailImage), img=m.querySelector('#productDetailMainImage');
@@ -7256,7 +7298,7 @@ function updateVariantSummary(){
   const pack=isPackVariant(), cfg=getPackConfig(currentVariantProduct.id);
   const unitPrice=pack?Number(cfg.price):Number(currentVariantProduct.price)||0;
   const total=unitPrice*variantState.qty;
-  const colorText=pack ? selectedPackColors().map((c,i)=>c?`${t('pack.colorPiece')} ${i+1}: ${colorLabel(currentVariantProduct.id,c)}`:`${t('pack.colorPiece')} ${i+1}: —`).join(' · ') : (variantState.color?colorLabel(currentVariantProduct.id,variantState.color):'—');
+  const colorText=pack ? selectedPackColors().map((c,i)=>c?`<span class="lx-cline">${t('pack.colorPiece')} ${i+1}: ${lxColorChipHTML(currentVariantProduct.id,c)}</span>`:`<span class="lx-cline">${t('pack.colorPiece')} ${i+1}: —</span>`).join('') : (variantState.color?lxColorChipHTML(currentVariantProduct.id,variantState.color):'—');
   document.getElementById('variantSummary').innerHTML=`<div class="row"><span>${t('summary.product')}</span><span>${t(currentVariantProduct.nameKey)}${pack?' · '+t('variant.pack'):''}</span></div><div class="row"><span>${t('summary.color')}</span><span>${colorText}</span></div><div class="row"><span>${t('summary.size')}</span><span>${variantState.size||'—'}</span></div><div class="row"><span>${t('summary.qty')}</span><span>${variantState.qty}</span></div><div class="row total"><span>${t('summary.total')}</span><span>${total} ${t('unit.dh')}</span></div>`;
 }
 function renderVariantPackInfo(){
@@ -7392,7 +7434,7 @@ function renderCart(){
       <div class="cart-item-photo"><img src="${PRODUCT_IMAGES[item.productId]}" alt=""></div>
       <div class="cart-item-info">
         <h4>${t(item.nameKey)}</h4>
-        ${item.isGiftPack===true?luxiaGiftCartMeta(item):`<div class="cart-item-meta">${item.mode==='pack'?t('variant.pack')+' · ':''}${colorTxt}${item.size?` · ${item.size}`:''}${item.packagingPremium>0?`<br><span style="color:#9f8059">🎁 Emballage premium : +${item.packagingPremium} DH</span>`:''}</div>`}
+        ${item.isGiftPack===true?luxiaGiftCartMeta(item):`<div class="cart-item-meta">${item.mode==='pack'?t('variant.pack')+(item.size?` · ${item.size}`:'')+(Array.isArray(item.colors)&&item.colors.length?item.colors.map((c,k)=>`<span class="lx-cline">${currentLang==='ar'?'قطعة':'Pièce'} ${k+1}: ${lxColorChipHTML(item.productId,c)}</span>`).join(''):`<span class="lx-cline">${colorTxt}</span>`):`${currentLang==='ar'?'قطعة واحدة':'1 pièce'}${item.size?` · ${item.size}`:''}${(item.color||(colorTxt&&colorTxt!=='—'))?`<span class="lx-cline">${currentLang==='ar'?'اللون':'Couleur'}: ${item.color?lxColorChipHTML(item.productId,item.color):colorTxt}</span>`:''}`}${item.packagingPremium>0?`<br><span style="color:#9f8059">🎁 Emballage premium : +${item.packagingPremium} DH</span>`:''}</div>`}
         <div class="cart-item-row">
           <div class="cart-item-qty">
             <button type="button" class="qty-btn" data-act="minus">−</button>
@@ -7518,7 +7560,7 @@ function cartSummaryHTML(withTotalOnly){
   const deliveryLabel=checkoutDeliveryType==='casa'?(currentLang==='ar'?'التوصيل إلى الدار البيضاء':'Livraison à Casablanca'):checkoutDeliveryType==='other'?(currentLang==='ar'?'التوصيل خارج الدار البيضاء':'Livraison hors Casablanca'):(currentLang==='ar'?'التوصيل':'Livraison');
   const deliveryTime=checkoutDeliveryType==='casa'?(currentLang==='ar'?'خلال 24 ساعة':'dans 24h'):checkoutDeliveryType==='other'?(currentLang==='ar'?'24–48 ساعة':'24–48h'):'';
   const deliveryFreeNote=(checkoutDeliveryType && delivery===0)?(currentLang==='ar'?' · مجاني':' · gratuit'):'';
-  const productNames=cart.map(i=>`${i.name}${i.colorText?` — ${i.colorText}`:''}${i.size?` / ${i.size}`:''} ×${i.qty}`).join('<br>');
+  const productNames=cart.map(i=>{const _c=(typeof itemColorText==='function'?itemColorText(i):'');return `${escHtml(t(i.nameKey))}${i.mode==='pack'?' · '+t('variant.pack'):''}${_c?` — ${escHtml(_c)}`:''}${i.size?` / ${escHtml(i.size)}`:''} ×${i.qty}`;}).join('<br>');
   return `<div class="row checkout-products-name"><span>${productNames}</span><span>${productsTotal} ${t("unit.dh")}</span></div><div class="row"><span>${deliveryLabel}${deliveryTime?` · ${deliveryTime}`:''}${deliveryFreeNote}</span><span>${delivery?delivery+' '+t("unit.dh"):(checkoutDeliveryType?(currentLang==='ar'?'مجاني':'gratuit'):'—')}</span></div><div class="row total"><span>${currentLang==='ar'?'المجموع النهائي':'Sous-total'}</span><span>${productsTotal+delivery} ${t("unit.dh")}</span></div>`;
 }
 function updateCheckoutSummary(){
@@ -7692,16 +7734,15 @@ function renderAdminLogin(){
     ${adminLanguageSwitcherHTML()}
     <div class="admin-login">
       <h2 style="font-family:var(--font-display); font-size:calc(26px * var(--font-scale)); margin-bottom:8px;">${t("admin.loginTitle")}</h2>
-      <p style="color:var(--ivory-dim); font-size:calc(13px * var(--font-scale)); margin-bottom:18px;">${t("admin.supabaseLoginHint")}</p>
       <div class="field" style="text-align:start;"><label>${t("admin.email")}</label><input type="email" id="adminEmail" autocomplete="username"></div>
       <div class="field" style="text-align:start;"><label>${t("admin.password")}</label><input type="password" id="adminPass" autocomplete="current-password"></div>
       <button class="btn btn-primary btn-block" id="adminLoginBtn">${t("admin.login")}</button>
-      <button type="button" class="btn btn-ghost btn-block" id="adminForgotBtn" style="margin-top:10px; font-size:calc(12.5px * var(--font-scale));">نسيت كلمة السر؟</button>
+      <button type="button" class="btn btn-ghost btn-block" id="adminForgotBtn" style="margin-top:10px; font-size:calc(12.5px * var(--font-scale));">Mot de passe oublié ?</button>
     </div>`;
   document.getElementById("adminForgotBtn").addEventListener("click", async ()=>{
     const email=document.getElementById("adminEmail").value.trim();
-    if(!email){ showToast("دخل الإيميل ديالك أولا"); return; }
-    if(!confirm(`غادي نصيفطو ليك إيميل استرجاع كلمة السر لـ ${email}. متأكد؟`)) return;
+    if(!email){ showToast("Veuillez d’abord saisir votre email"); return; }
+    if(!confirm(`Un email de réinitialisation du mot de passe sera envoyé à ${email}. Continuer ?`)) return;
     const btn=document.getElementById("adminForgotBtn"); btn.disabled=true;
     try{
       const res=await fetch(`${SUPABASE_AUTH_URL}/recover`,{
@@ -7709,8 +7750,8 @@ function renderAdminLogin(){
         body:JSON.stringify({email})
       });
       if(!res.ok){ const d=await res.json().catch(()=>({})); throw new Error(d.error_description||d.msg||d.message||"Recovery failed"); }
-      showToast("تصيفط ليك إيميل استرجاع كلمة السر، شوف البريد ديالك");
-    }catch(err){ console.error(err); showToast("ماقدرناش نصيفطو الإيميل، عاود جرب من بعد"); }
+      showToast("Email de réinitialisation envoyé. Vérifiez votre boîte mail.");
+    }catch(err){ console.error(err); showToast("Impossible d’envoyer l’email. Réessayez plus tard."); }
     finally{ btn.disabled=false; }
   });
   document.getElementById("adminLoginBtn").addEventListener("click", async ()=>{
@@ -7774,12 +7815,20 @@ async function renderAdminOrders(){
     html += orders.map(o=>{
       const statusIdx = STATUS_IDS.indexOf(o.status);
       const unread = !isOrderSeen(o.id);
-      const itemsHtml = (o.items||[]).map(i=>`<div class="row"><span>${escHtml(i.name)} — ${escHtml(i.color)} — ${escHtml(i.size)} ×${i.qty}</span><span>${i.price*i.qty} ${t("unit.dh")}</span></div>`).join("");
+      const itemsHtml = (o.items||[]).map(i=>{
+        /* Affichage admin : une pièce par ligne avec pastille de couleur (lecture seule, données de la commande inchangées) */
+        const colorStr=String(i.color||'').trim();
+        const packLike=i.type==='pack'||/^pack\b/i.test(String(i.name||''))||colorStr.indexOf(' + ')>-1;
+        const pieces=colorStr?(packLike?colorStr.split(' + '):[colorStr]):[];
+        const chip=lbl=>{const hx=lxColorHexByLabel(lbl);return `<span class="lx-cchip">${hx?`<i class="lx-cdot" style="background:${hx}"></i>`:''}${escHtml(lbl)}</span>`;};
+        const colorsHtml=pieces.map((c,k)=>`<span class="lx-cline">${packLike?`${currentLang==='ar'?'قطعة':'Pièce'} ${k+1}: `:`${currentLang==='ar'?'اللون':'Couleur'}: `}${chip(c.trim())}</span>`).join('');
+        return `<div class="row"><span><b>${escHtml(i.name)}</b>${i.size?` — ${escHtml(i.size)}`:''} ×${i.qty}${colorsHtml}</span><span>${i.price*i.qty} ${t("unit.dh")}</span></div>`;
+      }).join("");
       return `
       <div class="admin-order ${unread?'admin-order-unread':''}" data-order-card="${escAttr(o.id)}">
         <div class="admin-order-head" data-order="${escAttr(o.id)}">
           <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><b>${escHtml(o.id)}</b> — ${escHtml(o.customer.name)} — ${new Date(o.date).toLocaleString()} ${unread ? `<span class="admin-new-dot">${t("admin.unread")}</span>` : ""}</div>
-          <span class="admin-status">${t(STATUS_KEYS[statusIdx]||"status.new")}</span>
+          <span class="admin-status st-${escAttr(o.status||'new')}">${t(STATUS_KEYS[statusIdx]||"status.new")}</span>
         </div>
         <div class="admin-order-body" id="body-${escAttr(o.id)}">
           <div class="row"><span>${t("wa.phone")}</span><span>${escHtml(o.customer.phone)}</span></div>
@@ -9290,7 +9339,8 @@ ${sizesSectionHTML}
     const refreshCartUI=()=>{
       const live=document.getElementById('lp-cart-live'),count=document.getElementById('lp-cart-count');
       const items=[];
-      mainCartItems.forEach((item,i)=>items.push(`<div class="lp-cart-item"><div><div class="lp-cart-item-name">${escHtml(mainProductName)}</div><div class="lp-cart-item-meta">${item.mode==='pack'?'Pack':'1 '+(lang==='ar'?'قطعة':'pièce')} · ${item.price}dh${item.colorText?` · ${escHtml(item.colorText)}`:''}${item.size?` · ${escHtml(item.size)}`:''}</div></div><span class="gx-lp-actions"><button type="button" class="lp-cart-edit" data-cart-edit-main="${i}">${lang==='ar'?'تعديل':'Modifier'}</button><button type="button" class="lp-cart-remove" data-cart-remove-main="${i}">${lang==='ar'?'حذف':'Supprimer'}</button></span></div>`));
+      const __lpChip=(cid)=>{const c=(mainVariants&&mainVariants.colors||[]).find(x=>x.id===cid);const hex=String((c&&c.hex)||'#c9a877').replace(/[^#a-zA-Z0-9(),.% ]/g,'');return `<span class="lx-cchip"><i class="lx-cdot" style="background:${hex}"></i>${escHtml(c?((lang==='ar'?c.ar:c.fr)||c.fr||c.id):(cid||''))}</span>`;};
+      mainCartItems.forEach((item,i)=>items.push(`<div class="lp-cart-item"><div><div class="lp-cart-item-name">${escHtml(mainProductName)}</div><div class="lp-cart-item-meta">${item.mode==='pack'?'Pack':'1 '+(lang==='ar'?'قطعة':'pièce')} · ${item.price}dh${item.size?` · ${escHtml(item.size)}`:''}${(item.mode==='pack'&&Array.isArray(item.colors)&&item.colors.length)?item.colors.map((cid,k)=>`<span class="lx-cline">${lang==='ar'?'قطعة':'Pièce'} ${k+1}: ${__lpChip(cid)}</span>`).join(''):(item.color?`<span class="lx-cline">${lang==='ar'?'اللون':'Couleur'}: ${__lpChip(item.color)}</span>`:(item.colorText?`<span class="lx-cline">${lang==='ar'?'اللون':'Couleur'}: ${escHtml(item.colorText)}</span>`:''))}</div></div><span class="gx-lp-actions"><button type="button" class="lp-cart-edit" data-cart-edit-main="${i}">${lang==='ar'?'تعديل':'Modifier'}</button><button type="button" class="lp-cart-remove" data-cart-remove-main="${i}">${lang==='ar'?'حذف':'Supprimer'}</button></span></div>`));
       if(p2Added)items.push(`<div class="lp-cart-item"><div><div class="lp-cart-item-name">${escHtml(product2Name)}</div><div class="lp-cart-item-meta">${p2price}dh${p2HasVariants?` · ${escHtml(summaryText(p2Variants,p2HasColors,p2Pack,p2HasSizes,p2State))}`:''}</div></div><span class="gx-lp-actions"><button type="button" class="lp-cart-edit" id="lp-cart-edit-p2">${lang==='ar'?'تعديل':'Modifier'}</button><button type="button" class="lp-cart-remove" id="lp-cart-remove-p2">${lang==='ar'?'حذف':'Supprimer'}</button></span></div>`);
       const cartTotalNow=mainCartItems.reduce((s,i)=>s+i.price*i.qty,0)+(p2Added?p2price:0);
       if(live)live.innerHTML=items.join('')||`<div class="lp-cart-empty">${lang==='ar'?'السلة فارغة':'Votre panier est vide'}</div>`;
@@ -9678,7 +9728,7 @@ function renderAdminProducts(){
     return `<div class="admin-product-card">
       <button type="button" class="admin-product-summary" data-prod="${escAttr(p.id)}">
         <span class="admin-product-thumb">${PRODUCT_IMAGES[p.id]?`<img src="${escAttr(PRODUCT_IMAGES[p.id])}" alt="">`:''}</span>
-        <span class="admin-product-summary-main"><b>${escHtml(I18N.fr[p.nameKey]||I18N.ar[p.nameKey]||p.id)}</b><small>${p.price||0} ${t('unit.dh')} · ${collectionId?escHtml(collectionName(collectionId,currentLang)):t('admin.noCollection')}</small></span>
+        <span class="admin-product-summary-main"><b>${escHtml(I18N.fr[p.nameKey]||I18N.ar[p.nameKey]||p.id)}</b><small>${p.price||0} ${t('unit.dh')} · ${collectionId?escHtml(collectionName(collectionId,currentLang)):t('admin.noCollection')}${v.stock===0?(currentLang==='ar'?' · ⛔ نفدت الكمية':' · ⛔ Rupture'):''}</small></span>
         <span class="admin-status ${enabled?'is-on':'is-off'}">${enabled?t('admin.enabled'):t('admin.disabled')}</span>
         <span class="admin-product-chevron">${isOpen?'⌃':'⌄'}</span>
       </button>
@@ -9694,29 +9744,19 @@ function renderAdminProducts(){
                 <label>${t('admin.catalogTypeLabel')}</label>
                 <select id="pf-catalog-type-${p.id}">
                   <option value="" ${!collectionId?'selected':''}>${t('admin.chooseCollection')}</option>
-                  <option value="pyjama" ${collectionId==='pyjama'?'selected':''}>${t('admin.catalogTypePyjama')}</option>
-                  <option value="lingerie" ${collectionId==='lingerie'?'selected':''}>${t('admin.catalogTypeLingerie')}</option>
-                  <option value="accessoires" ${collectionId==='accessoires'?'selected':''}>${t('admin.catalogTypeAccessoires')}</option>
-                  <option value="custom" ${collectionId && !['pyjama','lingerie','accessoires'].includes(collectionId)?'selected':''}>${t('admin.catalogTypeCustom')}</option>
+                  ${collections.map(c=>`<option value="${escAttr(c.id)}" ${c.id===collectionId?'selected':''}>${escHtml(c[currentLang]||c.fr||c.ar||c.id)}</option>`).join('')}
                 </select>
               </div>
-            </div>
-            <div class="field" id="pf-custom-collection-wrap-${p.id}" style="${collectionId && !['pyjama','lingerie','accessoires'].includes(collectionId)?'':'display:none;'}">
-              <label>${t('admin.customCollectionLabel')}</label>
-              <select id="pf-custom-collection-${p.id}">
-                <option value="">${t('admin.chooseCollection')}</option>
-                ${collections.filter(c=>!['pyjama','lingerie','accessoires'].includes(c.id)).map(c=>`<option value="${escAttr(c.id)}" ${c.id===collectionId?'selected':''}>${escHtml(c[currentLang]||c.fr||c.ar)}</option>`).join('')}
-              </select>
-              <small class="admin-help">${t('admin.customCollectionHint')}</small>
             </div>
             <div class="admin-two-col"><div class="field"><label>${t('admin.field.descFr')}</label><textarea id="pf-desc-fr-${p.id}">${escHtml(I18N.fr[p.descKey]||'')}</textarea></div><div class="field"><label>${t('admin.field.descAr')}</label><textarea id="pf-desc-ar-${p.id}">${escHtml(I18N.ar[p.descKey]||'')}</textarea></div></div>
             <div class="admin-two-col"><div class="field"><label>${t('admin.field.badgeFr')}</label><input type="text" id="pf-badge-fr-${p.id}" value="${escAttr(I18N.fr[p.badgeKey]||'')}"></div><div class="field"><label>${t('admin.field.badgeAr')}</label><input type="text" id="pf-badge-ar-${p.id}" value="${escAttr(I18N.ar[p.badgeKey]||'')}"></div></div>
             <div class="field"><label>${t('admin.field.video')}</label><input type="text" id="pf-video-${p.id}" value="${escAttr(p.video||'')}" placeholder="https://.../video.mp4" style="direction:ltr;text-align:left;"></div>
             <div class="field"><label>${t('admin.videoUploadLabel')}</label><input type="file" accept="video/*" id="pf-video-file-${p.id}"><span id="pf-video-status-${p.id}" class="admin-upload-status"></span></div>
-            <div class="admin-toggle-row"><label><input type="checkbox" id="pf-enabled-${p.id}" ${(enabled||v.unassigned)?'checked':''}> <span>${t('admin.field.enabled')}</span></label><div class="field admin-stock"><label>${t('admin.field.stock')}</label><input type="number" min="0" step="1" id="pf-stock-${p.id}" placeholder="${t('admin.field.stockPlaceholder')}" value="${v.stock==null?'':v.stock}"></div></div>
+            <div class="admin-toggle-row"><label><input type="checkbox" id="pf-enabled-${p.id}" ${(enabled||v.unassigned)?'checked':''}> <span>${t('admin.field.enabled')}</span></label><div class="field admin-stock"><label>${t('admin.field.stock')}</label><input type="number" min="0" step="1" id="pf-stock-${p.id}" placeholder="${t('admin.field.stockPlaceholder')}" value="${v.stock==null?'':v.stock}"><label class="admin-soldout-toggle"><input type="checkbox" id="pf-soldout-${p.id}" ${v.stock===0?'checked':''}> <span>${currentLang==='ar'?'نفدت الكمية (Rupture de stock)':'Rupture de stock'}</span></label></div></div>
           </section>
 
           <section class="admin-section-card"><div class="admin-section-title"><span>02</span><div><h3>${t('admin.variantsTitle')}</h3><p>${t('admin.variantsHint')}</p></div></div>
+            ${lxVariantPresetHTML(p.id)}
             <div class="admin-variant-block"><div class="admin-block-head"><strong>${t('admin.colors.title')}</strong><small>${t('admin.onlyConfiguredHint')}</small></div><div class="admin-variant-list" id="colorlist-${p.id}">${v.colors.map(c=>`<div class="admin-variant-pill"><input type="text" class="admin-variant-input" data-colorfield="fr" data-pid="${p.id}" data-cid="${c.id}" value="${escAttr(c.fr)}" placeholder="${t('admin.colorFr')}"><input type="text" class="admin-variant-input" data-colorfield="ar" data-pid="${p.id}" data-cid="${c.id}" value="${escAttr(c.ar)}" placeholder="${t('admin.colorAr')}"><input type="color" data-colorfield="hex" data-pid="${p.id}" data-cid="${c.id}" value="${c.hex||'#c9a877'}"><button type="button" class="admin-variant-remove" data-removecolor="${p.id}:${c.id}">🗑️</button></div>`).join('')}</div><div class="admin-variant-add"><input type="text" id="newcolor-fr-${p.id}" placeholder="${t('admin.colorFr')}"><input type="text" id="newcolor-ar-${p.id}" placeholder="${t('admin.colorAr')}"><input type="color" id="newcolor-hex-${p.id}" value="#c9a877"><button type="button" class="btn btn-ghost" data-addcolor="${p.id}">${t('admin.addColor')}</button></div></div>
             <div class="admin-variant-block"><div class="admin-block-head"><strong>${t('admin.sizes.title')}</strong><small>${t('admin.onlyConfiguredHint')}</small></div><div class="admin-variant-list" id="sizelist-${p.id}">${v.sizes.map(sz=>`<div class="admin-variant-pill"><input type="text" class="admin-variant-input" data-sizeold="${escAttr(sz)}" data-pid="${p.id}" value="${escAttr(sz)}" style="width:74px"><button type="button" class="admin-variant-remove" data-removesize="${p.id}:${escAttr(sz)}">🗑️</button></div>`).join('')}</div><div class="admin-variant-add"><input type="text" id="newsize-${p.id}" placeholder="${t('admin.newSize')}" style="width:100px"><button type="button" class="btn btn-ghost" data-addsize="${p.id}">${t('admin.addSize')}</button></div></div>
           </section>
@@ -9783,7 +9823,70 @@ function bindAdminPackEvents(){
   document.querySelectorAll('[data-removepacksize]').forEach(btn=>btn.addEventListener('click',()=>{const i=btn.dataset.removepacksize.indexOf(':'),id=btn.dataset.removepacksize.slice(0,i),sz=btn.dataset.removepacksize.slice(i+1),v=PRODUCT_VARIANTS[id];if(v?.pack?.sizes)v.pack.sizes=v.pack.sizes.filter(x=>x!==sz);openProductId=id;renderAdminProducts();}));
 }
 
+
+/* ============================================================
+   LX PRESETS — tailles / pointures / couleurs de base à cocher
+   (par produit, fonctionne pour produits existants et nouveaux ;
+   seuls les choix cochés sont envoyés au client)
+   ============================================================ */
+const LX_SIZES_LETTERS=["XS","S","M","L","XL","XXL","3XL","4XL"];
+const LX_SIZES_SHOES=["35","36","37","38","39","40","41","42","43","44","45","46"];
+const LX_SIZE_ORDER=LX_SIZES_LETTERS.concat(LX_SIZES_SHOES);
+const LX_COLOR_PRESETS=[
+  {id:"noir",fr:"Noir",ar:"أسود",hex:"#1a1a1a"},{id:"blanc",fr:"Blanc",ar:"أبيض",hex:"#f4ede4"},
+  {id:"beige",fr:"Beige",ar:"بيج",hex:"#c9a877"},{id:"creme",fr:"Crème",ar:"كريمي",hex:"#f3e6c8"},
+  {id:"gris",fr:"Gris",ar:"رمادي",hex:"#8c8c8c"},{id:"marron",fr:"Marron",ar:"بني",hex:"#6b4423"},
+  {id:"rouge",fr:"Rouge",ar:"أحمر",hex:"#c8102e"},{id:"rose",fr:"Rose",ar:"وردي",hex:"#e8a0b4"},
+  {id:"bordeaux",fr:"Bordeaux",ar:"عنابي",hex:"#6d1a2c"},{id:"marine",fr:"Bleu marine",ar:"كحلي",hex:"#1b2a49"},
+  {id:"ciel",fr:"Bleu ciel",ar:"أزرق سماوي",hex:"#8ec5e8"},{id:"vert",fr:"Vert",ar:"أخضر",hex:"#2e7d4f"},
+  {id:"kaki",fr:"Kaki",ar:"كاكي",hex:"#78794a"},{id:"jaune",fr:"Jaune",ar:"أصفر",hex:"#f2c230"},
+  {id:"orange",fr:"Orange",ar:"برتقالي",hex:"#e87722"},{id:"violet",fr:"Violet",ar:"بنفسجي",hex:"#6f3d8f"}
+];
+function lxN(s){return String(s==null?'':s).trim().toLowerCase();}
+function lxFindColor(v,p){return (v.colors||[]).find(c=>c.id===p.id||lxN(c.fr)===lxN(p.fr)||lxN(c.ar)===lxN(p.ar));}
+function lxHasSize(v,s){return (v.sizes||[]).some(x=>lxN(x)===lxN(s));}
+function lxSortSizes(arr){
+  const pre=LX_SIZE_ORDER.filter(s=>arr.some(x=>lxN(x)===lxN(s)));
+  const rest=arr.filter(x=>!LX_SIZE_ORDER.some(s=>lxN(s)===lxN(x)));
+  return pre.concat(rest);
+}
+function lxSortColors(arr){
+  const pre=[];LX_COLOR_PRESETS.forEach(p=>arr.forEach(c=>{if((c.id===p.id||lxN(c.fr)===lxN(p.fr)||lxN(c.ar)===lxN(p.ar))&&!pre.includes(c))pre.push(c);}));
+  return pre.concat(arr.filter(c=>!pre.includes(c)));
+}
+function lxVariantPresetHTML(id){
+  const v=PRODUCT_VARIANTS[id]||{colors:[],sizes:[]};
+  const sizeChips=list=>list.map(s=>`<button type="button" class="lx-chip${lxHasSize(v,s)?' on':''}" data-lx-size="${escAttr(s)}" data-pid="${escAttr(id)}">${escHtml(s)}</button>`).join('');
+  const grp=(key,titre,chips)=>`<div class="lx-group"><div class="lx-group-head"><b>${titre}</b><span class="lx-group-actions"><button type="button" data-lx-act="all" data-lx-group="${key}" data-pid="${escAttr(id)}">Tout cocher · الكل</button><button type="button" data-lx-act="none" data-lx-group="${key}" data-pid="${escAttr(id)}">Tout effacer · مسح</button></span></div><div class="lx-chips">${chips}</div></div>`;
+  const colorChips=LX_COLOR_PRESETS.map(p=>`<button type="button" class="lx-chip${lxFindColor(v,p)?' on':''}" data-lx-color="${p.id}" data-pid="${escAttr(id)}"><span class="lx-dot" style="background:${p.hex}"></span>${escHtml(p.fr)} · ${escHtml(p.ar)}</button>`).join('');
+  return `<div class="lx-presets"><p class="lx-presets-hint">Cochez ce que vous voulez vendre : seuls les choix cochés sont visibles pour le client. · حدد غير اللي بغيتي، الزبون كيشوف غير اللي حددتي. N'oubliez pas <b>Enregistrer</b> en bas.</p>
+    ${grp('letters','Tailles · المقاسات',sizeChips(LX_SIZES_LETTERS))}
+    ${grp('shoes','Pointures · مقاسات الأحذية',sizeChips(LX_SIZES_SHOES))}
+    ${grp('colors','Couleurs de base · الألوان الأساسية',colorChips)}
+    <div class="lx-current-label">Sélection actuelle (modifiable) · الاختيار الحالي</div></div>`;
+}
+function lxRefresh(id){const y=window.scrollY;openProductId=id;renderAdminProducts();requestAnimationFrame(()=>window.scrollTo(0,y));}
+function lxBindPresets(){
+  document.querySelectorAll('[data-lx-size]').forEach(b=>b.addEventListener('click',e=>{
+    e.stopPropagation();const id=b.dataset.pid,s=b.dataset.lxSize,v=PRODUCT_VARIANTS[id];if(!v)return;
+    v.sizes=lxHasSize(v,s)?v.sizes.filter(x=>lxN(x)!==lxN(s)):lxSortSizes(v.sizes.concat([s]));lxRefresh(id);}));
+  document.querySelectorAll('[data-lx-color]').forEach(b=>b.addEventListener('click',e=>{
+    e.stopPropagation();const id=b.dataset.pid,p=LX_COLOR_PRESETS.find(x=>x.id===b.dataset.lxColor),v=PRODUCT_VARIANTS[id];if(!v||!p)return;
+    const ex=lxFindColor(v,p);
+    v.colors=ex?v.colors.filter(c=>c!==ex):lxSortColors(v.colors.concat([{id:p.id,fr:p.fr,ar:p.ar,hex:p.hex}]));lxRefresh(id);}));
+  document.querySelectorAll('[data-lx-act]').forEach(b=>b.addEventListener('click',e=>{
+    e.stopPropagation();const id=b.dataset.pid,v=PRODUCT_VARIANTS[id],all=b.dataset.lxAct==='all',g=b.dataset.lxGroup;if(!v)return;
+    if(g==='colors'){
+      v.colors=all?lxSortColors(v.colors.concat(LX_COLOR_PRESETS.filter(p=>!lxFindColor(v,p)).map(p=>({id:p.id,fr:p.fr,ar:p.ar,hex:p.hex})))):v.colors.filter(c=>!LX_COLOR_PRESETS.some(p=>lxFindColor({colors:[c]},p)));
+    }else{
+      const list=g==='letters'?LX_SIZES_LETTERS:LX_SIZES_SHOES;
+      v.sizes=all?lxSortSizes(v.sizes.concat(list.filter(s=>!lxHasSize(v,s)))):v.sizes.filter(x=>!list.some(s=>lxN(s)===lxN(x)));
+    }
+    lxRefresh(id);}));
+}
+
 async function bindProductVariantEvents(){
+  lxBindPresets();
   document.querySelectorAll("[data-addcolor]").forEach(btn=>{
     btn.addEventListener("click", async (e)=>{
       e.stopPropagation();
@@ -9813,7 +9916,7 @@ async function bindProductVariantEvents(){
     btn.addEventListener("click", async (e)=>{
       e.stopPropagation();
       const [id, cid] = btn.dataset.removecolor.split(":");
-      if(PRODUCT_VARIANTS[id].colors.length<=1) return;
+      
       const oldColors = PRODUCT_VARIANTS[id].colors.slice();
       PRODUCT_VARIANTS[id].colors = PRODUCT_VARIANTS[id].colors.filter(c=>c.id!==cid);
       try{
@@ -9869,7 +9972,7 @@ async function bindProductVariantEvents(){
       e.stopPropagation();
       const idx = btn.dataset.removesize.indexOf(":");
       const id = btn.dataset.removesize.slice(0, idx), size = btn.dataset.removesize.slice(idx+1);
-      if(PRODUCT_VARIANTS[id].sizes.length<=1) return;
+      
       const oldSizes = PRODUCT_VARIANTS[id].sizes.slice();
       PRODUCT_VARIANTS[id].sizes = PRODUCT_VARIANTS[id].sizes.filter(s=>s!==size);
       try{
@@ -11602,6 +11705,39 @@ body.luxia-store-home .product-grid .product-card.gp-card{
 .cart-success-toast .cart-success-actions{flex-wrap:nowrap !important;gap:8px !important;}
 .cart-success-toast .cart-success-action{flex:1 1 0;min-width:0;padding:10px 8px !important;font-size:12px !important;white-space:nowrap;text-align:center;}
 </style>
+<style id="luxia-store-head-clean-v19">
+/* En-tête boutique : fil d'Ariane + badge « DROP 01 » retirés, espace réduit */
+body.luxia-store-home .store-breadcrumb,
+body.luxia-store-home .store-drop-badge{display:none !important;}
+body.luxia-store-home .collection{padding-top:26px !important;}
+body.luxia-store-home .store-heading{padding-top:0 !important;}
+@media(min-width:900px){body.luxia-store-home .collection{padding-top:44px !important;}}
+</style>
+<script id="luxia-newest-first-v20">
+/* Produits ajoutés depuis l'admin : le plus récent s'affiche en premier dans sa collection.
+   La date de création est lue dans l'identifiant (prod + horodatage) ; les produits d'origine gardent leur ordre, après. */
+(function(){
+  function ts(p){
+    var m=/^prod([0-9a-z]{8})[0-9a-z]*$/.exec(String(p&&p.id||''));
+    if(!m) return 0;
+    var n=parseInt(m[1],36);
+    return (n>1.4e12&&n<4e12)?n:0;
+  }
+  var _g=window.getStoreFilteredProducts;
+  if(typeof _g!=='function') return;
+  window.getStoreFilteredProducts=function(){
+    var list=_g.apply(this,arguments);
+    if(!Array.isArray(list)) return list;
+    return list.map(function(p,i){return {p:p,i:i,t:ts(p)};})
+      .sort(function(a,b){
+        if(a.t&&b.t) return b.t-a.t;
+        if(a.t) return -1;
+        if(b.t) return 1;
+        return a.i-b.i;
+      }).map(function(x){return x.p;});
+  };
+})();
+</script>
 <script id="luxia-gift-theme-js">
 (function(){
   window.luxiaIsGiftId=function(id){
@@ -11684,6 +11820,119 @@ body.luxia-store-home .product-grid .product-card.gp-card{
 })();
 </script>
 
+<style id="luxia-store-toolbar-polish">
+/* Toolbar: compteur dans le flux, filtre supprimé, collections visibles en entier sur plusieurs lignes (plus de défilement) */
+body.luxia-store-home .store-toolbar{margin-top:30px;row-gap:12px;}
+body.luxia-store-home .store-count{position:static!important;margin:0!important;}
+body.luxia-store-home .store-sort-button{display:none!important;}
+body.luxia-store-home .store-filter-pills{flex-wrap:wrap;overflow:visible;gap:8px;}
+@media(max-width:520px){
+  body.luxia-store-home .store-toolbar{grid-template-columns:1fr;}
+  body.luxia-store-home .store-count{grid-row:1;grid-column:1;justify-self:end;}
+  body.luxia-store-home .store-filter-pills{grid-row:2;grid-column:1;gap:7px;}
+  body.luxia-store-home .store-filter{padding:9px 13px;font-size:10px;letter-spacing:.09em;}
+}
+@media(min-width:521px){body.luxia-store-home .store-filter-pills{grid-column:2;}}
+</style>
+<style id="luxia-price-soldout-polish">
+/* Prix + ancien prix : chiffres seuls (sans cadre), taille proportionnelle à la carte */
+body.luxia-store-home .product-card:not(.gp-card) .product-info .product-price-bottom,
+#productDetailOverlay .product-detail-modal:not(.gp-themed) .product-detail-price{
+  display:block!important;width:100%!important;max-width:100%!important;box-sizing:border-box!important;
+  background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important;text-shadow:none!important;
+  margin:0 auto 10px!important;padding:2px 0!important;
+  color:#7a5a26!important;font-weight:700!important;line-height:1.15!important;letter-spacing:.01em;
+  text-align:center!important;white-space:nowrap!important;
+  font-size:clamp(18px,5.2vw,23px)!important;
+}
+#productDetailOverlay .product-detail-modal:not(.gp-themed) .product-detail-price{font-size:clamp(22px,6vw,28px)!important;margin-bottom:12px!important;}
+body.luxia-store-home .product-card:not(.gp-card) .product-info .product-price-bottom .lx-old-price,
+#productDetailOverlay .product-detail-modal:not(.gp-themed) .product-detail-price .lx-old-price{
+  color:#8b8174!important;opacity:1!important;font-size:.62em!important;font-weight:400!important;letter-spacing:.02em;
+  margin-inline-start:6px!important;text-decoration-line:line-through!important;
+  text-decoration-color:rgba(122,90,38,.75)!important;text-decoration-thickness:1px!important;
+}
+@media(min-width:900px){body.luxia-store-home .product-card:not(.gp-card) .product-info .product-price-bottom{font-size:24px!important;}}
+/* Rupture de stock : visible mais non achetable */
+body.luxia-store-home .product-card.is-soldout .product-visual{position:relative;}
+body.luxia-store-home .product-card.is-soldout .product-photo{filter:grayscale(.6);opacity:.78;}
+.lx-soldout-badge{position:absolute;top:10px;inset-inline-start:10px;z-index:3;padding:5px 11px;border-radius:999px;background:rgba(41,38,34,.92);color:#fffdf8;font-size:10px;letter-spacing:.12em;text-transform:uppercase;line-height:1.2;pointer-events:none;}
+body.luxia-store-home .product-card.is-soldout .btn-order:disabled,
+body.luxia-store-home .product-card.is-soldout.gp-card .btn-order:disabled,
+.product-detail-add.is-soldout:disabled{background:#d9d3ca!important;color:#7c746a!important;border:1px solid #cfc7bb!important;box-shadow:none!important;cursor:not-allowed!important;opacity:1!important;}
+.admin-soldout-toggle{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:13px;cursor:pointer;}
+.admin-soldout-toggle input{width:auto;}
+</style>
+<script id="luxia-admin-soldout-sync">
+(function(){
+  /* Admin : la case « Rupture de stock » met le stock à 0 ; décocher remet le champ vide (stock illimité). */
+  document.addEventListener('change',function(e){
+    var el=e.target; if(!el||!el.id||el.id.indexOf('pf-soldout-')!==0) return;
+    var st=document.getElementById('pf-stock-'+el.id.slice('pf-soldout-'.length)); if(!st) return;
+    if(el.checked) st.value='0'; else if(st.value==='0') st.value='';
+  });
+  document.addEventListener('input',function(e){
+    var el=e.target; if(!el||!el.id||el.id.indexOf('pf-stock-')!==0) return;
+    var cb=document.getElementById('pf-soldout-'+el.id.slice('pf-stock-'.length)); if(cb) cb.checked=(el.value.trim()==='0');
+  });
+})();
+</script>
+<style id="luxia-readability-polish">
+/* Résumé du pack : une pièce par ligne, alignée proprement */
+#variantSummary .row > span:last-child{text-align:end;line-height:1.7;}
+/* Texte de livraison plus grand (panier du site, landing pages, panier landing) — les chiffres gardent leur taille */
+.luxia-shipping-info > div > span:first-child,
+.lp-shipping-info > div > span:first-child{font-size:15px!important;line-height:1.45!important;}
+.luxia-shipping-info p,
+.lp-shipping-info p{font-size:13px!important;line-height:1.55!important;}
+.luxia-shipping-info strong,
+.lp-shipping-info strong{font-size:12px!important;}
+@media(max-width:520px){
+  .luxia-shipping-info > div > span:first-child,
+  .lp-shipping-info > div > span:first-child{font-size:14px!important;}
+  .luxia-shipping-info p,
+  .lp-shipping-info p{font-size:12.5px!important;}
+  .luxia-shipping-info strong,
+  .lp-shipping-info strong{font-size:10.5px!important;}
+}
+</style>
+<style id="luxia-color-dots">
+.lx-cdot{display:inline-block;width:13px;height:13px;border-radius:50%;border:1px solid rgba(41,38,34,.35);box-shadow:0 0 0 1px rgba(255,255,255,.7);vertical-align:-2px;margin-inline-end:6px;flex:none;}
+.lx-cchip{display:inline-flex;align-items:center;white-space:nowrap;}
+.lx-cline{display:block;margin-top:3px;}
+#variantSummary .row > span:last-child .lx-cline{display:block;}
+</style>
+
+<style id="luxia-fixes">
+/* ADMIN : statut "Nouvelle commande" en vert */
+.admin-status.st-new{background:#e7f6ec!important;border-color:#3ea463!important;color:#1f7a42!important;font-weight:700!important;}
+.admin-status.st-confirmed{background:#eaf1fb!important;border-color:#5b8fd6!important;color:#2f5fa8!important;}
+.admin-status.st-shipped{background:#fff4e0!important;border-color:#e0a042!important;color:#9a6410!important;}
+.admin-status.st-delivered{background:#f0f0f0!important;border-color:#9a9a9a!important;color:#555!important;}
+.admin-status.st-cancelled{background:#fdeaea!important;border-color:#d96b6b!important;color:#a53a3a!important;}
+/* CONFIRMATION : message de contact */
+.confirm-contact{text-align:center;margin:6px 0 14px;font-size:calc(14px * var(--font-scale));font-weight:600;color:#8f6f3f;line-height:1.5;}
+/* FENETRE AJOUTER AU PANIER : tout visible sans défiler */
+#variantOverlay .modal{max-height:100svh!important;padding:14px 16px 12px!important;overflow-y:auto;}
+#variantOverlay .modal-head{margin-bottom:4px!important;}
+#variantOverlay .modal-head h3{font-size:calc(19px * var(--font-scale))!important;margin:0!important;}
+#variantOverlay .modal-sub{display:none!important;}
+#variantOverlay .field{margin-bottom:8px!important;}
+#variantOverlay .field label{margin-bottom:4px!important;font-size:calc(11px * var(--font-scale))!important;}
+#variantOverlay .select-pill-row{gap:6px 8px!important;}
+#variantOverlay .pill.color-pill.variant-color-option .variant-color-circle{width:22px!important;height:22px!important;}
+#variantOverlay #sizePills .pill{min-width:34px!important;height:32px!important;padding:4px 9px!important;}
+#variantOverlay .qty-btn{width:32px!important;height:32px!important;}
+#variantOverlay #variantPackInfo,#variantOverlay #variantSummary{padding:8px 12px!important;margin:6px 0!important;font-size:calc(12px * var(--font-scale))!important;}
+#variantOverlay #variantSummary .row{padding:2px 0!important;}
+#variantOverlay .modal-actions{position:sticky;bottom:0;margin-top:6px!important;padding-top:6px;z-index:5;}
+#variantOverlay .modal-actions .btn{padding-top:12px!important;padding-bottom:12px!important;}
+@media (max-height:720px){
+  #variantOverlay .modal{padding:10px 14px 10px!important;}
+  #variantOverlay .field{margin-bottom:5px!important;}
+  #variantOverlay #variantSummary .row:not(.total){display:none!important;}
+}
+</style>
 </body>
 
 
