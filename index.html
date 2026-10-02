@@ -9579,7 +9579,10 @@ document.getElementById('lp-cart-drawer')?.addEventListener('click',e=>{if(e.tar
         const item={mode:'piece',price:r.unitPrice,basePrice:r.basePrice,packagingPremium:r.packagingPremium,packagingPremiumTotal:r.packagingPremium,color:null,colors:null,colorText:'',size:r.summary,qty:1,isGiftPack:true,giftSel:{sel:r.sel,msg:r.msg,hide:r.hidePrice,wrap:r.wrap}};
         const same=mainCartItems.find(i=>i.isGiftPack===true&&i.size===item.size&&i.price===item.price); if(same) same.qty+=1; else mainCartItems.push(item);
         mainGiftState.sel={};mainGiftState.msg='';mainGiftState.hide=false;mainGiftState.wrap=false;mainOpen=false;showForm=false;paint();
-        setTimeout(()=>{window.scrollTo({top:0,behavior:'smooth'});showCartSuccessToast(lang==='ar'?'ar':'fr');const d=document.getElementById('lp-cart-drawer');if(d){d.classList.add('open');d.setAttribute('aria-hidden','false');refreshCartUI();}},80); return;
+        /* Pack Cadeau (landing): do NOT force-open the cart drawer after adding.
+           The customer can add another choice ("Ajouter un autre choix") or tap
+           "Finaliser la commande"; the toast still offers "Voir le panier". */
+        setTimeout(()=>{showCartSuccessToast(lang==='ar'?'ar':'fr');document.getElementById('lp-confirm-btn')?.scrollIntoView({behavior:'smooth',block:'center'});},80); return;
       }
       const effectivePack=mainPackEnabled && mainState.purchaseMode==='pack' ? mainPack : 0;
       if(!isReady(mainHasColors,effectivePack,mainHasSizes,mainState)){
