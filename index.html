@@ -4951,6 +4951,28 @@ body .lp-preview .lp-product-card.lp-gift-pack .lp-picker{
   background-color:transparent !important;
   color:#f1ece2 !important;
 }
+/* Pack Cadeau — description panel must stay inside the matte-black / luxury-gold theme. */
+body .lp-preview .lp-product-card.lp-gift-pack .lp-product-details{
+  background:rgba(185,154,98,.085) !important;
+  background-color:rgba(185,154,98,.085) !important;
+  border:1px solid rgba(185,154,98,.48) !important;
+  border-radius:14px !important;
+  padding:14px 15px !important;
+  margin:14px 0 8px !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.035),0 8px 18px rgba(0,0,0,.12) !important;
+  color:#eee5d6 !important;
+}
+body .lp-preview .lp-product-card.lp-gift-pack .lp-product-details .lp-product-details-title{
+  color:#d8bd7b !important;
+}
+body .lp-preview .lp-product-card.lp-gift-pack .lp-product-details .lp-product-desc p,
+body .lp-preview .lp-product-card.lp-gift-pack .lp-product-details .lp-product-benefits,
+body .lp-preview .lp-product-card.lp-gift-pack .lp-product-details .lp-product-benefits ul{
+  color:#e9e0d3 !important;
+}
+body .lp-preview .lp-product-card.lp-gift-pack .lp-product-details .lp-product-benefits{
+  border-top-color:rgba(185,154,98,.28) !important;
+}
 body .lp-preview .lp-product-card.lp-gift-pack .lp-product-title-price-frame.lp-product-head-top b{
   background:#151515 !important;
   color:#d8bd7b !important;
@@ -5514,16 +5536,38 @@ const PRODUCT_BENEFITS = {
   chemise:{fr:["Matière soyeuse et douce","Coupe élégante qui épouse la silhouette","Confort idéal pour la nuit"],ar:["خامة حريرية وناعمة","قصة أنيقة تنساب مع القوام","راحة مثالية أثناء النوم"]},
   packchemise:{fr:["Pack de 2 pièces","Deux modèles raffinés","Matière douce et confortable"],ar:["باك من قطعتين","تصميمان راقيان","خامة ناعمة ومريحة"]}
 };
-function getProductDescription(prod,lang){ const b=prod?(PRODUCT_BACKEND_ROWS[prod.id]||{}):{}, v=prod?(PRODUCT_VARIANTS[prod.id]||{}):{}; const gen=v.generatedContent||(function(){try{return lxLegacyGen(prod);}catch(e){return null;}})()||{}; if(lang==='ar'?(gen.ar&&!gen.manualAr):(gen.fr&&!gen.manualFr)) return lang==='ar'?gen.ar:gen.fr; return lang==='ar'?(b.desc_ar||I18N.ar[prod?.descKey]||gen.ar||''):(b.desc_fr||I18N.fr[prod?.descKey]||gen.fr||''); }
+function getProductDescription(prod,lang){
+  const b=prod?(PRODUCT_BACKEND_ROWS[prod.id]||{}):{}, v=prod?(PRODUCT_VARIANTS[prod.id]||{}):{};
+  /* Pack Cadeau: its customer-facing description is generated/saved inside gift.autoContent. */
+  const giftAuto=v.gift&&v.gift.autoContent;
+  if(giftAuto){
+    const giftText=lang==='ar'?giftAuto.ar:giftAuto.fr;
+    if(String(giftText||'').trim()) return giftText;
+  }
+  const gen=v.generatedContent||(function(){try{return lxLegacyGen(prod);}catch(e){return null;}})()||{};
+  if(lang==='ar'?(gen.ar&&!gen.manualAr):(gen.fr&&!gen.manualFr)) return lang==='ar'?gen.ar:gen.fr;
+  return lang==='ar'?(b.desc_ar||I18N.ar[prod?.descKey]||gen.ar||''):(b.desc_fr||I18N.fr[prod?.descKey]||gen.fr||'');
+}
 /* Sécurité : si un texte saisi à la main contient un titre « Avantages / المميزات » seul sur sa ligne, on ne l'affiche pas. */
 function lxStripBenefitsHeading(t){
   return String(t==null?'':t).split(/\r?\n/).filter(l=>!/^\s*[^\p{L}\p{N}]*\s*(?:les\s+)?avantages?(?:\s+du\s+produit)?\s*[:：-]?\s*$/iu.test(l) && !/^\s*[^\p{L}\p{N}]*\s*(?:ال)?(?:مميزات|مزايا)(?:\s+المنتج)?\s*[:：-]?\s*$/u.test(l)).join('\n').trim();
 }
 function getProductBenefits(prod,lang){
-  if(!prod) return []; const b=PRODUCT_BACKEND_ROWS[prod.id]||{}; const raw=lang==='ar'?b.benefits_ar:b.benefits_fr;
-  if(Array.isArray(raw)){ const __r=raw.filter(Boolean); if(__r.length) return __r; } if(typeof raw==='string'&&raw.trim()) return raw.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
-  const gen=((PRODUCT_VARIANTS[prod.id]||{}).generatedContent)||(function(){try{return lxLegacyGen(prod);}catch(e){return null;}})()||{};
-  const generated=lang==='ar'?gen.benefitsAr:gen.benefitsFr; if(Array.isArray(generated)&&generated.length) return generated.slice(); return (PRODUCT_BENEFITS[prod.id]?.[lang]||[]).slice();
+  if(!prod) return [];
+  const b=PRODUCT_BACKEND_ROWS[prod.id]||{}, v=PRODUCT_VARIANTS[prod.id]||{};
+  /* Pack Cadeau: use the benefits generated from the admin-defined gift contents. */
+  const giftAuto=v.gift&&v.gift.autoContent;
+  if(giftAuto){
+    const giftBenefits=lang==='ar'?giftAuto.benefitsAr:giftAuto.benefitsFr;
+    if(Array.isArray(giftBenefits)&&giftBenefits.length) return giftBenefits.slice();
+  }
+  const raw=lang==='ar'?b.benefits_ar:b.benefits_fr;
+  if(Array.isArray(raw)){ const __r=raw.filter(Boolean); if(__r.length) return __r; }
+  if(typeof raw==='string'&&raw.trim()) return raw.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
+  const gen=v.generatedContent||(function(){try{return lxLegacyGen(prod);}catch(e){return null;}})()||{};
+  const generated=lang==='ar'?gen.benefitsAr:gen.benefitsFr;
+  if(Array.isArray(generated)&&generated.length) return generated.slice();
+  return (PRODUCT_BENEFITS[prod.id]?.[lang]||[]).slice();
 }
 function renderProductDetails(prod,lang){
   if(!prod) return ''; const d=lxStripBenefitsHeading(getProductDescription(prod,lang)), bs=getProductBenefits(prod,lang);
@@ -8596,6 +8640,9 @@ function renderLandingPublic(p, isPreview){
   const mainHasSizes = !!(mainVariants && mainVariants.sizes && mainVariants.sizes.length);
   const mainHasVariants = mainHasColors || mainHasSizes;
   const mainState = { color:null, colors:Array(mainPack).fill(null), size:null, purchaseMode:'piece' };
+  /* Pack Cadeau landing: keep the exact gift-order state used by the main store
+     (gift item choices + message + hide-price + premium packaging). */
+  const mainGiftState = { sel:{}, msg:'', hide:false, wrap:false };
   const mainCartItems = [];
   /* Pack is inherited from the product's pack config (admin). The landing fields
      (badge / label / price / old price) only OVERRIDE the product values when filled. */
@@ -8795,6 +8842,24 @@ function renderLandingPublic(p, isPreview){
     const pyHeaderHTML = '';
     const mainPrice=Number(String(p.price||'0').replace(/[^0-9.]/g,''))||0;
     const mainPackPrice=Number(String(lpPackPriceRaw||'0').replace(/[^0-9.]/g,''))||0;
+    const mainIsGift = isLandingGiftProduct(mainSourceProduct);
+    const mainGiftConfig = mainIsGift ? ((PRODUCT_VARIANTS[mainSourceProduct.id]||{}).gift||{}) : null;
+    const mainGiftItems = mainIsGift ? giftVisibleItems(mainGiftConfig).map(x=>x.it) : [];
+    const mainGiftWrapPrice = mainIsGift ? Math.max(0,Number.isFinite(Number(mainGiftConfig?.wrapPrice))?Number(mainGiftConfig.wrapPrice):15) : 0;
+    const mainGiftSelectValues = mainIsGift ? mainGiftItems.flatMap((it,i)=>{
+      const kind=giftItemKind(it), out=[];
+      if(kind==='pyjama' && csv(it.colors).length) out.push(...csv(it.colors).map(v=>`c${i}:${v}`));
+      if(kind==='pyjama' && csv(it.sizes).length) out.push(...csv(it.sizes).map(v=>`s${i}:${v}`));
+      if(kind==='pantouf' && csv(it.sizes).length) out.push(`p${i}:${csv(it.sizes).join('|')}`);
+      return out;
+    }) : [];
+    const mainGiftChoicesReady = mainIsGift ? mainGiftItems.every((it,i)=>{
+      const kind=giftItemKind(it);
+      if(kind==='other') return true;
+      const hasColor=kind==='pyjama' && csv(it.colors).length>0;
+      const hasSize=csv(it.sizes).length>0;
+      return (!hasColor || !!mainGiftState.sel[`c${i}`]) && (!hasSize || !!mainGiftState.sel[`${kind==='pantouf'?'p':'s'}${i}`]);
+    }) : false;
     const mainEffectivePack=mainPackEnabled && mainState.purchaseMode==='pack' ? mainPack : 0;
     const mainVariantReady=!mainHasVariants || isReady(mainHasColors,mainEffectivePack,mainHasSizes,mainState);
     const p2VariantReady=!p2HasVariants || isReady(p2HasColors,p2Pack,p2HasSizes,p2State);
@@ -8808,8 +8873,11 @@ function renderLandingPublic(p, isPreview){
     const lpDeliveryValue = lpDeliveryFee ? `+${lpDeliveryFee} DH` : (lpDeliveryType?(lang==='ar'?'مجاني':'gratuit'):'—');
     const lpFinalTotal = total + lpDeliveryFee;
     const mainAdded=mainCartItems.length>0;
+    const mainGiftCurrentPrice = mainPrice + (mainIsGift && mainGiftState.wrap ? mainGiftWrapPrice : 0);
 
-    /* Main product: piece and Pack are independent cart lines. */
+    /* Main product: piece and Pack are independent cart lines.
+       Pack Cadeau is deliberately routed through its dedicated gift logic,
+       matching the main site's gift modal rather than the normal variant picker. */
     let mainActionHTML='';
     if(mainCartItems.length){
       mainActionHTML+=`<div class="lp-added-list">${mainCartItems.map((item,i)=>`
@@ -8818,7 +8886,21 @@ function renderLandingPublic(p, isPreview){
           <span class="lp-added-actions"><button type="button" class="lp-remove-btn" data-main-remove="${i}">🗑️ ${lang==='ar'?'حذف':'Supprimer'}</button></span>
         </div>`).join('')}</div>`;
     }
-    if(!mainHasVariants){
+    if(mainIsGift){
+      if(mainOpen){
+        const giftPicker = mainGiftItems.map((it,i)=>{
+          const kind=giftItemKind(it), name=String(it.name||'').trim();
+          const colorValues=csv(it.colors), sizeValues=csv(it.sizes);
+          const cKey=`c${i}`, sKey=`s${i}`, pKey=`p${i}`;
+          const select=(key,label,values)=>values.length?`<select required data-lp-gift-k="${key}" aria-label="${escAttr(label)}"><option value="">${escHtml(label)}</option>${values.map(v=>`<option value="${escAttr(v)}" ${mainGiftState.sel[key]===v?'selected':''}>${escHtml(v)}</option>`).join('')}</select>`:'';
+          return `<div class="lp-gift-item" data-lp-gift-item="${i}"><b>${escHtml(name)}</b>${kind==='other'?'':kind==='pantouf'?select(pKey,lang==='ar'?'Pointure':'Pointure',sizeValues):`${colorValues.length?select(cKey,lang==='ar'?'Couleur':'Couleur',colorValues):''}${sizeValues.length?select(sKey,lang==='ar'?'Taille':'Taille',sizeValues):''}`}</div>`;
+        }).join('');
+        const afterChoices = `<div class="lp-gift-after-choices" style="display:${mainGiftChoicesReady?'block':'none'}">${mainGiftConfig.msg!==false?`<label>${lang==='ar'?'بطاقة رسالة':'Carte message'}</label><textarea id="lp-gift-msg" maxlength="200">${escHtml(mainGiftState.msg)}</textarea>`:''}${mainGiftConfig.hide!==false?`<label class="lp-gift-check"><input type="checkbox" id="lp-gift-hide" ${mainGiftState.hide?'checked':''}> ${lang==='ar'?'عدم إظهار الثمن':'Ne pas afficher le prix'}</label>`:''}${mainGiftConfig.wrap!==false?`<label class="lp-gift-check"><input type="checkbox" id="lp-gift-wrap" ${mainGiftState.wrap?'checked':''}> ${lang==='ar'?`تغليف فاخر (+${mainGiftWrapPrice} DH)`:`Emballage premium (+${mainGiftWrapPrice} DH)`}</label>`:''}</div>`;
+        mainActionHTML+=`<div id="lp-main-picker" class="lp-picker lp-gift-picker">${giftPicker}${afterChoices}</div><button type="button" id="lp-main-add" class="lp-choose-btn">${lang==='ar'?'أضيفي إلى السلة':'Ajouter au panier'}</button>`;
+      }else{
+        mainActionHTML+=`<button type="button" id="lp-main-toggle" class="lp-choose-btn">${mainCartItems.length?(lang==='ar'?'إضافة اختيار آخر':'Ajouter un autre choix'):(lang==='ar'?'اختاري محتوى الهدية':'Choisir les options du cadeau')}</button>`;
+      }
+    }else if(!mainHasVariants){
       mainActionHTML+=`<button type="button" id="lp-main-add" class="lp-choose-btn">${lang==='ar'?'أضيفي إلى السلة':'Ajouter au panier'}</button>`;
     }else if(mainOpen){
       mainActionHTML+=`<div id="lp-main-picker" class="lp-picker">${pickerInner('main',mainVariants,mainPack,mainHasColors,mainHasSizes,mainState,mainPackEnabled,mainPackPrice)}</div><button type="button" id="lp-main-add" class="lp-choose-btn" >${mainState.purchaseMode==='pack'?(lang==='ar'?'أضيفي الـPack إلى السلة':'Ajouter le Pack au panier'):(lang==='ar'?'أضيفي القطعة إلى السلة':'Ajouter la pièce au panier')}</button>`;
@@ -8841,7 +8923,7 @@ function renderLandingPublic(p, isPreview){
       <p class="lp-success-text">${lang==='ar'?'شكراً لك! غادي نتاصلو بيك قريباً باش نأكدو معاك الطلب.':'Merci ! Nous vous contacterons bientôt pour confirmer votre commande.'}</p>
     </div>` : `<div id="lp-main-product" class="lp-card lp-product-card${isLandingGiftProduct(mainSourceProduct)?' lp-gift-pack':''}" style="text-align:${dir==='rtl'?'right':'left'};padding:18px;margin-bottom:14px;">
       <div class="lp-product-title-price-frame lp-product-head-top"><b>${escHtml(mainProductName)}</b></div>
-      <div class="lp-product-price-below">${mainPrice} DH</div>
+      <div class="lp-product-price-below" id="lp-main-price">${mainIsGift?mainGiftCurrentPrice:mainPrice} DH${mainIsGift&&mainGiftState.wrap?` <small style="opacity:.72;font-size:11px">(dont emballage premium +${mainGiftWrapPrice} DH)</small>`:''}</div>
       ${mainImageURL?`<div class="lp-main-gallery-wrap">
         <img id="lp-main-gallery-img" src="${escAttr(mainImageURL)}" alt="${escAttr(mainProductName)}" class="lp-product-card-img">
         ${mainGalleryImages.length>1 ? `<div class="lp-main-image-dots" id="lp-main-image-dots">${mainGalleryImages.map((u,i)=>`<button type="button" class="lp-main-image-dot ${i===0?'active':''}" data-lp-main-image="${i}" aria-label="${lang==='ar'?'الصورة':'Image'} ${i+1}"></button>`).join('')}</div>` : ''}
@@ -9091,9 +9173,11 @@ ${sizesSectionHTML}
         galleryTimer=setInterval(()=>{
           const max=thumbs.scrollWidth-thumbs.clientWidth;
           if(max<=2) return;
-          const next=thumbs.scrollLeft+thumbs.clientWidth;
+          const first=thumbs.querySelector('.lp-landing-thumb');
+          const step=first ? (first.getBoundingClientRect().width + 9) : thumbs.clientWidth;
+          const next=thumbs.scrollLeft+step;
           thumbs.scrollTo({left:next>max+2?0:next,behavior:'smooth'});
-        },3200);
+        },2500);
       };
       const stopAuto=()=>clearInterval(galleryTimer);
       startAuto();
@@ -9132,7 +9216,7 @@ ${sizesSectionHTML}
       const live=document.getElementById('lp-cart-live'),count=document.getElementById('lp-cart-count');
       const items=[];
       const __lpChip=(cid)=>{const c=(mainVariants&&mainVariants.colors||[]).find(x=>x.id===cid);const hex=String((c&&c.hex)||'#c9a877').replace(/[^#a-zA-Z0-9(),.% ]/g,'');return `<span class="lx-cchip"><i class="lx-cdot" style="background:${hex}"></i>${escHtml(c?((lang==='ar'?c.ar:c.fr)||c.fr||c.id):(cid||''))}</span>`;};
-      mainCartItems.forEach((item,i)=>items.push(`<div class="lp-cart-item"><div><div class="lp-cart-item-name">${escHtml(mainProductName)}</div><div class="lp-cart-item-meta">${item.mode==='pack'?'Pack':'1 '+(lang==='ar'?'قطعة':'pièce')} · ${item.price}dh${item.size?` · ${escHtml(item.size)}`:''}${(item.mode==='pack'&&Array.isArray(item.colors)&&item.colors.length)?item.colors.map((cid,k)=>`<span class="lx-cline">${lang==='ar'?'قطعة':'Pièce'} ${k+1}: ${__lpChip(cid)}</span>`).join(''):(item.color?`<span class="lx-cline">${lang==='ar'?'اللون':'Couleur'}: ${__lpChip(item.color)}</span>`:(item.colorText?`<span class="lx-cline">${lang==='ar'?'اللون':'Couleur'}: ${escHtml(item.colorText)}</span>`:''))}</div></div><span class="gx-lp-actions"><button type="button" class="lp-cart-edit" data-cart-edit-main="${i}">${lang==='ar'?'تعديل':'Modifier'}</button><button type="button" class="lp-cart-remove" data-cart-remove-main="${i}">${lang==='ar'?'حذف':'Supprimer'}</button></span></div>`));
+      mainCartItems.forEach((item,i)=>items.push(`<div class="lp-cart-item"><div><div class="lp-cart-item-name">${escHtml(mainProductName)}</div><div class="lp-cart-item-meta">${item.isGiftPack===true?`🎁 Pack Cadeau · ${item.price}dh${item.size?`<div>${escHtml(item.size)}</div>`:''}${item.packagingPremium>0?`<div style="color:#9f8059">🎁 ${lang==='ar'?'تغليف فاخر':'Emballage premium'} : +${item.packagingPremium} DH</div>`:''}`:`${item.mode==='pack'?'Pack':'1 '+(lang==='ar'?'قطعة':'pièce')} · ${item.price}dh${item.size?` · ${escHtml(item.size)}`:''}${(item.mode==='pack'&&Array.isArray(item.colors)&&item.colors.length)?item.colors.map((cid,k)=>`<span class="lx-cline">${lang==='ar'?'قطعة':'Pièce'} ${k+1}: ${__lpChip(cid)}</span>`).join(''):(item.color?`<span class="lx-cline">${lang==='ar'?'اللون':'Couleur'}: ${__lpChip(item.color)}</span>`:(item.colorText?`<span class="lx-cline">${lang==='ar'?'اللون':'Couleur'}: ${escHtml(item.colorText)}</span>`:''))}`}</div></div><span class="gx-lp-actions"><button type="button" class="lp-cart-edit" data-cart-edit-main="${i}">${lang==='ar'?'تعديل':'Modifier'}</button><button type="button" class="lp-cart-remove" data-cart-remove-main="${i}">${lang==='ar'?'حذف':'Supprimer'}</button></span></div>`));
       if(p2Added)items.push(`<div class="lp-cart-item"><div><div class="lp-cart-item-name">${escHtml(product2Name)}</div><div class="lp-cart-item-meta">${p2price}dh${p2HasVariants?` · ${escHtml(summaryText(p2Variants,p2HasColors,p2Pack,p2HasSizes,p2State))}`:''}</div></div><span class="gx-lp-actions"><button type="button" class="lp-cart-edit" id="lp-cart-edit-p2">${lang==='ar'?'تعديل':'Modifier'}</button><button type="button" class="lp-cart-remove" id="lp-cart-remove-p2">${lang==='ar'?'حذف':'Supprimer'}</button></span></div>`);
       const cartTotalNow=mainCartItems.reduce((s,i)=>s+i.price*i.qty,0)+(p2Added?p2price:0);
       if(live)live.innerHTML=items.join('')||`<div class="lp-cart-empty">${lang==='ar'?'السلة فارغة':'Votre panier est vide'}</div>`;
@@ -9166,6 +9250,7 @@ ${sizesSectionHTML}
       document.querySelectorAll('[data-cart-edit-main]').forEach(b=>b.addEventListener('click',()=>{
         const i=Number(b.dataset.cartEditMain); const it=mainCartItems[i]; if(!it) return;
         mainCartItems.splice(i,1);
+        if(it.isGiftPack===true){ mainGiftState.sel={...(it.giftSel?.sel||{})};mainGiftState.msg=it.giftSel?.msg||'';mainGiftState.hide=!!it.giftSel?.hide;mainGiftState.wrap=!!it.giftSel?.wrap;mainOpen=true;showForm=false;document.getElementById('lp-cart-drawer')?.classList.remove('open');paint();setTimeout(()=>document.getElementById('lp-main-picker')?.scrollIntoView({behavior:'smooth',block:'center'}),60);return; }
         mainState.purchaseMode=it.mode==='pack'?'pack':'piece';
         mainState.color=it.color||null;
         mainState.colors=(Array.isArray(it.colors)&&it.colors.length)?it.colors.slice():Array(mainPack).fill(null);
@@ -9279,6 +9364,23 @@ document.getElementById('lp-cart-drawer')?.addEventListener('click',e=>{if(e.tar
       setTimeout(()=>{ if(!window.closed){ history.length>1?history.back():location.href='/'; } },150);
     });
     document.getElementById('lp-main-toggle')?.addEventListener('click',()=>{ mainOpen=true; paint(); });
+    /* Pack Cadeau: landing uses the same gift choices/options as the main site. */
+    if(mainIsGift){
+      const giftSyncAfterChoices=()=>{
+        const ready=mainGiftItems.every((it,i)=>{
+          const kind=giftItemKind(it); if(kind==='other') return true;
+          const hasColor=kind==='pyjama' && csv(it.colors).length>0, hasSize=csv(it.sizes).length>0;
+          return (!hasColor || !!mainGiftState.sel[`c${i}`]) && (!hasSize || !!mainGiftState.sel[`${kind==='pantouf'?'p':'s'}${i}`]);
+        });
+        document.querySelector('.lp-gift-after-choices')?.classList.toggle('is-visible',ready); return ready;
+      };
+      document.querySelectorAll('[data-lp-gift-k]').forEach(sel=>sel.addEventListener('change',()=>{ mainGiftState.sel[sel.dataset.lpGiftK]=sel.value||''; giftSyncAfterChoices(); }));
+      document.getElementById('lp-gift-msg')?.addEventListener('input',e=>{mainGiftState.msg=e.target.value||'';});
+      document.getElementById('lp-gift-hide')?.addEventListener('change',e=>{mainGiftState.hide=!!e.target.checked;});
+      document.getElementById('lp-gift-wrap')?.addEventListener('change',e=>{ mainGiftState.wrap=!!e.target.checked; const price=document.getElementById('lp-main-price'); if(price) price.innerHTML=mainGiftState.wrap?`${mainPrice+mainGiftWrapPrice} DH <small style="opacity:.72;font-size:11px">(dont emballage premium +${mainGiftWrapPrice} DH)</small>`:`${mainPrice} DH`; });
+      giftSyncAfterChoices();
+    }
+
     document.querySelectorAll('[data-lp-pack-cta]').forEach(a=>a.addEventListener('click',e=>{
       e.preventDefault();
       if(mainPackEnabled && !orderPlaced){ mainState.purchaseMode='pack'; mainState.color=null; mainState.colors=Array(mainPack).fill(null); mainOpen=true; paint(); }
@@ -9287,6 +9389,18 @@ document.getElementById('lp-cart-drawer')?.addEventListener('click',e=>{if(e.tar
     document.getElementById('lp-p2-toggle')?.addEventListener('click',()=>{ p2Open=true; paint(); });
     document.querySelectorAll('[data-main-remove]').forEach(btn=>btn.addEventListener('click',()=>{const i=Number(btn.dataset.mainRemove);if(Number.isInteger(i))mainCartItems.splice(i,1);showForm=false;paint();}));
     document.getElementById('lp-main-add')?.addEventListener('click',()=>{
+      if(mainIsGift){
+        const missing=[];
+        mainGiftItems.forEach((it,i)=>{ const kind=giftItemKind(it); if(kind==='other') return; const hasColor=kind==='pyjama'&&csv(it.colors).length>0, hasSize=csv(it.sizes).length>0; if(hasColor&&!mainGiftState.sel[`c${i}`]) missing.push(document.querySelector(`[data-lp-gift-k="c${i}"]`)); if(hasSize&&!mainGiftState.sel[`${kind==='pantouf'?'p':'s'}${i}`]) missing.push(document.querySelector(`[data-lp-gift-k="${kind==='pantouf'?'p':'s'}${i}"]`)); });
+        if(missing.length){ missing.filter(Boolean).forEach(el=>{el.classList.remove('lp-attention-signal');void el.offsetWidth;el.classList.add('lp-attention-signal');}); try{navigator.vibrate&&navigator.vibrate([90,50,90,50,140]);}catch(e){} missing.find(Boolean)?.scrollIntoView({behavior:'smooth',block:'center'}); showToast(lang==='ar'?'اختاري جميع الاختيارات المطلوبة أولاً':'Choisissez les tailles et pointures requises'); return; }
+        const parts=mainGiftItems.map((it,i)=>{ const kind=giftItemKind(it), name=String(it.name||'').trim(), col=mainGiftState.sel[`c${i}`]?`${lang==='ar'?'اللون':'Couleur'} ${mainGiftState.sel[`c${i}`]} · `:''; if(kind==='pyjama') return `${name}: ${col}${lang==='ar'?'المقاس':'Taille'} ${mainGiftState.sel[`s${i}`]||''}`; if(kind==='pantouf') return `${name}: ${lang==='ar'?'المقاس':'Pointure'} ${mainGiftState.sel[`p${i}`]||''}`; return name; });
+        const msg=String(mainGiftState.msg||'').trim(), hidePrice=!!mainGiftState.hide, packagingPremium=mainGiftState.wrap?mainGiftWrapPrice:0, basePrice=mainPrice, unitPrice=basePrice+packagingPremium;
+        const giftSummary=parts.join(' · ')+(msg?` · ${lang==='ar'?'رسالة':'Message'} : "${msg}"`:'')+(hidePrice?` · ${lang==='ar'?'بدون ثمن':'Sans prix'}`:'')+(mainGiftState.wrap?` · ${lang==='ar'?'تغليف فاخر':'Emballage premium'}`:'');
+        const item={mode:'piece',price:unitPrice,basePrice,packagingPremium,packagingPremiumTotal:packagingPremium,color:null,colors:null,colorText:'',size:giftSummary,qty:1,isGiftPack:true,giftSel:{sel:{...mainGiftState.sel},msg,hide:hidePrice,wrap:mainGiftState.wrap}};
+        const same=mainCartItems.find(i=>i.isGiftPack===true&&i.size===item.size&&i.price===item.price); if(same) same.qty+=1; else mainCartItems.push(item);
+        mainGiftState.sel={};mainGiftState.msg='';mainGiftState.hide=false;mainGiftState.wrap=false;mainOpen=false;showForm=false;paint();
+        setTimeout(()=>{window.scrollTo({top:0,behavior:'smooth'});showCartSuccessToast(lang==='ar'?'ar':'fr');const d=document.getElementById('lp-cart-drawer');if(d){d.classList.add('open');d.setAttribute('aria-hidden','false');refreshCartUI();}},80); return;
+      }
       const effectivePack=mainPackEnabled && mainState.purchaseMode==='pack' ? mainPack : 0;
       if(!isReady(mainHasColors,effectivePack,mainHasSizes,mainState)){
         const picker=document.getElementById('lp-main-picker');
