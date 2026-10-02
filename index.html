@@ -5224,6 +5224,40 @@ body .lp-preview .lp-product-card.lp-gift-pack:not(.lp-order-success) .lp-produc
   border-top-color: rgba(185,154,98,.34) !important;
 }
 </style>
+
+<style id="luxia-pack-gift-description-final-v2">
+/* Pack Cadeau — description panel: warm dark luxury tone, consistent with matte-black + gold. */
+body .lp-preview .lp-product-card.lp-gift-pack:not(.lp-order-success) .lp-product-details {
+  background: linear-gradient(145deg, #2b211d 0%, #211918 52%, #1b1817 100%) !important;
+  background-color: #211918 !important;
+  border: 1px solid rgba(202,170,105,.72) !important;
+  border-radius: 16px !important;
+  padding: 15px 16px !important;
+  margin: 14px 0 10px !important;
+  color: #f3e9d9 !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.045), 0 8px 20px rgba(0,0,0,.22) !important;
+}
+body .lp-preview .lp-product-card.lp-gift-pack:not(.lp-order-success) .lp-product-details .lp-product-desc,
+body .lp-preview .lp-product-card.lp-gift-pack:not(.lp-order-success) .lp-product-details .lp-product-benefits {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+body .lp-preview .lp-product-card.lp-gift-pack:not(.lp-order-success) .lp-product-details .lp-product-details-title {
+  color: #e0c486 !important;
+}
+body .lp-preview .lp-product-card.lp-gift-pack:not(.lp-order-success) .lp-product-details .lp-product-desc p,
+body .lp-preview .lp-product-card.lp-gift-pack:not(.lp-order-success) .lp-product-details .lp-product-benefits,
+body .lp-preview .lp-product-card.lp-gift-pack:not(.lp-order-success) .lp-product-details .lp-product-benefits ul {
+  color: #f1e7d8 !important;
+}
+body .lp-preview .lp-product-card.lp-gift-pack:not(.lp-order-success) .lp-product-details .lp-product-benefits {
+  border-top-color: rgba(202,170,105,.34) !important;
+}
+body .lp-preview .lp-product-card.lp-gift-pack:not(.lp-order-success) .lp-product-details .lp-product-benefits li::marker {
+  color: #d7b66e !important;
+}
+</style>
+
 </head>
 <body class="luxia-store-home">
 
@@ -5609,8 +5643,31 @@ function getProductBenefits(prod,lang){
   return (PRODUCT_BENEFITS[prod.id]?.[lang]||[]).slice();
 }
 function renderProductDetails(prod,lang){
-  if(!prod) return ''; const d=lxStripBenefitsHeading(getProductDescription(prod,lang)), bs=getProductBenefits(prod,lang);
-  const bhtml=bs.length?`<ul>${bs.map(x=>`<li>${escHtml(String(x))}</li>`).join('')}</ul>`:'';
+  if(!prod) return '';
+  let d='', bs=[];
+  try{
+    d=lxStripBenefitsHeading(getProductDescription(prod,lang));
+    bs=getProductBenefits(prod,lang);
+  }catch(e){ console.warn('Landing product details:',e); }
+
+  /* Gift products: always resolve the customer-facing copy from the gift
+     configuration, with a direct fallback when an older record has no
+     saved autoContent. */
+  try{
+    const v=PRODUCT_VARIANTS[prod.id]||{};
+    const g=v.gift;
+    if(g && Array.isArray(g.items) && g.items.length){
+      const auto=g.autoContent || (typeof giftAutoContent==='function' ? giftAutoContent(g.items) : null);
+      if(auto){
+        const gd=lang==='ar'?auto.ar:auto.fr;
+        const gb=lang==='ar'?auto.benefitsAr:auto.benefitsFr;
+        if(!String(d||'').trim() && String(gd||'').trim()) d=String(gd).trim();
+        if((!Array.isArray(bs)||!bs.length) && Array.isArray(gb)) bs=gb.filter(Boolean);
+      }
+    }
+  }catch(e){ console.warn('Landing gift details:',e); }
+
+  const bhtml=Array.isArray(bs)&&bs.length?`<div class="lp-product-benefits"><ul>${bs.map(x=>`<li>${escHtml(String(x))}</li>`).join('')}</ul></div>`:'';
   const dhtml=(d||bhtml)?`<div class="lp-product-desc"><div class="lp-product-details-title">${lang==='ar'?'الوصف':'Description'}</div>${d?`<p>${escHtml(d)}</p>`:''}${bhtml}</div>`:'';
   return dhtml?`<div class="lp-product-details">${dhtml}</div>`:'';
 }
@@ -9178,8 +9235,19 @@ ${sizesSectionHTML}
       const hasColors=isMain?mainHasColors:p2HasColors;
       const hasSizes=isMain?mainHasSizes:p2HasSizes;
       const state=isMain?mainState:p2State;
+      /* Pack Cadeau has its own select-based choice flow. Its Add-to-cart
+         button must NOT be controlled by the normal color/size picker state. */
       const ready=isMain
-        ? (!mainHasVariants || isReady(mainHasColors, mainPackEnabled && mainState.purchaseMode==='pack' ? mainPack : 0, mainHasSizes, mainState))
+        ? (mainIsGift
+            ? !!mainGiftItems.length && mainGiftItems.every((it,i)=>{
+                const kind=giftItemKind(it);
+                if(kind==='other') return true;
+                const hasColor=kind==='pyjama' && csv(it.colors).length>0;
+                const hasSize=csv(it.sizes).length>0;
+                return (!hasColor || !!mainGiftState.sel[`c${i}`]) &&
+                       (!hasSize || !!mainGiftState.sel[`${kind==='pantouf'?'p':'s'}${i}`]);
+              })
+            : (!mainHasVariants || isReady(mainHasColors, mainPackEnabled && mainState.purchaseMode==='pack' ? mainPack : 0, mainHasSizes, mainState)))
         : (!p2HasVariants || isReady(p2HasColors, p2Pack, p2HasSizes, p2State));
       if(picker){
         picker.innerHTML=pickerInner(ns,variants,pack,hasColors,hasSizes,state,isMain?mainPackEnabled:false,isMain?mainPackPrice:'');
@@ -9428,7 +9496,16 @@ document.getElementById('lp-cart-drawer')?.addEventListener('click',e=>{if(e.tar
         });
         document.querySelector('.lp-gift-after-choices')?.classList.toggle('is-visible',ready); return ready;
       };
-      document.querySelectorAll('[data-lp-gift-k]').forEach(sel=>sel.addEventListener('change',()=>{ mainGiftState.sel[sel.dataset.lpGiftK]=sel.value||''; giftSyncAfterChoices(); }));
+      document.querySelectorAll('[data-lp-gift-k]').forEach(sel=>sel.addEventListener('change',()=>{
+        mainGiftState.sel[sel.dataset.lpGiftK]=sel.value||'';
+        const ready=giftSyncAfterChoices();
+        const addBtn=document.getElementById('lp-main-add');
+        if(addBtn){
+          addBtn.disabled=!ready;
+          addBtn.style.opacity=ready?'1':'.45';
+          addBtn.style.cursor=ready?'pointer':'not-allowed';
+        }
+      }));
       document.getElementById('lp-gift-msg')?.addEventListener('input',e=>{mainGiftState.msg=e.target.value||'';});
       document.getElementById('lp-gift-hide')?.addEventListener('change',e=>{mainGiftState.hide=!!e.target.checked;});
       document.getElementById('lp-gift-wrap')?.addEventListener('change',e=>{ mainGiftState.wrap=!!e.target.checked; const price=document.getElementById('lp-main-price'); if(price) price.innerHTML=mainGiftState.wrap?`${mainPrice+mainGiftWrapPrice} DH <small style="opacity:.72;font-size:11px">(dont emballage premium +${mainGiftWrapPrice} DH)</small>`:`${mainPrice} DH`; });
