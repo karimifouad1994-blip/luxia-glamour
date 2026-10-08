@@ -6611,6 +6611,49 @@ html:root body .lp-preview .lp-row-open .lp-row-close{
   border:1px solid rgba(233,207,152,.75) !important;box-shadow:0 6px 14px -6px rgba(60,8,20,.55) !important;
 }
 </style>
+<style id="lx-landing-text-readability">
+/* --- landing : lisibilité du texte Description + avantages (cartes produit hors pack cadeau) --- */
+html:root body .lp-preview .lp-product-card:not(.lp-gift-pack):not(.lp-order-success) .lp-product-details .lp-product-desc p{
+  color:#3a2a2e !important;
+  font-weight:400 !important;
+  font-size:calc(16.5px * var(--font-scale,1)) !important;
+  line-height:1.7 !important;
+}
+html:root body .lp-preview .lp-product-card:not(.lp-gift-pack):not(.lp-order-success) .lp-product-details .lp-product-benefits,
+html:root body .lp-preview .lp-product-card:not(.lp-gift-pack):not(.lp-order-success) .lp-product-details .lp-product-benefits ul{
+  color:#3a2a2e !important;
+  font-weight:400 !important;
+  font-size:calc(16px * var(--font-scale,1)) !important;
+  line-height:1.6 !important;
+}
+html:root body .lp-preview .lp-product-card:not(.lp-gift-pack):not(.lp-order-success) .lp-product-details .lp-product-benefits ul{
+  list-style:none !important;
+  padding:0 !important;
+  margin:0 !important;
+}
+html:root body .lp-preview .lp-product-card:not(.lp-gift-pack):not(.lp-order-success) .lp-product-details .lp-product-benefits li{
+  display:flex !important;
+  align-items:flex-start !important;
+  gap:10px !important;
+  margin:0 0 10px !important;
+  color:#3a2a2e !important;
+  font-weight:400 !important;
+}
+html:root body .lp-preview .lp-product-card:not(.lp-gift-pack):not(.lp-order-success) .lp-product-details .lp-product-benefits li:last-child{margin-bottom:0 !important}
+html:root body .lp-preview .lp-product-card:not(.lp-gift-pack):not(.lp-order-success) .lp-product-details .lp-product-benefits li::before{
+  content:"\2726";
+  flex:none;
+  color:#a8802f;
+}
+
+/* --- landing (hero luxia) : moins de vide autour du titre et sous « Découvrir » --- */
+html:root body .lp-preview .lp-hero.lp-hero-clean{padding-top:68px !important;padding-bottom:18px !important}
+html:root body .lp-preview .lp-hero-clean .lp-hero-content{padding-top:24px !important;padding-bottom:8px !important}
+/* --- landing : tailles de texte plus mesurées (le thème pyjama agrandit déjà via --font-scale) --- */
+html:root body .lp-preview .lp-product-card:not(.lp-gift-pack):not(.lp-order-success) .lp-product-details .lp-product-desc p{font-size:calc(16px * var(--font-scale,1)) !important}
+html:root body .lp-preview .lp-product-card:not(.lp-gift-pack):not(.lp-order-success) .lp-product-details .lp-product-benefits,
+html:root body .lp-preview .lp-product-card:not(.lp-gift-pack):not(.lp-order-success) .lp-product-details .lp-product-benefits ul{font-size:calc(15.5px * var(--font-scale,1)) !important}
+</style>
 </head>
 <body class="luxia-store-home">
 
@@ -9810,7 +9853,7 @@ let LANDING_EDIT_ID = null;
 
 function landingDefaults(){ return {
   slug:"offre", type:"luxia", status:"draft", language:"ar", kicker:"LUXIA",
-  price:"", oldPrice:"", whatsapp:"", heroImage:"", video:"", video2:"",
+  price:"", oldPrice:"", whatsapp:"", heroImage:"", video:"", video2:"", videoStartMuted:false,
   gallery:[], showOrderForm:true,
   showReviews:true, showFaq:true, showGallery:true, showBenefits:true, showWhatsapp:true, showSuccessWhatsapp:true,
   showSiteLink:true, siteLinkText:"", siteLinkUrl:"", showMenuButton:true,
@@ -10043,6 +10086,7 @@ function landingEditorHTML(p){
       <div class="full"><label>${t("lp.videoLabel")}</label><input id="lp-video" value="${escAttr(p.video||'')}" placeholder="https://.../video.mp4" style="direction:ltr;text-align:left;"></div>
       <div class="full"><label>${t("lp.videoUploadLabel")}</label><input type="file" accept="video/*" id="lp-video-file"> <span id="lp-video-status" style="font-size:calc(12px * var(--font-scale));color:var(--gold-soft);"></span></div>
       <div class="full" style="margin-top:8px;padding-top:16px;border-top:1px solid var(--line);"><label>${t("lp.video2Label")}</label><input type="file" accept="video/*" id="lp-video2-file"><span id="lp-video2-status" style="display:block;margin-top:6px;font-size:calc(12px * var(--font-scale));color:var(--gold-soft);"></span><small>${t("lp.video2Hint")}</small></div>
+      <div class="full" style="margin-top:8px;padding-top:14px;border-top:1px solid var(--line);"><label style="display:flex;align-items:flex-start;gap:8px;color:var(--ivory)"><input type="checkbox" id="lp-video-muted" ${p.videoStartMuted?'checked':''} style="width:auto;margin-top:4px"><span>🔇 Vidéos en sourdine au départ — la cliente appuie sur 🔊 pour activer le son · الفيديو يبدأ بلا صوت والزبونة كتضغط على 🔊<br><small style="opacity:.75">Décoché = comportement actuel : son au départ si le navigateur l'autorise, sinon sourdine.</small></span></label></div>
     </div></div>
     <div class="admin-card"><h3 style="margin-bottom:16px">Contenu — Français</h3><div class="lp-admin-grid">
       <div class="full"><label>${t("lp.titleLabel")} (FR)</label><input id="lp-title-fr" value="${escAttr(p.titleFr||'')}"></div>
@@ -10111,6 +10155,7 @@ function collectLandingForm(){
   p.gallery=[...document.querySelectorAll('[data-lpimg]')].map(x=>x.value.trim()).filter(Boolean);
   p.heroImage=p.gallery[0]||'';
   p.video=document.getElementById('lp-video')?.value.trim()||'';
+  p.videoStartMuted=!!document.getElementById('lp-video-muted')?.checked;
   p.video2=(window.__luneaLandingVideo2Temp&&window.__luneaLandingVideo2Temp[LANDING_EDIT_ID||'__new__'])||p.video2||'';
   p.sourceProductId=document.getElementById('lp-source-product')?.value||'';
   /* A ready-made main LUXIA product never uses a subtitle; its product description is shown once below the price. */
@@ -11047,8 +11092,8 @@ function renderLandingPublic(p, isPreview){
         ${pyFeatureRowHTML}
         ${p.price?`<div class="lp-price">${escHtml(p.price)}dh ${lpOldEff?`<span class="lp-old-price">${escHtml(lpOldEff)}</span>`:''}${pyDiscountBadgeHTML}</div>`:''}
       </div>
-    </section>` : `<section class="lp-hero lp-hero-clean"><div class="lp-hero-content"><h1 class="lp-hero-lux-title">LUXIA</h1><p class="hero-tagline lp-hero-lux-tagline">${lang==='ar'?'مجموعة فاخرة':'Luxury Collection'}</p>${description?`<p class="lp-hero-description">${escHtml(description)}</p>`:''}<a class="lp-cta" href="#lp-main-product">${lang==='ar'?'إكتشفي':'Découvrir'}</a></div></section>`;
-    document.body.innerHTML=`${lpPromoBarHTML}${collectionHeaderHTML}${collectionDrawerHTML}${cartFabHTML}${closeBtnHTML}${langSwitchHTML}${lightboxHTML}${p2LightboxHTML}<main class="lp-preview ${isPyjama?'lp-theme-pyjama':''}" style="padding-top:${LP_PROMO_H}px;">${heroHTML}${offerBannerHTML(lang,'lp')?`<section class="lp-section lp-offer-section">${offerBannerHTML(lang,'lp')}</section>`:''}${colorShowcaseHTML}${packBannerHTML}<div class="lp-wrap">${p.video2?`<section class="lp-section lp-video-section lp-video2-section"><div class="lunea-video-wrap"><video class="lp-video lp-video2" src="${escAttr(p.video2)}" autoplay loop preload="auto" playsinline disablepictureinpicture disableremoteplayback controlslist="nodownload noplaybackrate noremoteplayback"></video><button type="button" class="lunea-sound-btn" aria-label="إيقاف الصوت" title="إيقاف الصوت">🔊</button></div></section>`:''}${p.showOrderForm?`<section class="lp-section" id="order">${hasX?xSectionInner:(mainCardHTML.replace('__LP_FORM_HERE__',formHTML)+p2CardHTML)}</section>`:''}${p.showBenefits&&benefits?`<section class="lp-section"><h2>${lang==='ar'?'المميزات':'Les avantages'}</h2><div class="lp-benefits">${benefits}</div></section>`:''}${p.showReviews&&reviews?`<section class="lp-section"><h2>${lang==='ar'?'آراء الزبناء':'Avis clientes'}</h2><div class="lp-reviews-grid">${reviews}</div></section>`:''}${p.showFaq&&faqs?`<section class="lp-section lp-faq"><h2>FAQ</h2>${faqs}</section>`:''}${p.video?`<section class="lp-section"><div class="lunea-video-wrap"><video class="lp-video" src="${escAttr(p.video)}" autoplay loop preload="auto" playsinline disablepictureinpicture disableremoteplayback controlslist="nodownload noplaybackrate noremoteplayback"></video><button type="button" class="lunea-sound-btn" aria-label="إيقاف الصوت" title="إيقاف الصوت">🔊</button></div></section>`:''}
+    </section>` : `<section class="lp-hero lp-hero-clean"><div class="lp-hero-content"><h1 class="lp-hero-lux-title">LUXIA</h1><p class="hero-tagline lp-hero-lux-tagline">${lang==='ar'?'مجموعة فاخرة':'Luxury Collection'}</p><a class="lp-cta" href="#lp-main-product">${lang==='ar'?'إكتشفي':'Découvrir'}</a></div></section>`;
+    document.body.innerHTML=`${lpPromoBarHTML}${collectionHeaderHTML}${collectionDrawerHTML}${cartFabHTML}${closeBtnHTML}${langSwitchHTML}${lightboxHTML}${p2LightboxHTML}<main class="lp-preview ${isPyjama?'lp-theme-pyjama':''}" style="padding-top:${LP_PROMO_H}px;">${heroHTML}${offerBannerHTML(lang,'lp')?`<section class="lp-section lp-offer-section">${offerBannerHTML(lang,'lp')}</section>`:''}${colorShowcaseHTML}${packBannerHTML}<div class="lp-wrap">${p.video2?`<section class="lp-section lp-video-section lp-video2-section"><div class="lunea-video-wrap"${p.videoStartMuted?' data-start-muted="1"':''}><video class="lp-video lp-video2" src="${escAttr(p.video2)}"${p.videoStartMuted?' muted':''} autoplay loop preload="auto" playsinline disablepictureinpicture disableremoteplayback controlslist="nodownload noplaybackrate noremoteplayback"></video><button type="button" class="lunea-sound-btn" aria-label="إيقاف الصوت" title="إيقاف الصوت">🔊</button></div></section>`:''}${p.showOrderForm?`<section class="lp-section" id="order">${hasX?xSectionInner:(mainCardHTML.replace('__LP_FORM_HERE__',formHTML)+p2CardHTML)}</section>`:''}${p.showBenefits&&benefits?`<section class="lp-section"><h2>${lang==='ar'?'المميزات':'Les avantages'}</h2><div class="lp-benefits">${benefits}</div></section>`:''}${p.showReviews&&reviews?`<section class="lp-section"><h2>${lang==='ar'?'آراء الزبناء':'Avis clientes'}</h2><div class="lp-reviews-grid">${reviews}</div></section>`:''}${p.showFaq&&faqs?`<section class="lp-section lp-faq"><h2>FAQ</h2>${faqs}</section>`:''}${p.video?`<section class="lp-section"><div class="lunea-video-wrap"${p.videoStartMuted?' data-start-muted="1"':''}><video class="lp-video" src="${escAttr(p.video)}"${p.videoStartMuted?' muted':''} autoplay loop preload="auto" playsinline disablepictureinpicture disableremoteplayback controlslist="nodownload noplaybackrate noremoteplayback"></video><button type="button" class="lunea-sound-btn" aria-label="إيقاف الصوت" title="إيقاف الصوت">🔊</button></div></section>`:''}
 <section class="lp-section lp-experience-section">
   <div class="lp-experience-kicker">${lang==='ar'?'التجربة':'L’EXPÉRIENCE'}</div>
   <h2>${lang==='ar'?'لماذا LUXIA':'Pourquoi LUXIA'}</h2>
@@ -11826,6 +11871,23 @@ async function bootLandingRoute(){
   if(window.__luneaForcePreview){slug='preview';window.__luneaForcePreview=false;}
   if(!slug && path.startsWith('/p/')) slug=decodeURIComponent(path.slice(3));
   if(!slug){ document.documentElement.classList.remove('landing-route-pending'); return false; }
+  /* Les produits (galerie, avantages, descriptions, variantes) arrivent de la base en parallèle.
+     On attend qu'ils soient prêts avant de dessiner la landing, sinon elle s'affiche parfois avec
+     la photo principale seulement et sans avantages. Garde-fou : 8 s max, puis nouveau rendu à l'arrivée. */
+  let __lxInitTimedOut=false, __lxLastLanding=null;
+  try{
+    if(typeof luneaInitPromise!=='undefined'){
+      await Promise.race([
+        luneaInitPromise.catch(function(){}),
+        new Promise(function(r){ setTimeout(function(){ __lxInitTimedOut=true; r(); },8000); })
+      ]);
+      if(__lxInitTimedOut){
+        luneaInitPromise.catch(function(){}).then(function(){
+          try{ if(__lxLastLanding) renderLandingPublic(__lxLastLanding); }catch(e){}
+        });
+      }
+    }
+  }catch(e){}
   if(slug==='preview'){
     let pv=null;
     try{pv=JSON.parse(localStorage.getItem('lunea_lp_preview')||'null');}catch(e){}
@@ -11850,6 +11912,7 @@ async function bootLandingRoute(){
   if(cachedLanding){
     try{
       renderLandingPublic(cachedLanding);
+      __lxLastLanding=cachedLanding;
       renderedCached=true;
       document.documentElement.classList.remove('landing-route-pending');
     }catch(e){ console.warn('Cached landing render failed',e); }
@@ -11867,6 +11930,7 @@ async function bootLandingRoute(){
       try{localStorage.setItem(cacheKey,JSON.stringify(p));}catch(e){}
       localStorage.removeItem('lunea_lp_preview');
       renderLandingPublic(p);
+      __lxLastLanding=p;
       document.documentElement.classList.remove('landing-route-pending');
       return true;
     }
@@ -13080,6 +13144,7 @@ function highlightProductFromUrl(){
     root.querySelectorAll('.lunea-video-wrap video').forEach(function(video){
       if(video.dataset.luneaReady === '1') return;
       video.dataset.luneaReady = '1';
+      if(video.closest('[data-start-muted="1"]')) video.muted = true;
       video.controls = false;
       video.setAttribute('controlslist','nodownload noplaybackrate noremoteplayback');
       video.setAttribute('disablepictureinpicture','');
@@ -13115,7 +13180,7 @@ function highlightProductFromUrl(){
     // If the browser blocked sound autoplay, the first user interaction lets us try again.
     const unlock=function(){
       document.querySelectorAll('.lunea-video-wrap video').forEach(function(video){
-        if(video.muted){
+        if(video.muted && !video.closest('[data-start-muted="1"]')){
           video.muted=false;
           video.volume=1;
           startVideo(video);
@@ -15919,4 +15984,5 @@ html:root body .lp-preview .lp-product-card:not(.lp-gift-pack):not(.lp-order-suc
   background-color:#fffafb !important;
 }
 html:root body .lp-preview .lp-product-card:not(.lp-gift-pack):not(.lp-order-success):not(.lx-none) .lp-product-card-inner{background:transparent !important}
+
 </style>
