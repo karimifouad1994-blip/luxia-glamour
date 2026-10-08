@@ -6996,6 +6996,8 @@ const SUPABASE_PRODUCTS_URL = `${SUPABASE_URL}/rest/v1/products`;
 const SUPABASE_SETTINGS_URL = `${SUPABASE_URL}/rest/v1/site_settings`;
 const LANGUAGE_STORAGE_KEY = "lunea_language";
 let SITE_DEFAULT_LANGUAGE = "fr";
+let SITE_DEFAULT_LANGUAGE_LOADED = false; /* vrai quand la langue d'ouverture choisie dans l'admin a bien été lue */
+const LANGUAGE_DEFAULT_SNAPSHOT_KEY = "lunea_language_for_default";
 let SITE_CONTENT = { fr:{}, ar:{} };
 const SUPABASE_STORAGE_BUCKET = "product-images";
 const SUPABASE_STORAGE_OBJECT_URL = `${SUPABASE_URL}/storage/v1/object/${SUPABASE_STORAGE_BUCKET}`;
@@ -7705,7 +7707,7 @@ async function loadSiteSettings(){
     const rows=await supabaseRequest(`${SUPABASE_SETTINGS_URL}?id=eq.site&select=default_language,content_fr,content_ar`);
     if(Array.isArray(rows) && rows[0]){
       const r=rows[0];
-      if(r.default_language==='ar' || r.default_language==='fr') SITE_DEFAULT_LANGUAGE=r.default_language;
+      if(r.default_language==='ar' || r.default_language==='fr'){ SITE_DEFAULT_LANGUAGE=r.default_language; SITE_DEFAULT_LANGUAGE_LOADED=true; }
       if(r.content_fr && typeof r.content_fr==='object') SITE_CONTENT.fr={...r.content_fr};
       if(r.content_ar && typeof r.content_ar==='object') SITE_CONTENT.ar={...r.content_ar};
       SITE_BACKGROUND_URL = (SITE_CONTENT.fr && SITE_CONTENT.fr.__background_url) || (SITE_CONTENT.ar && SITE_CONTENT.ar.__background_url) || LUXIA_DEFAULT_BACKGROUND_URL;
@@ -7805,17 +7807,26 @@ async function saveSiteDefaultLanguage(lang, onDiag){
     onDiag
   });
   if(!Array.isArray(result) || !result.length) throw new Error("Site language save returned no row (check Supabase RLS policies for INSERT/UPDATE on site_settings)");
-  SITE_DEFAULT_LANGUAGE=lang;
+  SITE_DEFAULT_LANGUAGE=lang; SITE_DEFAULT_LANGUAGE_LOADED=true;
+  /* L'admin vient de choisir la langue d'ouverture : on oublie l'ancien choix mémorisé dans ce navigateur pour qu'il voie tout de suite le résultat. */
+  try{ localStorage.removeItem(LANGUAGE_STORAGE_KEY); localStorage.removeItem(LANGUAGE_DEFAULT_SNAPSHOT_KEY); }catch(e){}
 }
 
 function getSavedVisitorLanguage(){
   try{
     const lang=localStorage.getItem(LANGUAGE_STORAGE_KEY);
-    return (lang==='ar' || lang==='fr') ? lang : null;
+    if(lang!=='ar' && lang!=='fr') return null;
+    /* Le choix du visiteur n'est gardé que s'il a été fait avec la langue d'ouverture actuelle de l'admin :
+       si l'admin change la langue d'ouverture, elle s'applique de nouveau à tout le monde. */
+    if(SITE_DEFAULT_LANGUAGE_LOADED && localStorage.getItem(LANGUAGE_DEFAULT_SNAPSHOT_KEY)!==SITE_DEFAULT_LANGUAGE) return null;
+    return lang;
   }catch(e){ return null; }
 }
 function saveVisitorLanguage(lang){
-  try{ localStorage.setItem(LANGUAGE_STORAGE_KEY,lang); }catch(e){}
+  try{
+    localStorage.setItem(LANGUAGE_STORAGE_KEY,lang);
+    localStorage.setItem(LANGUAGE_DEFAULT_SNAPSHOT_KEY,SITE_DEFAULT_LANGUAGE);
+  }catch(e){}
 }
 
 /* ============================================================
@@ -10492,7 +10503,7 @@ function renderLandingPublic(p, isPreview){
   /* Landing pages always open in French for a fresh visit. The visitor can
      switch to Arabic with the visible FR/AR control; the main site's language
      preference is intentionally not used here. */
-  let lang = 'fr';
+  let lang = ((!isPreview && window.__lpUserLang) || (p.language==='ar'?'ar':'fr'));
   const pick=(base)=>{ const key=base+(lang==='ar'?'Ar':'Fr'); return (p[key]!=null && p[key]!=='') ? p[key] : (p[base]||''); };
   const pickArr=(base)=>{ const key=base+(lang==='ar'?'Ar':'Fr'); return (p[key]&&p[key].length) ? p[key] : (p[base]||[]); };
 
@@ -11352,7 +11363,7 @@ ${sizesSectionHTML}
     document.getElementById('lp-lightbox')?.addEventListener('click',e=>{ if(e.target.id==='lp-lightbox') e.currentTarget.classList.remove('open'); });
     document.getElementById('lp-lightbox-p2-close')?.addEventListener('click',()=>document.getElementById('lp-lightbox-p2')?.classList.remove('open'));
     document.getElementById('lp-lightbox-p2')?.addEventListener('click',e=>{ if(e.target.id==='lp-lightbox-p2') e.currentTarget.classList.remove('open'); });
-    document.querySelectorAll('[data-lp-lang]').forEach(b=>b.addEventListener('click',()=>{ if(b.dataset.lpLang!==lang){ lang=b.dataset.lpLang; paint(); } }));
+    document.querySelectorAll('[data-lp-lang]').forEach(b=>b.addEventListener('click',()=>{ if(b.dataset.lpLang!==lang){ lang=b.dataset.lpLang; if(!isPreview) window.__lpUserLang=lang; paint(); } }));
     const refreshCartUI=()=>{
       const live=document.getElementById('lp-cart-live'),count=document.getElementById('lp-cart-count');
       const items=[];
@@ -13186,7 +13197,12 @@ function highlightProductFromUrl(){
     root.querySelectorAll('.lunea-video-wrap video').forEach(function(video){
       if(video.dataset.luneaReady === '1') return;
       video.dataset.luneaReady = '1';
-      if(video.closest('[data-start-muted="1"]')) video.muted = true;
+      if(video.closest('[data-start-muted="1"]')){
+        video.muted = !window.__lpUserSound;
+        video.addEventListener('volumechange',function(){
+          if(!window.__lpUserSound && !video.muted && video.closest('[data-start-muted="1"]')){ video.muted = true; }
+        });
+      }
       video.controls = false;
       video.setAttribute('controlslist','nodownload noplaybackrate noremoteplayback');
       video.setAttribute('disablepictureinpicture','');
@@ -13198,6 +13214,7 @@ function highlightProductFromUrl(){
           e.preventDefault();
           e.stopPropagation();
           video.muted = !video.muted;
+          if(video.closest('[data-start-muted="1"]')) window.__lpUserSound = !video.muted;
           if(!video.muted) video.volume = 1;
           startVideo(video);
           setButton(video,button);
