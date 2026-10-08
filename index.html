@@ -32,6 +32,41 @@ html.landing-route-pending{background:#fdf1f1!important;}
 html.landing-route-pending body{visibility:hidden!important;background:#fdf1f1!important;}
 html.landing-route-pending::before{content:"LUXIA";position:fixed;inset:0;z-index:9999;display:grid;place-items:center;background:#fdf1f1;color:#b52f4b;font-family:Georgia,serif;font-size:28px;letter-spacing:.18em;animation:lpBootFade .8s ease-in-out infinite alternate;}
 @keyframes lpBootFade{from{opacity:.45}to{opacity:1}}
+
+/* ===== Landing : vidéo dans la carte + titre « Commander ce produit » premium ===== */
+html body .lp-preview .lp-product-card .lp-card-video{margin:4px 0 16px;padding:0;}
+html body .lp-preview .lp-product-card .lp-card-video .lunea-video-wrap{width:100%;max-width:100%;margin:0 0 12px;border-radius:16px;overflow:hidden;box-shadow:0 8px 22px rgba(120,80,30,.16);}
+html body .lp-preview .lp-product-card .lp-card-video .lunea-video-wrap:last-child{margin-bottom:0;}
+html body .lp-preview .lp-product-card .lp-card-video video{width:100%;max-width:100%;height:auto;display:block;border-radius:16px;margin:0;}
+html body .lp-preview .lp-product-card:not(.lp-gift-pack) .lp-product-order-label{
+  display:flex;align-items:center;justify-content:center;gap:12px;text-align:center;
+  margin:22px 0 14px;font-family:var(--font-display) !important;font-weight:700 !important;font-size:calc(21px * var(--font-scale)) !important;
+  letter-spacing:.06em !important;line-height:1.3 !important;color:#7a5418 !important;opacity:1 !important;
+}
+html body .lp-preview .lp-product-card .lp-product-order-label::before,
+html body .lp-preview .lp-product-card .lp-product-order-label::after{
+  content:"";flex:1;height:1px;background:linear-gradient(90deg,transparent,currentColor);opacity:.7;
+}
+html body .lp-preview .lp-product-card .lp-product-order-label::after{background:linear-gradient(270deg,transparent,currentColor);}
+
+/* Landing : zone titre + prix (au-dessus de la photo principale) */
+html:root body .lp-preview .lp-product-card:not(.lp-gift-pack):not(.lp-order-success) .lp-head-zone{position:relative;margin:0 0 16px !important;padding:22px 14px 20px !important;border-radius:22px !important;border:1px solid rgba(201,162,79,.28) !important;
+  background:radial-gradient(120% 70% at 50% 0%,rgba(222,187,106,.22),rgba(222,187,106,0) 70%),linear-gradient(180deg,#fffaf5 0%,#fbeee9 100%) !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.8) !important;display:flex;flex-direction:column;align-items:center;text-align:center;}
+html:root body .lp-preview .lp-product-card:not(.lp-gift-pack):not(.lp-order-success) .lp-head-zone::after{content:"";display:block;width:56%;max-width:220px;height:1px;margin:16px auto 0;background:linear-gradient(90deg,transparent,#c9a24f,transparent);}
+html:root body .lp-preview .lp-product-card:not(.lp-gift-pack):not(.lp-order-success) .lp-head-zone .lp-product-title-price-frame.lp-product-head-top{margin:0 !important;padding:0 !important;width:100% !important;background:transparent !important;border:0 !important;box-shadow:none !important;}
+html:root body .lp-preview .lp-product-card:not(.lp-gift-pack):not(.lp-order-success) .lp-head-zone .lp-product-title-price-frame.lp-product-head-top b{display:block !important;width:100% !important;max-width:100% !important;margin:0 !important;padding:14px 8px !important;
+  background:linear-gradient(90deg,transparent,#c9a24f 18%,#c9a24f 82%,transparent) top/100% 1px no-repeat,linear-gradient(90deg,transparent,#c9a24f 18%,#c9a24f 82%,transparent) bottom/100% 1px no-repeat !important;
+  border:0 !important;border-radius:0 !important;box-shadow:none !important;text-shadow:none !important;
+  color:#5a1628 !important;-webkit-text-fill-color:#5a1628 !important;font-family:var(--font-display) !important;font-size:calc(29px * var(--font-scale)) !important;font-weight:600 !important;letter-spacing:.03em !important;line-height:1.2 !important;text-align:center !important;}
+html:root body .lp-preview .lp-product-card:not(.lp-gift-pack):not(.lp-order-success) .lp-head-zone .lp-product-price-below{display:flex !important;flex-wrap:wrap;align-items:baseline !important;justify-content:center !important;gap:4px 10px;width:100% !important;max-width:100% !important;margin:14px 0 0 !important;padding:0 !important;
+  background:transparent !important;border:0 !important;border-radius:0 !important;box-shadow:none !important;text-shadow:none !important;
+  color:#7b2a3d !important;-webkit-text-fill-color:#7b2a3d !important;font-family:var(--font-display) !important;font-size:calc(34px * var(--font-scale)) !important;font-weight:700 !important;letter-spacing:.02em !important;line-height:1.1 !important;text-align:center !important;}
+html:root body .lp-preview .lp-product-card:not(.lp-gift-pack):not(.lp-order-success) .lp-head-zone .lp-product-price-below .lp-landing-old-price,html:root body .lp-preview .lp-product-card:not(.lp-gift-pack):not(.lp-order-success) .lp-head-zone .lp-product-price-below s{margin:0 !important;font-size:calc(17px * var(--font-scale)) !important;font-weight:500 !important;
+  color:#9b8f8f !important;-webkit-text-fill-color:#9b8f8f !important;text-decoration-line:line-through !important;text-decoration-color:#9b8f8f !important;opacity:1 !important;}
+html:root body .lp-preview .lp-product-card:not(.lp-gift-pack):not(.lp-order-success) .lp-head-zone .lp-save-badge{display:inline-block;padding:5px 12px;border-radius:999px;background:linear-gradient(135deg,#ecd08a,#c9a24f) !important;color:#3a0b18 !important;-webkit-text-fill-color:#3a0b18 !important;
+  font-family:'Jost',system-ui,sans-serif !important;font-size:12px !important;font-weight:700 !important;letter-spacing:.03em;line-height:1.2;box-shadow:0 2px 6px rgba(150,110,40,.25);}
+html:root body .lp-preview .lp-product-card:not(.lp-gift-pack):not(.lp-order-success) .lp-head-zone .lp-product-price-below small{flex-basis:100%;text-align:center;}
 </style>
 <script>
 /* Start the public landing request as early as possible, while the HTML is still parsing.
@@ -10744,7 +10779,7 @@ function renderLandingPublic(p, isPreview){
     const lpOldEff = p.oldPrice || ((lpManualSrcOld>pyPriceNum && pyPriceNum>0) ? (lpManualSrcOld+'dh') : (lpAutoOld?(lpAutoOld+'dh'):''));
     /* Non-Pyjama landing pages: reuse the existing old-price data only. */
     const lpOldPriceHTML = (!isPyjama && lpOldEff)
-      ? `<s class="lp-landing-old-price">${escHtml(lpOldEff)}</s>`
+      ? `<s class="lp-landing-old-price">${escHtml(String(lpOldEff).replace(/\s*dh\s*$/i,'').trim()+' DH')}</s>`
       : '';
     const p2LandingOldNum = !isPyjama && product2SourceProduct
       ? Number(getProductOldPrice(product2SourceProduct.id)||0)
@@ -10903,14 +10938,20 @@ function renderLandingPublic(p, isPreview){
     const siteLinkHref = (p.siteLinkUrl||'').trim() || siteLinkAutoHref;
     const siteLinkLabel = (p.siteLinkText||'').trim() || (lang==='ar' ? '✨ اكتشفي التشكيلة الكاملة على موقعنا الرسمي' : '✨ Découvrez toute la collection sur notre site officiel');
     const siteLinkHTML = (p.showSiteLink!==false) ? `<a href="${escAttr(siteLinkHref)}" target="_blank" rel="noopener" class="lp-site-link">${escHtml(siteLinkLabel)}<span class="lp-site-link-arrow">${dir==='rtl'?'←':'→'}</span></a>` : '';
+    const __lpOldN=Number(String(lpOldEff||'0').replace(/[^0-9.]/g,''))||0, __lpSave=Math.round(__lpOldN-(Number(mainPrice)||0));
+    const lpSaveBadgeHTML=(lpOldPriceHTML && !mainIsGift && __lpSave>0) ? `<span class="lp-save-badge">${lang==='ar'?'وفّري '+__lpSave+' DH':'Économisez '+__lpSave+' DH'}</span>` : '';
+    /* Vidéo(s) de la landing : affichée(s) DANS la carte produit, entre « Commander ce produit » et le bouton « Choisir taille & couleur ». */
+    const lpVideoInCard = !!(p.video||p.video2) && !!p.showOrderForm && !hasX && !orderPlaced;
+    const __lpCardVid=(srcUrl,cls)=>`<div class="lunea-video-wrap"${p.videoStartMuted?' data-start-muted="1"':''}><video class="lp-video ${cls}" src="${escAttr(srcUrl)}"${p.videoStartMuted?' muted':''} autoplay loop preload="auto" playsinline disablepictureinpicture disableremoteplayback controlslist="nodownload noplaybackrate noremoteplayback"></video><button type="button" class="lunea-sound-btn" aria-label="إيقاف الصوت" title="إيقاف الصوت">🔊</button></div>`;
+    const cardVideoHTML = lpVideoInCard ? `<div class="lp-card-video">${p.video2?__lpCardVid(p.video2,'lp-video2'):''}${p.video?__lpCardVid(p.video,''):''}</div>` : '';
     const mainCardHTML = orderPlaced ? `<div id="lp-main-product" class="lp-card lp-product-card lp-order-success" style="text-align:center;padding:34px 20px;margin:20px 0;">
       <div class="lp-success-icon">✓</div>
       <div class="lp-success-title">${lang==='ar'?'تم تسجيل طلبك بنجاح ❤️':'Votre commande a été enregistrée avec succès ❤️'}</div>
       <p class="lp-success-text">${lang==='ar'?'شكراً لك! سنتواصل معك قريباً لتأكيد طلبك.':'Merci ! Nous vous contacterons bientôt pour confirmer votre commande.'}</p>
       ${(lpLastWaUrl&&p.showSuccessWhatsapp!==false&&!window.__lpWaDismissed)?`<div class=\"lp-success-wa-box\" style=\"display:block;margin:18px auto 0;padding:14px 12px 12px;max-width:320px;border-radius:16px;border:1px solid rgba(201,162,79,.6);background:linear-gradient(180deg,rgba(255,255,255,.85),rgba(250,240,220,.7));box-shadow:0 6px 18px rgba(150,110,40,.14);text-align:center\"><div class=\"lp-success-wa-q\" style=\"display:block;font-size:14px;font-weight:600;letter-spacing:.02em;color:#3b2f22;margin-bottom:12px;line-height:1.5\">${lang==='ar'?'هل تريدين إرسال الطلب أيضاً عبر واتساب ؟':'Envoyer aussi sur WhatsApp ?'} <small>${lang==='ar'?'(اختياري)':'(optionnel)'}</small></div><div class=\"lp-success-wa-actions\" style=\"display:flex;gap:10px;justify-content:center;align-items:stretch\"><a class=\"lp-wa-yes\" style=\"flex:1;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 14px;border-radius:999px;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;text-decoration:none;cursor:pointer;font-family:inherit;line-height:1.2;border:1px solid #b88a2f;color:#2a1f0e;background:linear-gradient(135deg,#f3dc9b,#c9a24f 55%,#e4c377);box-shadow:0 4px 12px rgba(201,162,79,.4)\" href=\"${escAttr(lpLastWaUrl)}\" target=\"_blank\" rel=\"noopener\" onclick=\"window.__lpWaDismissed=true;var b=this.closest('.lp-success-wa-box');setTimeout(function(){if(b)b.remove()},300)\"><svg viewBox=\"0 0 24 24\" width=\"16\" height=\"16\" style=\"width:16px;height:16px;flex:none;display:inline-block;position:static\" aria-hidden=\"true\"><path fill=\"currentColor\" d=\"M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.2 14.2c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.2-4.6-4-4.7-4.2-.1-.2-1.1-1.5-1.1-2.8s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.3.5-.4.4c-.1.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.1 1 2.1 1.3 2.4 1.5.3.1.5.1.7-.1l1-1.2c.2-.3.4-.2.7-.1l1.9.9c.3.1.5.2.5.3.1.2.1.8-.1 1.4z\"/></svg><span>${lang==='ar'?'نعم':'Oui'}</span></a><button type=\"button\" class=\"lp-wa-no\" style=\"flex:1;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 14px;border-radius:999px;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;text-decoration:none;cursor:pointer;font-family:inherit;line-height:1.2;border:1px solid rgba(201,162,79,.85);color:#7a5a1c;background:transparent;box-shadow:none\" onclick=\"window.__lpWaDismissed=true;var b=this.closest('.lp-success-wa-box');if(b)b.remove()\">${lang==='ar'?'لا':'Non'}</button></div></div>`:''}
     </div>` : `<div id="lp-main-product" class="lp-card lp-product-card${isLandingGiftProduct(mainSourceProduct)?' lp-gift-pack':''}" style="text-align:${dir==='rtl'?'right':'left'};padding:18px;margin-bottom:14px;">
-      <div class="lp-product-title-price-frame lp-product-head-top"><b>${escHtml(mainProductName)}</b></div>
-      <div class="lp-product-price-below" id="lp-main-price">${mainIsGift?mainGiftCurrentPrice:mainPrice} DH${lpOldPriceHTML}${mainIsGift&&mainGiftState.wrap?` <small style="opacity:.72;font-size:11px">(dont emballage premium +${mainGiftWrapPrice} DH)</small>`:''}</div>
+      <div class="lp-head-zone"><div class="lp-product-title-price-frame lp-product-head-top"><b>${escHtml(mainProductName)}</b></div>
+      <div class="lp-product-price-below" id="lp-main-price">${mainIsGift?mainGiftCurrentPrice:mainPrice} DH${lpOldPriceHTML}${lpSaveBadgeHTML}${mainIsGift&&mainGiftState.wrap?` <small style="opacity:.72;font-size:11px">(dont emballage premium +${mainGiftWrapPrice} DH)</small>`:''}</div></div>
       ${mainImageURL?`<div class="lp-main-gallery-wrap">
         <img id="lp-main-gallery-img" src="${escAttr(mainImageURL)}" alt="${escAttr(mainProductName)}" class="lp-product-card-img">
         ${mainGalleryImages.length>1 ? `<div class="lp-main-image-dots" id="lp-main-image-dots">${mainGalleryImages.map((u,i)=>`<button type="button" class="lp-main-image-dot ${i===0?'active':''}" data-lp-main-image="${i}" aria-label="${lang==='ar'?'الصورة':'Image'} ${i+1}"></button>`).join('')}</div>` : ''}
@@ -10923,6 +10964,7 @@ function renderLandingPublic(p, isPreview){
       </div>`:''}
       ${renderProductDetails(mainSourceProduct,lang) || ((p.descriptionFr||p.descriptionAr) ? `<div class="lp-product-details"><div class="lp-product-desc"><div class="lp-product-details-title">${lang==='ar'?'الوصف':'Description'}</div><p>${escHtml(lang==='ar'?(p.descriptionAr||p.descriptionFr):(p.descriptionFr||p.descriptionAr))}</p></div></div>` : '')}
       <div class="lp-product-order-label">${lang==='ar'?'طلب هذا المنتج':'Commander ce produit'}</div>
+      ${cardVideoHTML}
       ${mainActionHTML}
       ${siteLinkHTML}
       ${!hasX && mainAdded && !showForm ? `<button type="button" id="lp-confirm-btn" class="lp-cta" style="width:100%;text-align:center;border:none;cursor:pointer;margin-top:12px;">${lang==='ar'?'إتمام الطلب':'Finaliser la commande'}</button>` : ''}
@@ -10949,8 +10991,8 @@ function renderLandingPublic(p, isPreview){
     }
     const p2RequiredNotice = (p2Added && !mainAdded && !xCartCount()) ? `<p class="lp-main-required">${lang==='ar'?'أضيفي المنتج الرئيسي إلى السلة لإكمال الطلب':'Ajoutez le produit principal au panier pour finaliser la commande'}</p>` : '';
     const p2CardHTML = orderPlaced ? '' : ((product2Name && p2price) ? `<div class="lp-card lp-product-card${isLandingGiftProduct(product2SourceProduct)?' lp-gift-pack':''}" style="text-align:${dir==='rtl'?'right':'left'};padding:18px;margin-bottom:14px;">
-      <div class="lp-product-title-price-frame lp-product-head-top"><b>${escHtml(product2Name)}</b></div>
-      <div class="lp-product-price-below" id="lp-p2-price">${p2IsGift?lpGiftPriceHTML(p2price,p2GiftInfo.wrapPrice,p2GiftState.wrap):(p2CurrentPrice()+' DH')}${p2LandingOldHTML}</div>
+      <div class="lp-head-zone"><div class="lp-product-title-price-frame lp-product-head-top"><b>${escHtml(product2Name)}</b></div>
+      <div class="lp-product-price-below" id="lp-p2-price">${p2IsGift?lpGiftPriceHTML(p2price,p2GiftInfo.wrapPrice,p2GiftState.wrap):(p2CurrentPrice()+' DH')}${p2LandingOldHTML}</div></div>
       ${p2ImageURL?`<div class="lp-p2-gallery-wrap"><img id="lp-p2-gallery-img" src="${escAttr(p2ImageURL)}" alt="${escAttr(product2Name)}" class="lp-product-card-img">
         ${p.showGallery && p2AdditionalImages.length ? `<div class="lp-landing-gallery" data-lp-gallery="p2">
           <div class="lp-landing-thumbs" id="lp-p2-thumbs">
@@ -11024,8 +11066,8 @@ function renderLandingPublic(p, isPreview){
       const name=xName(s), imgs=xImages(s), img0=imgs[0]||'', add=imgs.slice(1);
       const priceHTML=(s.isGift?lpGiftPriceHTML(s.price,s.giftInfo.wrapPrice,s.giftState.wrap):(s.price+' DH'))+xOldHTML(s);
       return `<div id="lp-${s.ns}-product" class="lp-card lp-product-card lp-x-product${s.isGift?' lp-gift-pack':''}" style="text-align:${dir==='rtl'?'right':'left'};padding:18px;margin-bottom:14px;">
-      <div class="lp-product-title-price-frame lp-product-head-top"><b>${escHtml(name)}</b></div>
-      <div class="lp-product-price-below" id="lp-${s.ns}-price">${priceHTML}</div>
+      <div class="lp-head-zone"><div class="lp-product-title-price-frame lp-product-head-top"><b>${escHtml(name)}</b></div>
+      <div class="lp-product-price-below" id="lp-${s.ns}-price">${priceHTML}</div></div>
       ${img0?`<div class="lp-main-gallery-wrap lp-x-gallery-wrap"><img id="lp-${s.ns}-gallery-img" src="${escAttr(img0)}" alt="${escAttr(name)}" class="lp-product-card-img">
         ${p.showGallery && add.length ? `<div class="lp-landing-gallery" data-lp-gallery="${s.ns}">
           <div class="lp-landing-thumbs" id="lp-${s.ns}-thumbs">
@@ -11093,7 +11135,7 @@ function renderLandingPublic(p, isPreview){
         ${p.price?`<div class="lp-price">${escHtml(p.price)}dh ${lpOldEff?`<span class="lp-old-price">${escHtml(lpOldEff)}</span>`:''}${pyDiscountBadgeHTML}</div>`:''}
       </div>
     </section>` : `<section class="lp-hero lp-hero-clean"><div class="lp-hero-content"><h1 class="lp-hero-lux-title">LUXIA</h1><p class="hero-tagline lp-hero-lux-tagline">${lang==='ar'?'مجموعة فاخرة':'Luxury Collection'}</p><a class="lp-cta" href="#lp-main-product">${lang==='ar'?'إكتشفي':'Découvrir'}</a></div></section>`;
-    document.body.innerHTML=`${lpPromoBarHTML}${collectionHeaderHTML}${collectionDrawerHTML}${cartFabHTML}${closeBtnHTML}${langSwitchHTML}${lightboxHTML}${p2LightboxHTML}<main class="lp-preview ${isPyjama?'lp-theme-pyjama':''}" style="padding-top:${LP_PROMO_H}px;">${heroHTML}${offerBannerHTML(lang,'lp')?`<section class="lp-section lp-offer-section">${offerBannerHTML(lang,'lp')}</section>`:''}${colorShowcaseHTML}${packBannerHTML}<div class="lp-wrap">${p.video2?`<section class="lp-section lp-video-section lp-video2-section"><div class="lunea-video-wrap"${p.videoStartMuted?' data-start-muted="1"':''}><video class="lp-video lp-video2" src="${escAttr(p.video2)}"${p.videoStartMuted?' muted':''} autoplay loop preload="auto" playsinline disablepictureinpicture disableremoteplayback controlslist="nodownload noplaybackrate noremoteplayback"></video><button type="button" class="lunea-sound-btn" aria-label="إيقاف الصوت" title="إيقاف الصوت">🔊</button></div></section>`:''}${p.showOrderForm?`<section class="lp-section" id="order">${hasX?xSectionInner:(mainCardHTML.replace('__LP_FORM_HERE__',formHTML)+p2CardHTML)}</section>`:''}${p.showBenefits&&benefits?`<section class="lp-section"><h2>${lang==='ar'?'المميزات':'Les avantages'}</h2><div class="lp-benefits">${benefits}</div></section>`:''}${p.showReviews&&reviews?`<section class="lp-section"><h2>${lang==='ar'?'آراء الزبناء':'Avis clientes'}</h2><div class="lp-reviews-grid">${reviews}</div></section>`:''}${p.showFaq&&faqs?`<section class="lp-section lp-faq"><h2>FAQ</h2>${faqs}</section>`:''}${p.video?`<section class="lp-section"><div class="lunea-video-wrap"${p.videoStartMuted?' data-start-muted="1"':''}><video class="lp-video" src="${escAttr(p.video)}"${p.videoStartMuted?' muted':''} autoplay loop preload="auto" playsinline disablepictureinpicture disableremoteplayback controlslist="nodownload noplaybackrate noremoteplayback"></video><button type="button" class="lunea-sound-btn" aria-label="إيقاف الصوت" title="إيقاف الصوت">🔊</button></div></section>`:''}
+    document.body.innerHTML=`${lpPromoBarHTML}${collectionHeaderHTML}${collectionDrawerHTML}${cartFabHTML}${closeBtnHTML}${langSwitchHTML}${lightboxHTML}${p2LightboxHTML}<main class="lp-preview ${isPyjama?'lp-theme-pyjama':''}" style="padding-top:${LP_PROMO_H}px;">${heroHTML}${offerBannerHTML(lang,'lp')?`<section class="lp-section lp-offer-section">${offerBannerHTML(lang,'lp')}</section>`:''}${colorShowcaseHTML}${packBannerHTML}<div class="lp-wrap">${(p.video2&&!lpVideoInCard)?`<section class="lp-section lp-video-section lp-video2-section"><div class="lunea-video-wrap"${p.videoStartMuted?' data-start-muted="1"':''}><video class="lp-video lp-video2" src="${escAttr(p.video2)}"${p.videoStartMuted?' muted':''} autoplay loop preload="auto" playsinline disablepictureinpicture disableremoteplayback controlslist="nodownload noplaybackrate noremoteplayback"></video><button type="button" class="lunea-sound-btn" aria-label="إيقاف الصوت" title="إيقاف الصوت">🔊</button></div></section>`:''}${p.showOrderForm?`<section class="lp-section" id="order">${hasX?xSectionInner:(mainCardHTML.replace('__LP_FORM_HERE__',formHTML)+p2CardHTML)}</section>`:''}${p.showBenefits&&benefits?`<section class="lp-section"><h2>${lang==='ar'?'المميزات':'Les avantages'}</h2><div class="lp-benefits">${benefits}</div></section>`:''}${p.showReviews&&reviews?`<section class="lp-section"><h2>${lang==='ar'?'آراء الزبناء':'Avis clientes'}</h2><div class="lp-reviews-grid">${reviews}</div></section>`:''}${p.showFaq&&faqs?`<section class="lp-section lp-faq"><h2>FAQ</h2>${faqs}</section>`:''}${(p.video&&!lpVideoInCard)?`<section class="lp-section"><div class="lunea-video-wrap"${p.videoStartMuted?' data-start-muted="1"':''}><video class="lp-video" src="${escAttr(p.video)}"${p.videoStartMuted?' muted':''} autoplay loop preload="auto" playsinline disablepictureinpicture disableremoteplayback controlslist="nodownload noplaybackrate noremoteplayback"></video><button type="button" class="lunea-sound-btn" aria-label="إيقاف الصوت" title="إيقاف الصوت">🔊</button></div></section>`:''}
 <section class="lp-section lp-experience-section">
   <div class="lp-experience-kicker">${lang==='ar'?'التجربة':'L’EXPÉRIENCE'}</div>
   <h2>${lang==='ar'?'لماذا LUXIA':'Pourquoi LUXIA'}</h2>
@@ -15986,3 +16028,5 @@ html:root body .lp-preview .lp-product-card:not(.lp-gift-pack):not(.lp-order-suc
 html:root body .lp-preview .lp-product-card:not(.lp-gift-pack):not(.lp-order-success):not(.lx-none) .lp-product-card-inner{background:transparent !important}
 
 </style>
+
+
