@@ -6689,6 +6689,255 @@ html:root body .lp-preview .lp-product-card:not(.lp-gift-pack):not(.lp-order-suc
 html:root body .lp-preview .lp-product-card:not(.lp-gift-pack):not(.lp-order-success) .lp-product-details .lp-product-benefits,
 html:root body .lp-preview .lp-product-card:not(.lp-gift-pack):not(.lp-order-success) .lp-product-details .lp-product-benefits ul{font-size:calc(15.5px * var(--font-scale,1)) !important}
 </style>
+<style id="luxia-hyper-luxury-landing-final">
+/* =====================================================================
+   LUXIA — Landing : finition « maison de couture »
+   Design uniquement (CSS). Aucune logique, aucun HTML, aucun script modifié.
+   Palette : bordeaux profond #2a0711 / #4a0e1c · or antique #b08a3e → #f6e3ae · soie rose #f7e6e0 · ivoire #fffaf3
+   Placé en dernier dans <head> (les blocs de style du body sont effacés par la landing).
+   ===================================================================== */
+
+/* ---------- 1. HERO : étiquette de couture ---------- */
+html:root body main.lp-preview .lp-hero.lp-hero-clean{
+  isolation:isolate;
+  background:
+    linear-gradient(104deg,transparent 28%,rgba(233,207,152,.075) 46%,transparent 62%),
+    radial-gradient(85% 46% at 50% 0%,rgba(0,0,0,.38),transparent 72%),
+    linear-gradient(180deg,#1d040b 0%,#37091a 15%,#5a1427 33%,#7c3341 49%,#c99a98 66%,#efe0d7 82%,#f7e6e0 100%) !important;
+}
+/* double filet doré qui se dissout dans la soie rose */
+html:root body main.lp-preview .lp-hero.lp-hero-clean::after{
+  content:"";position:absolute;inset:76px 16px 16px;z-index:0;pointer-events:none;
+  border:1px solid rgba(233,207,152,.46);border-radius:3px 3px 26px 26px;
+  box-shadow:inset 0 0 0 6px transparent,inset 0 0 0 7px rgba(233,207,152,.20);
+  -webkit-mask-image:linear-gradient(180deg,#000 0%,#000 46%,transparent 86%);
+          mask-image:linear-gradient(180deg,#000 0%,#000 46%,transparent 86%);
+}
+html:root body main.lp-preview .lp-hero-clean .lp-hero-content{position:relative;z-index:1;}
+
+html:root body main.lp-preview .lp-hero-clean .lp-hero-lux-title{
+  font-family:'Cormorant Garamond','Amiri',Georgia,serif !important;
+  font-weight:500 !important;
+  font-size:calc(clamp(40px,12vw,84px) * var(--font-scale,1)) !important;
+  line-height:1 !important;
+  letter-spacing:.28em !important;
+  direction:ltr !important;unicode-bidi:isolate;
+  padding-left:.28em !important;padding-right:0 !important;
+  max-width:100%;
+  margin-bottom:14px !important;
+}
+html:root body main.lp-preview .lp-hero-clean .lp-hero-lux-tagline{
+  font-family:'Cormorant Garamond','Amiri',Georgia,serif !important;
+  font-style:italic !important;font-weight:500 !important;
+  font-size:calc(clamp(17px,4.6vw,22px) * var(--font-scale,1)) !important;
+  letter-spacing:.2em !important;
+  color:#f3dca0 !important;
+  margin-bottom:26px !important;
+}
+/* ornement : filet · losange · filet */
+html:root body main.lp-preview .lp-hero-clean .lp-hero-lux-tagline::after{
+  content:"";display:block;width:168px;height:12px;margin:16px auto 0;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 12'%3E%3Cdefs%3E%3ClinearGradient id='a' x1='0' x2='1'%3E%3Cstop offset='0' stop-color='%23e9cf98' stop-opacity='0'/%3E%3Cstop offset='1' stop-color='%23e9cf98'/%3E%3C/linearGradient%3E%3ClinearGradient id='b' x1='1' x2='0'%3E%3Cstop offset='0' stop-color='%23e9cf98' stop-opacity='0'/%3E%3Cstop offset='1' stop-color='%23e9cf98'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect x='4' y='5.5' width='62' height='1' fill='url(%23a)'/%3E%3Crect x='94' y='5.5' width='62' height='1' fill='url(%23b)'/%3E%3Cpath d='M80 1.5 85.5 6 80 10.5 74.5 6Z' fill='%23e9cf98'/%3E%3C/svg%3E") center/contain no-repeat;
+}
+/* bouton Découvrir : or battu */
+html:root body main.lp-preview .lp-hero-clean .lp-cta{
+  padding:16px 46px !important;
+  font-size:calc(15px * var(--font-scale,1)) !important;
+  font-weight:700 !important;letter-spacing:.14em !important;
+  border-radius:999px !important;
+  background:linear-gradient(135deg,#f8e7b6 0%,#d8b25f 46%,#a77f36 100%) !important;
+  color:#2a0711 !important;border:1px solid #f6e3ae !important;
+  box-shadow:0 0 0 5px rgba(233,207,152,.16),0 20px 30px -14px rgba(20,2,8,.75),inset 0 1px 0 rgba(255,255,255,.6) !important;
+  transition:transform .35s cubic-bezier(.22,.7,.2,1),box-shadow .35s ease !important;
+}
+html:root body main.lp-preview .lp-hero-clean .lp-cta:hover{
+  transform:translateY(-2px);
+  box-shadow:0 0 0 7px rgba(233,207,152,.26),0 24px 34px -14px rgba(20,2,8,.8),inset 0 1px 0 rgba(255,255,255,.7) !important;
+}
+
+/* ---------- 2. Titres de section : filigrane doré ---------- */
+html:root body main.lp-preview .lp-section h2,
+html:root body main.lp-preview .lp-experience-section h2{
+  font-family:'Cormorant Garamond','Amiri',Georgia,serif !important;
+  font-weight:500 !important;
+  font-size:calc(clamp(27px,7vw,34px) * var(--font-scale,1)) !important;
+  letter-spacing:.06em !important;
+  color:#4a0e1c !important;
+  margin-bottom:26px !important;
+}
+html:root body main.lp-preview .lp-section h2::after,
+html:root body main.lp-preview .lp-experience-section h2::after{
+  content:"";display:block;width:150px;height:12px;margin:12px auto 0;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 12'%3E%3Cdefs%3E%3ClinearGradient id='a' x1='0' x2='1'%3E%3Cstop offset='0' stop-color='%23b08a3e' stop-opacity='0'/%3E%3Cstop offset='1' stop-color='%23b08a3e'/%3E%3C/linearGradient%3E%3ClinearGradient id='b' x1='1' x2='0'%3E%3Cstop offset='0' stop-color='%23b08a3e' stop-opacity='0'/%3E%3Cstop offset='1' stop-color='%23b08a3e'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect x='4' y='5.5' width='62' height='1' fill='url(%23a)'/%3E%3Crect x='94' y='5.5' width='62' height='1' fill='url(%23b)'/%3E%3Cpath d='M80 1.5 85.5 6 80 10.5 74.5 6Z' fill='%23b08a3e'/%3E%3C/svg%3E") center/contain no-repeat;
+}
+html:root body main.lp-preview .lp-experience-kicker{
+  color:#8f6a2c !important;font-weight:600 !important;letter-spacing:.2em !important;
+}
+
+/* ---------- 3. Cartes produits fermées : écrin bordeaux à double filet ---------- */
+html:root body main.lp-preview button.lp-row-card.lp-row-card.lp-card.lp-product-card:not(.lp-gift-pack){
+  border-radius:16px !important;
+  border:1px solid #c9a86a !important;
+  box-shadow:0 30px 40px -28px rgba(42,7,17,.9),inset 0 0 0 4px #4a0e1c,inset 0 0 0 5px rgba(233,207,152,.34) !important;
+  transition:transform .4s cubic-bezier(.22,.7,.2,1),box-shadow .4s ease !important;
+}
+html:root body main.lp-preview button.lp-row-card.lp-row-card.lp-card.lp-product-card:not(.lp-gift-pack):hover{
+  transform:translateY(-3px);
+  box-shadow:0 36px 44px -28px rgba(42,7,17,.95),inset 0 0 0 4px #4a0e1c,inset 0 0 0 5px rgba(233,207,152,.55) !important;
+}
+html:root body main.lp-preview button.lp-row-card.lp-row-card.lp-card.lp-product-card:not(.lp-gift-pack) .lp-row-card-img{
+  box-shadow:0 10px 20px -12px rgba(0,0,0,.7) !important;
+}
+html:root body main.lp-preview button.lp-row-card.lp-row-card.lp-card.lp-product-card:not(.lp-gift-pack) .lp-row-card-price{
+  font-family:'Cormorant Garamond','Amiri',Georgia,serif !important;
+  font-weight:600 !important;
+  font-size:calc(21px * var(--font-scale,1)) !important;
+  letter-spacing:.03em !important;
+  color:#f0d9a0 !important;
+}
+html:root body main.lp-preview button.lp-row-card.lp-row-card.lp-card.lp-product-card:not(.lp-gift-pack) .lp-row-card-price .lp-landing-old-price{
+  font-size:calc(14px * var(--font-scale,1)) !important;font-weight:400 !important;
+}
+html:root body main.lp-preview button.lp-row-card.lp-row-card.lp-card.lp-product-card:not(.lp-gift-pack) .lp-row-card-cta{
+  border-radius:999px !important;
+  letter-spacing:.06em !important;
+  box-shadow:0 8px 16px -8px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.55) !important;
+}
+
+/* ---------- 4. Carte produit ouverte & formulaire : cadre ivoire-or ---------- */
+html:root body main.lp-preview .lp-product-card:not(.lp-row-card):not(.lp-gift-pack):not(.lp-order-success){
+  background:linear-gradient(180deg,#fbede7 0%,#f4e2dc 100%) !important;
+  border:1px solid rgba(176,138,62,.58) !important;
+  border-radius:20px !important;
+  box-shadow:0 34px 50px -36px rgba(74,14,28,.6),inset 0 0 0 5px #fbede7,inset 0 0 0 6px rgba(176,138,62,.26) !important;
+}
+html:root body main.lp-preview .lp-choose-btn{
+  letter-spacing:.04em;
+  box-shadow:0 10px 20px -10px rgba(42,7,17,.5),inset 0 1px 0 rgba(233,207,152,.25);
+}
+
+
+/* ---------- 4b. Description : titre affirmé, texte plus fin (FR + AR) ---------- */
+html:root body main.lp-preview .lp-product-card:not(.lp-gift-pack):not(.lp-order-success) .lp-product-details .lp-product-details-title{
+  font-family:'Cormorant Garamond','Amiri',Georgia,serif !important;
+  font-size:calc(23px * var(--font-scale,1)) !important;
+  font-weight:600 !important;letter-spacing:.02em !important;
+  color:#4a0e1c !important;
+  margin:4px 0 12px !important;
+}
+html:root body main.lp-preview .lp-product-card:not(.lp-gift-pack):not(.lp-order-success) .lp-product-details .lp-product-desc p{
+  font-size:calc(14px * var(--font-scale,1)) !important;
+  line-height:1.9 !important;
+}
+html:root body main.lp-preview .lp-product-card:not(.lp-gift-pack):not(.lp-order-success) .lp-product-details .lp-product-benefits,
+html:root body main.lp-preview .lp-product-card:not(.lp-gift-pack):not(.lp-order-success) .lp-product-details .lp-product-benefits ul,
+html:root body main.lp-preview .lp-product-card:not(.lp-gift-pack):not(.lp-order-success) .lp-product-details .lp-product-benefits li{
+  font-size:calc(13.5px * var(--font-scale,1)) !important;
+  line-height:1.75 !important;
+}
+html:root body main.lp-preview .lp-product-card:not(.lp-gift-pack):not(.lp-order-success) .lp-product-details .lp-product-benefits li{margin-bottom:8px !important;}
+
+/* ---------- 5. « Pourquoi LUXIA » : cartes ivoire, fines et sobres ---------- */
+html:root body main.lp-preview .lp-experience-card{
+  background:linear-gradient(160deg,#fffaf3 0%,#f9eadf 100%) !important;
+  border:1px solid rgba(176,138,62,.55) !important;
+  border-radius:8px !important;
+  box-shadow:0 20px 32px -24px rgba(74,14,28,.5),inset 0 0 0 4px #fffaf3,inset 0 0 0 5px rgba(176,138,62,.26) !important;
+  padding:20px 12px !important;
+}
+html:root body main.lp-preview .lp-experience-icon{color:#a8802f !important;font-size:19px !important;}
+html:root body main.lp-preview .lp-experience-card h3{color:#4a0e1c !important;font-weight:600 !important;letter-spacing:.02em;}
+html:root body main.lp-preview .lp-experience-card p{color:#5b4147 !important;}
+html:root body main.lp-preview .lp-experience-quote{
+  border:0 !important;padding:26px 14px !important;
+  font-family:'Cormorant Garamond','Amiri',Georgia,serif !important;
+  font-style:italic;font-size:calc(clamp(19px,5vw,23px) * var(--font-scale,1)) !important;
+  color:#5a1427 !important;
+  background:
+    linear-gradient(90deg,transparent,#b08a3e,transparent) top/100% 1px no-repeat,
+    linear-gradient(90deg,transparent,#b08a3e,transparent) bottom/100% 1px no-repeat !important;
+}
+
+/* ---------- 6. Avis clientes : cartes ivoire-or ---------- */
+html:root body main.lp-preview .lp-testimonials-title{
+  font-family:'Cormorant Garamond','Amiri',Georgia,serif !important;
+  font-weight:500 !important;font-size:calc(27px * var(--font-scale,1)) !important;
+  letter-spacing:.05em;color:#4a0e1c !important;margin-bottom:16px !important;
+}
+html:root body main.lp-preview .lp-wa-card{
+  background:linear-gradient(160deg,#fffaf3,#f9eadf) !important;
+  border:1px solid rgba(176,138,62,.45) !important;border-radius:10px !important;
+  box-shadow:0 14px 24px -18px rgba(74,14,28,.5) !important;
+}
+html:root body main.lp-preview .lp-wa-phone{color:#8f6a2c !important;font-weight:600 !important;letter-spacing:.04em;}
+html:root body main.lp-preview .lp-wa-msg{
+  color:#3a2a2e !important;background:#fff !important;
+  border:1px solid rgba(176,138,62,.28) !important;border-radius:8px !important;
+  box-shadow:0 6px 12px -10px rgba(74,14,28,.45) !important;
+}
+html:root body main.lp-preview .lp-wa-time{color:#9a8574 !important;}
+
+/* ---------- 7. Livraison (page uniquement, pas le panier) ---------- */
+html:root body main.lp-preview .lp-wrap .lp-shipping-info{
+  background:linear-gradient(160deg,#fffaf3,#f9eadf) !important;
+  border:1px solid rgba(176,138,62,.5) !important;border-radius:10px !important;
+  box-shadow:0 18px 30px -22px rgba(74,14,28,.5),inset 0 0 0 3px #fffaf3,inset 0 0 0 4px rgba(176,138,62,.22) !important;
+}
+html:root body main.lp-preview .lp-wrap .lp-shipping-info strong{color:#4a0e1c !important;}
+
+/* ---------- 8. Pied de page : bordeaux profond et or ---------- */
+html:root body main.lp-preview .lp-site-footer{
+  position:relative;
+  background:linear-gradient(180deg,#3a0b16 0%,#2a0711 100%) !important;
+  color:#f3e3c4 !important;border-top:1px solid #b08a3e !important;
+}
+html:root body main.lp-preview .lp-site-footer::before{
+  content:"";position:absolute;top:0;left:12%;right:12%;height:1px;
+  background:linear-gradient(90deg,transparent,#f3dfae,transparent);
+}
+html:root body main.lp-preview .lp-site-footer .mark{
+  font-weight:500 !important;font-size:calc(30px * var(--font-scale,1)) !important;letter-spacing:.34em !important;
+  direction:ltr;unicode-bidi:isolate;padding-left:.34em;
+  background:linear-gradient(110deg,#d9c18d 0%,#b9965b 27%,#f8e9bb 50%,#d6b56f 70%,#a9814d 100%);
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent !important;
+}
+html:root body main.lp-preview .lp-site-footer .footer-tagline{color:#d9bd82 !important;letter-spacing:.24em;}
+html:root body main.lp-preview .lp-site-footer .footer-badge{
+  color:#f1e1bf !important;background:rgba(255,255,255,.03) !important;
+  border:1px solid rgba(233,207,152,.38) !important;
+}
+html:root body main.lp-preview .lp-site-footer .footer-badge svg{color:#e9cf98 !important;}
+html:root body main.lp-preview .lp-site-footer .footer-bottom{
+  color:rgba(243,227,196,.62) !important;border-top:1px solid rgba(233,207,152,.22) !important;
+}
+
+/* ---------- 9. Arabe : pas d'espacement entre lettres (casse la liaison) ---------- */
+html[dir="rtl"] body main.lp-preview .lp-hero-clean .lp-hero-lux-tagline,
+html[dir="rtl"] body main.lp-preview .lp-hero-clean .lp-cta,
+html[dir="rtl"] body main.lp-preview .lp-section h2,
+html[dir="rtl"] body main.lp-preview .lp-experience-section h2,
+html[dir="rtl"] body main.lp-preview .lp-experience-kicker,
+html[dir="rtl"] body main.lp-preview .lp-experience-card h3,
+html[dir="rtl"] body main.lp-preview .lp-testimonials-title,
+html[dir="rtl"] body main.lp-preview .lp-choose-btn,
+html[dir="rtl"] body main.lp-preview .lp-site-footer .footer-tagline,
+html[dir="rtl"] body main.lp-preview button.lp-row-card .lp-row-card-cta{letter-spacing:0 !important;}
+html[dir="rtl"] body main.lp-preview .lp-hero-clean .lp-hero-lux-tagline{font-style:normal !important;}
+html[dir="rtl"] body main.lp-preview .lp-experience-quote{font-style:normal;}
+
+/* ---------- 10. Accessibilité : focus clavier visible ---------- */
+html:root body main.lp-preview a:focus-visible,
+html:root body main.lp-preview button:focus-visible{outline:2px solid #c9a24f;outline-offset:3px;}
+html:root body main.lp-preview .lp-hero-clean .lp-cta:focus-visible{outline-color:#fff3cf;outline-offset:5px;}
+@media (prefers-reduced-motion:reduce){
+  html:root body main.lp-preview button.lp-row-card,
+  html:root body main.lp-preview .lp-hero-clean .lp-cta{transition:none !important;transform:none !important;}
+}
+@media (max-width:420px){
+  html:root body main.lp-preview .lp-hero.lp-hero-clean::after{inset:72px 12px 12px;}
+  html:root body main.lp-preview .lp-hero-clean .lp-cta{padding:15px 38px !important;}
+}
+</style>
 </head>
 <body class="luxia-store-home">
 
@@ -15774,6 +16023,216 @@ html[dir="rtl"] body.luxia-store-home .product-grid .product-card.product-card.g
 html body.luxia-store-home .product-grid .product-card.product-card.gp-card .product-title-above-text.product-title-above-text::after{
   inset-inline:12px 92px !important;
 }
+</style>
+<style id="luxia-design-pass-final">
+/* LUXIA — design pass (visual only, no logic). Tokens */
+:root{--lx-paper:#f6f1e9;--lx-card:#fffdf9;--lx-ink:#2b2320;--lx-mute:#7b6f66;--lx-wine:#3a1f2d;--lx-wine-d:#24131b;--lx-gold:#b8935a;--lx-gold2:#c9a45c;--lx-gold-txt:#ecd7a6;--lx-price:#7a5a24;--lx-line:#e7ddd0;--lx-sh:0 1px 2px rgba(43,35,32,.06),0 14px 32px -18px rgba(43,35,32,.30);}
+html:root body.luxia-store-home,html:has(body.luxia-store-home){background:var(--lx-paper)!important;color:var(--lx-ink)!important;}
+/* promo + header */
+html:root body .promo-bar{background:#24131b!important;border-bottom:0!important;}
+html:root body .promo-bar span{color:#ecd9b4!important;letter-spacing:.06em!important;font-weight:400!important;}
+html:root body header{background:rgba(246,241,233,.9)!important;-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-bottom:1px solid var(--lx-line)!important;}
+html:root body .main-nav a,html:root body .main-nav button{color:var(--lx-ink)!important;font-weight:500!important;letter-spacing:.04em!important;}
+html:root body .cart-badge:not(.zero){background:var(--lx-wine)!important;color:#fff!important;}
+/* buttons */
+html:root body button,html:root body .btn-order{animation:none!important;}
+html:root body .btn-primary,html:root body .btn-order{background:var(--lx-wine)!important;color:#ecd7a6!important;border:1px solid var(--lx-gold2)!important;border-radius:12px!important;font-weight:500!important;letter-spacing:.06em!important;text-transform:none!important;box-shadow:0 10px 22px -12px rgba(26,12,18,.55)!important;transition:background .25s,transform .25s!important;}
+html:root body .btn-primary:hover,html:root body .btn-order:hover:not([disabled]){background:var(--lx-wine-d)!important;}
+html:root body .btn-ghost{background:transparent!important;color:var(--lx-wine)!important;border:1px solid rgba(58,31,45,.35)!important;border-radius:12px!important;font-weight:500!important;}
+html:root body .btn-ghost:hover{background:rgba(58,31,45,.06)!important;}
+html:root body .btn-order[disabled]{background:#d9d0c5!important;border-color:#d9d0c5!important;color:#8d8277!important;box-shadow:none!important;}
+html:root body .hero .btn-primary{padding:16px 36px!important;border-radius:999px!important;}
+/* hero */
+html:root body .hero h1{letter-spacing:.2em!important;font-weight:500!important;}
+html:root body .hero .pitch{max-width:34ch!important;margin-left:auto!important;margin-right:auto!important;line-height:1.7!important;}
+/* store heading + filters */
+html:root body.luxia-store-home .store-heading h2{font-family:'Cormorant Garamond','Amiri',serif!important;font-size:clamp(36px,9vw,50px)!important;font-weight:600!important;color:var(--lx-ink)!important;line-height:1.05!important;}
+html:root body.luxia-store-home .store-heading p{color:var(--lx-mute)!important;max-width:36ch;margin-inline:auto;}
+html:root body.luxia-store-home .store-drop-badge{background:var(--lx-wine)!important;color:#f3dfb8!important;border:0!important;border-radius:999px!important;padding:6px 16px!important;}
+html:root body.luxia-store-home .store-drop-badge *{color:inherit!important;}
+html:root body.luxia-store-home .store-count{color:var(--lx-mute)!important;}
+html:root body.luxia-store-home .store-filter{border-radius:999px!important;border:1px solid var(--lx-line)!important;background:var(--lx-card)!important;color:var(--lx-ink)!important;padding:9px 18px!important;font-weight:500!important;}
+html:root body.luxia-store-home .store-filter.active{background:var(--lx-wine)!important;border-color:var(--lx-gold2)!important;color:#ecd7a6!important;}
+/* collection headings */
+html:root body.luxia-store-home .home-collection-section{margin-bottom:54px!important;}
+html:root body.luxia-store-home .home-collection-heading{background:none!important;box-shadow:none!important;padding:4px 0 6px!important;margin-bottom:22px!important;}
+html:root body.luxia-store-home .home-collection-heading h3{font-size:clamp(28px,7vw,36px)!important;font-weight:600!important;color:var(--lx-ink)!important;}
+html:root body.luxia-store-home .home-collection-kicker{color:var(--lx-gold)!important;}
+html:root body.luxia-store-home .home-collection-rule{width:64px!important;background:var(--lx-gold)!important;opacity:.8!important;}
+/* grid */
+html:root body.luxia-store-home .product-grid{gap:16px 12px!important;align-items:stretch!important;}
+@media(min-width:640px){html:root body.luxia-store-home .product-grid{gap:28px 22px!important;}}
+/* cards v2 */
+html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.product-card:not(.gp-card){background:var(--lx-card)!important;border:1px solid var(--lx-line)!important;border-radius:18px!important;box-shadow:var(--lx-sh)!important;overflow:hidden!important;display:flex!important;flex-direction:column!important;height:100%!important;min-height:0!important;align-self:stretch!important;padding:0!important;}
+html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.product-card:not(.gp-card)::before,html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.product-card:not(.gp-card)::after{content:none!important;display:none!important;}
+html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.product-card:not(.gp-card) .product-visual{order:1;border-radius:0!important;margin:0!important;}
+html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.product-card:not(.gp-card) .product-title-price-head,html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.product-card:not(.gp-card) .product-title-above{order:2;background:transparent!important;border:0!important;box-shadow:none!important;padding:0!important;margin:0!important;min-height:0!important;}
+html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.product-card:not(.gp-card) .product-title-price-head{padding:14px 12px 4px!important;}
+html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.product-card:not(.gp-card) .product-title-above-text.product-title-above-text.product-title-above-text{display:-webkit-box!important;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;background:none!important;border:0!important;box-shadow:none!important;text-shadow:none!important;border-radius:0!important;padding:0!important;font-family:'Cormorant Garamond','Amiri',serif!important;font-size:22px!important;font-weight:600!important;letter-spacing:.01em!important;line-height:1.2!important;text-align:center!important;color:var(--lx-ink)!important;-webkit-text-fill-color:var(--lx-ink)!important;text-transform:none!important;font-variant-numeric:lining-nums;min-height:1.2em;}
+html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.product-card:not(.gp-card) .lx-card-gal{order:3;margin:8px 0 0!important;padding:0 12px!important;}
+html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.product-card:not(.gp-card) .lx-card-thumbs{width:auto!important;max-width:200px;margin:0 auto!important;gap:6px!important;}
+html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.product-card:not(.gp-card) .lx-card-thumb{border-radius:8px!important;}
+html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.product-card:not(.gp-card) .lx-card-dots{display:none!important;}
+html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.product-card:not(.gp-card) .product-info{order:4;margin-top:auto!important;flex:1 1 auto!important;padding:8px 12px 14px!important;display:flex!important;flex-direction:column!important;justify-content:flex-end!important;gap:10px!important;background:transparent!important;height:auto!important;}
+html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.product-card:not(.gp-card) .product-price-only,html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.product-card:not(.gp-card) .product-price-bottom{font-family:'Cormorant Garamond','Amiri',serif!important;font-size:27px!important;font-weight:700!important;color:var(--lx-price)!important;background:none!important;border:0!important;box-shadow:none!important;text-align:center!important;line-height:1.1!important;padding:0!important;margin:0!important;font-variant-numeric:lining-nums;font-feature-settings:"lnum" 1;}
+html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.product-card:not(.gp-card) .product-price-bottom *{font-family:'Jost',sans-serif!important;font-size:12px!important;font-weight:400!important;color:var(--lx-mute)!important;font-feature-settings:"lnum" 1;}
+html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.product-card:not(.gp-card) .product-price-bottom s,html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.product-card:not(.gp-card) .product-price-bottom .lx-old-price{color:#a39688!important;margin-inline:6px;}
+html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.product-card:not(.gp-card) .btn-order.btn-order.btn-order{width:100%!important;min-height:46px!important;padding:0 14px!important;margin:0!important;font-size:13px!important;letter-spacing:.04em!important;font-family:'Jost','Amiri',sans-serif!important;background:var(--lx-wine)!important;color:#ecd7a6!important;border:1px solid var(--lx-gold2)!important;border-radius:12px!important;box-shadow:0 10px 22px -12px rgba(26,12,18,.55)!important;text-shadow:none!important;}
+html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.product-card:not(.gp-card) .btn-order.btn-order.btn-order[disabled]{background:#e4dbcf!important;border-color:#e4dbcf!important;color:#8d8277!important;box-shadow:none!important;}
+html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.product-card:not(.gp-card) .swatch-row,html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.product-card:not(.gp-card) .product-sizes-row{justify-content:center!important;gap:6px!important;}
+html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.product-card:not(.gp-card) .swatch{width:18px!important;height:18px!important;border:2px solid #fff!important;box-shadow:0 0 0 1px var(--lx-line)!important;}
+html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.product-card:not(.gp-card) .product-size-chip{font-size:11px!important;padding:4px 9px!important;border-radius:8px!important;border:1px solid var(--lx-line)!important;background:#fff!important;color:var(--lx-ink)!important;}
+@media(max-width:639px){
+ html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.product-card:not(.gp-card) .product-title-above-text.product-title-above-text.product-title-above-text{font-size:17px!important;}
+ html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.product-card:not(.gp-card) .product-price-only,html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.product-card:not(.gp-card) .product-price-bottom{font-size:22px!important;}
+ html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.product-card:not(.gp-card) .btn-order.btn-order.btn-order{min-height:42px!important;font-size:12.5px!important;}
+ html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.product-card:not(.gp-card) .product-title-price-head{padding:12px 8px 2px!important;}
+ html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.product-card:not(.gp-card) .product-info{padding:6px 8px 12px!important;}
+ html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.product-card:not(.gp-card) .lx-card-gal{padding:0 8px!important;}
+}
+/* why / quote / reviews */
+html:root body.luxia-store-home .why{background:#24131b!important;}
+html:root body.luxia-store-home .why-card{background:linear-gradient(180deg,rgba(236,215,166,.07),rgba(236,215,166,.02))!important;border:1px solid rgba(201,164,92,.38)!important;border-radius:18px!important;box-shadow:none!important;}
+html:root body.luxia-store-home .why-card h4{color:var(--lx-gold-txt)!important;}
+html:root body.luxia-store-home .why-card p{color:#d9cfc4!important;}
+html:root body.luxia-store-home .why-card svg{color:var(--lx-gold2)!important;}
+html:root body .feature-banner .quote{font-family:'Cormorant Garamond','Amiri',serif!important;font-style:italic!important;font-size:clamp(26px,6.5vw,36px)!important;line-height:1.3!important;color:var(--lx-wine)!important;}
+html:root body .home-avis-title{font-family:'Cormorant Garamond','Amiri',serif!important;font-weight:600!important;color:var(--lx-ink)!important;}
+html:root body .home-wa-card{border-radius:16px!important;box-shadow:var(--lx-sh)!important;}
+/* modals */
+html:root body .modal-close,html:root body .qty-btn{border-radius:999px!important;}
+
+html:root body .lang-switch .lang-btn.active{background:var(--lx-wine)!important;color:#ecd7a6!important;border-color:var(--lx-wine)!important;}
+html:root body .promo-bar{background:#24131b!important;}
+html:root body.luxia-store-home .hero .btn-primary{background:linear-gradient(135deg,#f0dfae,#c9a45c 55%,#e2c682)!important;color:#2a1620!important;border:1px solid #b88a2f!important;box-shadow:0 12px 26px -12px rgba(0,0,0,.7)!important;font-weight:600!important;}
+html:root body.luxia-store-home .feature-banner .quote{color:#3a1f2d!important;}
+html:root body.luxia-store-home .lang-switch .lang-btn.active{background:#24131b!important;color:var(--lx-gold-txt)!important;border-color:var(--lx-gold2)!important;}
+html:root body.luxia-store-home .store-filter.active,html:root body.luxia-store-home .store-drop-badge{background:#24131b!important;color:var(--lx-gold-txt)!important;border-color:var(--lx-gold2)!important;}
+
+/* ===== PACK CADEAU — thème « coffret de nuit » aubergine + or ===== */
+html:root body.luxia-store-home .home-collection-section.home-collection-section.gp-section{background:radial-gradient(120% 55% at 50% 0%,#3a1f2d 0%,#24131b 60%,#1b0d14 100%)!important;border:1px solid rgba(201,164,92,.5)!important;border-radius:26px!important;box-shadow:0 22px 44px -26px rgba(26,12,18,.8)!important;padding:0 12px 24px!important;margin:10px 0 34px!important;}
+html:root body.luxia-store-home .home-collection-section.home-collection-section.gp-section .home-collection-heading{padding:26px 20px 6px!important;margin:0 auto 18px!important;background:none!important;box-shadow:none!important;}
+html:root body.luxia-store-home .home-collection-section.home-collection-section.gp-section .home-collection-heading h3{color:#ecd7a6!important;font-family:'Cormorant Garamond','Amiri',serif!important;font-size:clamp(30px,8vw,40px)!important;font-weight:600!important;}
+html:root body.luxia-store-home .home-collection-section.home-collection-section.gp-section .home-collection-rule{width:90px!important;height:1px!important;background:linear-gradient(90deg,transparent,#c9a45c,transparent)!important;opacity:1!important;}
+html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.gp-card{background:linear-gradient(170deg,#3d2132 0%,#2a1620 55%,#1f0f17 100%)!important;background-color:#2a1620!important;border:1px solid #c9a45c!important;border-radius:22px!important;box-shadow:inset 0 0 0 4px #2a1620,inset 0 0 0 5px rgba(201,164,92,.5),0 18px 32px -16px rgba(0,0,0,.7)!important;overflow:hidden!important;display:flex!important;flex-direction:column!important;height:100%!important;padding:0!important;}
+html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.gp-card .gp-lid{position:absolute!important;top:10px!important;left:50%!important;right:auto!important;inset-inline-start:50%!important;inset-inline-end:auto!important;width:58px!important;max-width:58px!important;height:auto!important;transform:translateX(-50%)!important;z-index:7!important;}
+html[dir="rtl"] html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.gp-card .gp-lid{transform:translateX(50%)!important;}
+html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.gp-card .gp-lid .gp-bow{transform:none!important;}
+html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.gp-card .product-title-price-head{background:transparent!important;border:0!important;border-radius:0!important;padding:54px 14px 12px!important;margin:0!important;text-align:center!important;}
+html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.gp-card .product-title-above-text.product-title-above-text{display:block!important;position:static!important;width:100%!important;padding:0!important;text-align:center!important;font-family:'Cormorant Garamond','Amiri',serif!important;font-size:25px!important;font-weight:600!important;letter-spacing:.02em!important;color:#ecd7a6!important;-webkit-text-fill-color:#ecd7a6!important;text-transform:capitalize!important;line-height:1.15!important;font-variant-numeric:lining-nums;}
+html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.gp-card .product-title-above-text.product-title-above-text::after{content:""!important;display:block!important;position:static!important;inset:auto!important;width:46px!important;height:1px!important;margin:9px auto 0!important;background:#c9a45c!important;}
+html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.gp-card .gp-box{margin:0!important;padding:0 12px!important;background:transparent!important;border:0!important;box-shadow:none!important;}
+html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.gp-card .gp-box .product-visual{border-radius:14px!important;border:1px solid rgba(201,164,92,.75)!important;overflow:hidden!important;margin:0!important;background:#1f0f17!important;}
+html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.gp-card .product-visual .gx-badge{background:linear-gradient(135deg,#f0dfae,#c9a45c)!important;color:#2a1620!important;-webkit-text-fill-color:#2a1620!important;border:0!important;}
+html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.gp-card .lx-card-gal{background:transparent!important;padding:10px 12px 0!important;margin:0!important;}
+html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.gp-card .lx-card-thumbs{width:auto!important;max-width:190px;margin:0 auto!important;gap:6px!important;}
+html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.gp-card .lx-card-thumb{background:transparent!important;border:1px solid rgba(201,164,92,.55)!important;border-radius:8px!important;}
+html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.gp-card .lx-card-dots i{background:rgba(236,215,166,.3)!important;}
+html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.gp-card .lx-card-dots i.on{background:#ecd7a6!important;}
+html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.gp-card .product-info{background:transparent!important;margin-top:auto!important;padding:10px 12px 16px!important;display:flex!important;flex-direction:column!important;gap:10px!important;}
+html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.gp-card .product-price-only,html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.gp-card .product-price-bottom{font-family:'Cormorant Garamond','Amiri',serif!important;font-size:30px!important;font-weight:700!important;color:#ecd7a6!important;background:none!important;border:0!important;box-shadow:none!important;text-align:center!important;line-height:1.1!important;padding:0!important;margin:0!important;font-variant-numeric:lining-nums;font-feature-settings:"lnum" 1;}
+html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.gp-card .product-price-bottom *{font-family:'Jost',sans-serif!important;font-size:13px!important;font-weight:400!important;color:#b9a99a!important;font-feature-settings:"lnum" 1;margin-inline:6px;}
+html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.gp-card .btn-order.btn-order.btn-order{background:linear-gradient(135deg,#f0dfae,#c9a45c 55%,#e2c682)!important;color:#2a1620!important;border:1px solid #e8d49a!important;border-radius:12px!important;min-height:46px!important;font-weight:600!important;letter-spacing:.04em!important;box-shadow:0 10px 22px -12px rgba(0,0,0,.7)!important;text-shadow:none!important;}
+@media(max-width:639px){
+ html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.gp-card .product-title-above-text.product-title-above-text{font-size:21px!important;}
+ html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.gp-card .product-price-only,html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.gp-card .product-price-bottom{font-size:25px!important;}
+ html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.gp-card .gp-box,html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.gp-card .lx-card-gal{padding-inline:8px!important;}
+ html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.gp-card .product-info{padding:10px 8px 12px!important;}
+ html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.gp-card .btn-order.btn-order.btn-order{min-height:42px!important;font-size:12.5px!important;}
+}
+
+/* ===== PACK CADEAU v2 — même ordre que les autres cartes, coffret champagne sur fond aubergine ===== */
+html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.gp-card{background:linear-gradient(165deg,#fbf3e2 0%,#f1e2c4 58%,#e4cc98 100%)!important;background-color:#f1e2c4!important;border:1px solid #b88a2f!important;border-radius:22px!important;overflow:visible!important;box-shadow:inset 0 0 0 4px #f6ead0,inset 0 0 0 5px rgba(150,106,30,.45),0 22px 36px -16px rgba(0,0,0,.75)!important;}
+html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.gp-card .gp-lid{top:-20px!important;width:50px!important;max-width:50px!important;}
+html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.gp-card .gp-box{order:1!important;padding:12px 12px 0!important;margin:0!important;border:0!important;}
+html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.gp-card .gp-box::before,html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.gp-card .gp-box::after,html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.gp-card .lx-card-gal::before,html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.gp-card .lx-card-gal::after{content:none!important;display:none!important;}
+html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.gp-card .gp-box .product-visual{border-radius:14px!important;border:1px solid rgba(150,106,30,.55)!important;background:#e9d7ae!important;}
+html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.gp-card .product-title-price-head{order:2!important;padding:12px 12px 2px!important;}
+html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.gp-card .product-title-above-text.product-title-above-text{color:#3a1f2d!important;-webkit-text-fill-color:#3a1f2d!important;font-size:22px!important;}
+html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.gp-card .product-title-above-text.product-title-above-text::after{width:36px!important;margin:7px auto 0!important;background:#b88a2f!important;}
+html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.gp-card .lx-card-gal{order:3!important;border:0!important;border-top:0!important;background:transparent!important;padding:8px 12px 0!important;}
+html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.gp-card .lx-card-thumbs{width:min(100%,190px)!important;max-width:190px!important;margin:0 auto!important;}
+html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.gp-card .lx-card-thumb{border:1px solid rgba(150,106,30,.5)!important;background:#e9d7ae!important;}
+html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.gp-card .lx-card-dots i{background:rgba(58,31,45,.25)!important;}
+html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.gp-card .lx-card-dots i.on{background:#3a1f2d!important;}
+html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.gp-card .product-info{order:4!important;border:0!important;}
+html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.gp-card .product-price-only,html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.gp-card .product-price-bottom{display:flex!important;justify-content:center!important;align-items:baseline!important;flex-wrap:wrap!important;align-self:stretch!important;width:100%!important;color:#3a1f2d!important;}
+html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.gp-card .product-price-bottom *{color:#8f8070!important;}
+html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.gp-card .btn-order.btn-order.btn-order{background:#3a1f2d!important;color:#ecd7a6!important;border:1px solid #b88a2f!important;box-shadow:0 10px 22px -12px rgba(26,12,18,.6)!important;}
+@media(max-width:639px){ html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.gp-card .product-title-above-text.product-title-above-text{font-size:19px!important;} }
+
+/* ===== PACK CADEAU v3 : photo pleine largeur + fenêtres assorties (champagne / aubergine / or) ===== */
+html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.gp-card .gp-box{padding:0!important;}
+html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.gp-card .gp-box .product-visual{border:0!important;border-bottom:1px solid rgba(150,106,30,.55)!important;border-radius:21px 21px 0 0!important;aspect-ratio:4 / 5!important;height:auto!important;min-height:0!important;max-height:none!important;width:100%!important;}
+html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.gp-card .gp-box .product-visual img,html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.gp-card .gp-box .product-visual .product-photo{width:100%!important;height:100%!important;object-fit:cover!important;border-radius:0!important;}
+html:root body #productDetailOverlay .product-detail-modal.gp-themed,html:root body #variantOverlay .modal.gp-themed,html:root body #giftModal.gf-modal .gf-box{background:linear-gradient(165deg,#fbf3e2 0%,#f1e2c4 58%,#e4cc98 100%)!important;background-color:#f1e2c4!important;color:#3a1f2d!important;border:1px solid #b88a2f!important;box-shadow:inset 0 0 0 4px #f6ead0,inset 0 0 0 5px rgba(150,106,30,.45),0 26px 50px -18px rgba(20,8,14,.8)!important;}
+html:root body #giftModal.gf-modal{background:radial-gradient(90% 60% at 50% 30%,rgba(58,31,45,.88),rgba(24,10,17,.94))!important;}
+html:root body #giftModal.gf-modal .gf-box>img{border-bottom-color:#b88a2f!important;box-shadow:none!important;}
+html:root body #giftModal.gf-modal .gf-box h3,html:root body .gp-themed .modal-head h3,html:root body .gp-themed h4,html:root body .gp-themed .field label,html:root body #giftModal.gf-modal .gf-it b,html:root body .gp-themed .product-detail-price,html:root body .gp-themed .qty-value,html:root body #giftModal.gf-modal .gf-pr{color:#3a1f2d!important;}
+html:root body #giftModal.gf-modal label,html:root body #giftModal.gf-modal .gf-ck,html:root body .gp-themed .modal-sub,html:root body .gp-themed p,html:root body .gp-themed li,html:root body .gp-themed .product-detail-section,html:root body #giftModal.gf-modal .gf-box .gf-customer-content,html:root body #giftModal.gf-modal .gf-box .gf-customer-content p,html:root body #giftModal.gf-modal .gf-box .gf-customer-content ul,html:root body #giftModal.gf-modal .gf-box .gf-customer-content li{color:#4a3a32!important;}
+html:root body #giftModal.gf-modal .gf-box .gf-customer-content li::marker{color:#b88a2f!important;}
+html:root body #giftModal.gf-modal .gf-it select,html:root body #giftModal.gf-modal .gf-box textarea,html:root body .gp-themed input,html:root body .gp-themed select,html:root body .gp-themed textarea{background:#fffaf0!important;color:#3a1f2d!important;border:1px solid rgba(150,106,30,.6)!important;box-shadow:inset 0 1px 2px rgba(58,31,45,.12)!important;}
+html:root body #giftModal.gf-modal .gf-it select option{background:#fffaf0!important;color:#3a1f2d!important;}
+html:root body #giftModal.gf-modal .gf-it select.is-required-missing{background:#fff1f1!important;border:2px solid #c0392b!important;}
+html:root body #giftModal.gf-modal .gf-x,html:root body .gp-themed .modal-close{background:#3a1f2d!important;color:#ecd7a6!important;border:1px solid #b88a2f!important;}
+html:root body .gp-themed .modal-head{border-bottom-color:rgba(150,106,30,.35)!important;}
+html:root body .gp-themed .product-detail-gallery,html:root body .gp-themed .product-detail-thumbs{background:transparent!important;border-bottom-color:rgba(150,106,30,.4)!important;}
+html:root body #productDetailOverlay .product-detail-modal.gp-themed .product-detail-gallery .product-detail-main-image{background:#e9d7ae!important;border:1.5px solid #b88a2f!important;box-shadow:0 14px 26px -14px rgba(58,31,45,.5)!important;}
+html:root body .gp-themed .product-detail-main-image img{background:#e9d7ae!important;}
+html:root body #productDetailOverlay .product-detail-modal.gp-themed .product-detail-thumb{background:#e9d7ae!important;border:1px solid rgba(150,106,30,.5)!important;box-shadow:none!important;}
+html:root body #productDetailOverlay .product-detail-modal.gp-themed .product-detail-thumb.active{border:1.5px solid #3a1f2d!important;box-shadow:0 0 0 1px #3a1f2d!important;}
+html:root body .gp-themed .product-detail-color-option,html:root body .gp-themed .product-detail-size-option,html:root body .gp-themed .pill,html:root body .gp-themed .qty-btn{background:#fffaf0!important;color:#3a1f2d!important;border:1px solid rgba(150,106,30,.6)!important;box-shadow:none!important;}
+html:root body .gp-themed .product-detail-color-option.active,html:root body .gp-themed .product-detail-color-option.selected,html:root body .gp-themed .product-detail-size-option.active,html:root body .gp-themed .product-detail-size-option.selected,html:root body .gp-themed .pill.active,html:root body .gp-themed .pill.selected{background:#3a1f2d!important;color:#ecd7a6!important;border-color:#b88a2f!important;}
+html:root body .gp-themed .order-summary,html:root body #variantOverlay .modal.gp-themed .order-summary,html:root body #variantOverlay .modal.gp-themed #variantSummary,html:root body #variantOverlay .modal.gp-themed #variantPackInfo{background:#fbf3e2!important;background-image:none!important;color:#3a1f2d!important;border:1px solid rgba(150,106,30,.5)!important;}
+html:root body .gp-themed .btn-primary,html:root body .gp-themed .product-detail-add,html:root body #giftModal.gf-modal #gfAdd{background:#3a1f2d!important;color:#ecd7a6!important;border:1px solid #b88a2f!important;box-shadow:0 10px 20px -10px rgba(26,12,18,.7)!important;}
+html:root body .gp-themed .btn-ghost{background:transparent!important;color:#3a1f2d!important;border:1px solid rgba(58,31,45,.4)!important;}
+html:root body #productDetailOverlay .product-detail-modal.gp-themed .product-detail-section ul li::before{background:linear-gradient(135deg,#d9b96b,#b88a2f)!important;box-shadow:none!important;}
+
+/* ===== PACK CADEAU v4 : carte plus compacte + liste d'options (lx-dd) assortie ===== */
+html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.gp-card.gp-card .gp-box .product-visual{aspect-ratio:1 / 1!important;}
+html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.gp-card.gp-card .product-title-price-head{padding:10px 10px 0!important;}
+html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.gp-card.gp-card .product-title-above-text.product-title-above-text{font-size:20px!important;}
+html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.gp-card.gp-card .product-title-above-text.product-title-above-text::after{margin:6px auto 0!important;}
+html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.gp-card.gp-card .lx-card-gal{padding:8px 10px 0!important;}
+html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.gp-card.gp-card .lx-card-thumbs{width:min(100%,150px)!important;max-width:150px!important;gap:5px!important;}
+html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.gp-card.gp-card .lx-card-dots{margin-top:5px!important;}
+html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.gp-card.gp-card .product-info{padding:6px 10px 12px!important;gap:8px!important;margin-top:0!important;flex:0 0 auto!important;}
+html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.gp-card.gp-card .product-price-only.product-price-bottom{display:flex!important;justify-content:center!important;align-items:baseline!important;text-align:center!important;font-size:26px!important;width:100%!important;padding:0!important;}
+html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.gp-card.gp-card .btn-order.btn-order.btn-order{min-height:42px!important;}
+html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.gp-card.gp-card{height:auto!important;justify-content:flex-start!important;}
+/* liste d'options (Taille / Couleur) */
+html:root body .lx-dd-ov{background:rgba(24,10,17,.72)!important;}
+html:root body .lx-dd-sheet{background:linear-gradient(170deg,#fbf3e2 0%,#f1e2c4 60%,#e4cc98 100%)!important;color:#3a1f2d!important;border:1.5px solid #b88a2f!important;border-bottom:0!important;box-shadow:0 -18px 40px -12px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.6)!important;}
+html:root body .lx-dd-grip{background:#b88a2f!important;}
+html:root body .lx-dd-title{color:#3a1f2d!important;}
+html:root body .lx-dd-sub{color:#8a6d3b!important;}
+html:root body .lx-dd-line{background:linear-gradient(90deg,transparent,rgba(150,106,30,.6),transparent)!important;}
+html:root body .lx-dd-opt{background:#fffaf0!important;color:#3a1f2d!important;border:1px solid rgba(150,106,30,.35)!important;}
+html:root body .lx-dd-opt:active{background:#f3e5c2!important;}
+html:root body .lx-dd-opt[aria-selected="true"]{background:#3a1f2d!important;color:#ecd7a6!important;border-color:#b88a2f!important;box-shadow:0 6px 14px -8px rgba(0,0,0,.5)!important;}
+html:root body .lx-dd-btn{background:#fffaf0!important;color:#3a1f2d!important;border:1.5px solid rgba(150,106,30,.6)!important;box-shadow:0 2px 0 rgba(150,106,30,.25)!important;}
+html:root body .lx-dd-btn[data-empty="1"] .lx-dd-val{color:#8a6d3b!important;}
+html:root body .lx-dd-chev{border-color:#3a1f2d!important;}
+html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.gp-card.gp-card .product-price-only.product-price-bottom{flex-wrap:nowrap!important;font-size:24px!important;white-space:nowrap!important;}
+html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.gp-card.gp-card .product-price-only.product-price-bottom *{font-size:12px!important;margin-inline:5px 0!important;}
+
+/* Rupture de stock : la photo principale garde ses couleurs (le badge + le bouton gris indiquent déjà l'état) */
+html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.is-soldout .product-visual .product-photo,
+html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.is-soldout .product-photo{filter:none!important;opacity:1!important;-webkit-filter:none!important;}
+html:root body.luxia-store-home .product-card.is-soldout .product-visual{filter:none!important;opacity:1!important;}
+
+/* ===== Vue « collection » (filtre) : grille 2 colonnes comme la vue Tous, galerie pleine largeur ===== */
+html:root body.luxia-store-home #productGrid:has(> .product-card){display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:16px 12px!important;align-items:stretch!important;}
+@media(min-width:640px){html:root body.luxia-store-home #productGrid:has(> .product-card){grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:28px 22px!important;}}
+html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.product-card:not(.gp-card) .lx-card-gal{padding:0 12px!important;margin:10px 0 0!important;}
+html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.product-card:not(.gp-card) .lx-card-thumbs{width:100%!important;max-width:none!important;margin:0!important;gap:6px!important;}
+html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.product-card:not(.gp-card) .lx-card-thumb{border-radius:10px!important;}
+@media(max-width:639px){html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.product-card:not(.gp-card) .lx-card-gal{padding:0 8px!important;}}
+/* prix : seuls les petits éléments (ancien prix, « dès », pièces) sont réduits */
+html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.product-card:not(.gp-card) .product-price-bottom b,html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.product-card:not(.gp-card) .product-price-bottom strong{font-family:inherit!important;font-size:inherit!important;font-weight:inherit!important;color:inherit!important;}
+html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.product-card:not(.gp-card) .product-price-bottom small,html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.product-card:not(.gp-card) .product-price-bottom em,html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.product-card:not(.gp-card) .product-price-bottom s,html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.product-card:not(.gp-card) .product-price-bottom .lx-old-price{font-size:13px!important;}
+html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.product-card:not(.gp-card) .product-price-bottom .lx-mp-cardprice{justify-content:center!important;}
+html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.gp-card.gp-card .product-price-bottom b,html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.gp-card.gp-card .product-price-bottom strong{font-family:inherit!important;font-size:inherit!important;font-weight:inherit!important;color:inherit!important;}
 </style>
 </body>
 
