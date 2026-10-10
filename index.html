@@ -6938,6 +6938,27 @@ html:root body main.lp-preview .lp-hero-clean .lp-cta:focus-visible{outline-colo
   html:root body main.lp-preview .lp-hero-clean .lp-cta{padding:15px 38px !important;}
 }
 </style>
+<style id="luxia-v20-main-photo-only">
+/* 1) Carte produit : photo principale seule (sans miniatures ni points) */
+html:root:root:root body.luxia-store-home .product-grid .product-card .lx-card-gal,
+html:root:root:root body.luxia-store-home .product-grid .product-card .product-gallery-strip,
+html:root:root:root body.luxia-store-home .product-grid .product-card .product-gallery-dots{display:none!important;}
+/* 2) Photo principale : coins arrondis en haut seulement, collée aux bords de la carte */
+html:root:root:root body.luxia-store-home .product-grid .product-card:not(.gp-card) .product-visual{border-radius:20px 20px 0 0!important;overflow:hidden!important;margin:0!important;}
+html:root:root:root body.luxia-store-home .product-grid .product-card:not(.gp-card) .product-visual > .product-photo{border-radius:20px 20px 0 0!important;}
+/* 3) Fenetre produit : galerie horizontale, 3 photos visibles, meme largeur que la photo principale */
+html:root:root:root:root:root body #productDetailOverlay .product-detail-modal .product-detail-thumbs{display:flex!important;flex-wrap:nowrap!important;gap:8px!important;width:100%!important;max-width:100%!important;box-sizing:border-box!important;margin:0!important;padding:10px 0 2px!important;overflow-x:auto!important;overflow-y:hidden!important;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+html:root:root:root:root:root body #productDetailOverlay .product-detail-modal .product-detail-thumbs::-webkit-scrollbar{display:none;}
+html:root:root:root:root:root body #productDetailOverlay .product-detail-modal .product-detail-thumb{flex:0 0 calc((100% - 16px)/3)!important;width:calc((100% - 16px)/3)!important;min-width:0!important;height:auto!important;aspect-ratio:1/1!important;box-sizing:border-box!important;scroll-snap-align:start;}
+/* 4) Avis clients : look WhatsApp reel */
+html:root:root:root body main.lp-preview .lp-wa-card{background:#e5ddd5!important;background-image:radial-gradient(rgba(0,0,0,.035) 1px,transparent 1px)!important;background-size:12px 12px!important;border:0!important;border-radius:12px!important;box-shadow:0 4px 12px -6px rgba(0,0,0,.35)!important;}
+html:root:root:root body main.lp-preview .lp-wa-phone{color:#075e54!important;font-weight:700!important;}
+html:root:root:root body main.lp-preview .lp-wa-msg{background:#dcf8c6!important;color:#111b21!important;border:0!important;border-radius:8px 8px 2px 8px!important;box-shadow:0 1px 1px rgba(0,0,0,.13)!important;}
+html:root:root:root body main.lp-preview .lp-wa-msg::after{background:#dcf8c6!important;}
+html:root:root:root body main.lp-preview .lp-wa-time{color:#667781!important;}
+/* 5) Option admin : masquer le bouton WhatsApp (site + landing) */
+html.lx-wa-off .wa-round,html.lx-wa-off a.lp-wa-float,html.lx-wa-off .lp-success-wa-box,html.lx-wa-off .lp-site-footer a[href*="wa.me"]{display:none!important;}
+</style>
 </head>
 <body class="luxia-store-home">
 
@@ -7932,6 +7953,7 @@ function applyBrandName(){
   document.title=`${name} — Luxury Collection`;
 }
 function applySiteWhatsapp(){
+  try{const r=(SITE_CONTENT.fr&&SITE_CONTENT.fr.__show_whatsapp!==undefined?SITE_CONTENT.fr.__show_whatsapp:(SITE_CONTENT.ar?SITE_CONTENT.ar.__show_whatsapp:undefined));document.documentElement.classList.toggle("lx-wa-off",r==="0"||r===0||r===false);}catch(e){}
   const el=document.getElementById("footerWhatsappLink");
   if(el) el.href=`https://wa.me/${SITE_WHATSAPP_NUMBER}`;
 }
@@ -9786,6 +9808,15 @@ async function renderAdminSettings(){
       <button class="btn btn-primary" id="saveSiteAdminLinkBtn" style="margin-top:12px;">حفظ / Enregistrer</button>
     </div>
     <div style="height:1px; background:var(--line); margin:30px 0;"></div>
+    <h3 style="font-family:var(--font-display); font-size:calc(24px * var(--font-scale)); margin-bottom:10px;">زر WhatsApp في الموقع وصفحات اللاندينغ</h3>
+    <div class="field" style="max-width:700px;">
+      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+        <input type="checkbox" id="siteShowWhatsapp" ${(SITE_CONTENT.fr&&SITE_CONTENT.fr.__show_whatsapp==='0')||(SITE_CONTENT.ar&&SITE_CONTENT.ar.__show_whatsapp==='0')?'':'checked'} style="width:auto;">
+        <span>إظهار زر WhatsApp / Afficher le bouton WhatsApp</span>
+      </label>
+      <button class="btn btn-primary" id="saveSiteShowWhatsappBtn" style="margin-top:12px;">حفظ / Enregistrer</button>
+    </div>
+    <div style="height:1px; background:var(--line); margin:30px 0;"></div>
     <h3 style="font-family:var(--font-display); font-size:calc(24px * var(--font-scale)); margin-bottom:10px;">مصاريف التوصيل</h3>
     <p style="color:var(--ivory-dim); font-size:calc(12px * var(--font-scale)); margin-bottom:14px;">حددي سعر التوصيل إلى الدار البيضاء وسعر التوصيل لباقي المدن. سيظهر هذا التغيير مباشرة في الموقع وفي صفحات الهبوط.</p>
     <div class="field" style="max-width:700px; display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:16px;">
@@ -9971,6 +10002,19 @@ async function renderAdminSettings(){
       showToast(t("admin.settingsSaved"));
     }catch(err){ console.error(err); showToast(err?.message || t("admin.backendWriteError")); }
     finally{ adminLinkBtn.disabled=false; }
+  });
+  const showWaBtn=document.getElementById("saveSiteShowWhatsappBtn");
+  if(showWaBtn) showWaBtn.addEventListener("click",async()=>{
+    const show=document.getElementById("siteShowWhatsapp").checked;
+    showWaBtn.disabled=true;
+    try{
+      const content={fr:{...(SITE_CONTENT.fr||{})},ar:{...(SITE_CONTENT.ar||{})}};
+      content.fr.__show_whatsapp=show?"1":"0"; content.ar.__show_whatsapp=show?"1":"0";
+      await saveSiteContent(content);
+      applySiteWhatsapp();
+      showToast(t("admin.settingsSaved"));
+    }catch(err){ console.error(err); showToast(err?.message || t("admin.backendWriteError")); }
+    finally{ showWaBtn.disabled=false; }
   });
   const shippingBtn=document.getElementById("saveShippingSettingsBtn");
   if(shippingBtn) shippingBtn.addEventListener("click",async()=>{
@@ -10377,7 +10421,7 @@ function landingEditorHTML(p){
       <div><label>${t("lp.kickerLabel")}</label><input id="lp-kicker" value="${escAttr(p.kicker)}"></div>
       <div><label>${t("lp.priceLabel")}</label><input id="lp-price" value="${escAttr(p.price)}"></div>
       <div><label>${t("lp.oldPriceLabel")}</label><input id="lp-oldprice" value="${escAttr(p.oldPrice)}"></div>
-      <div><label>${t("lp.whatsappLabel")}</label><input id="lp-whatsapp" value="${escAttr(p.whatsapp)}"></div>
+      <div><label>${t("lp.whatsappLabel")}</label><input id="lp-whatsapp" value="${escAttr(p.whatsapp)}"></div><div style="grid-column:1/-1"><label>رأي الزبونة 1 (اتركه فارغا للنص الافتراضي)</label><input id="lp-rev1" value="${escAttr(p.rev1||'')}"></div><div style="grid-column:1/-1"><label>رأي الزبونة 2 (اتركه فارغا للنص الافتراضي)</label><input id="lp-rev2" value="${escAttr(p.rev2||'')}"></div><div style="grid-column:1/-1"><label>رأي الزبونة 3 (اتركه فارغا للنص الافتراضي)</label><input id="lp-rev3" value="${escAttr(p.rev3||'')}"></div>
       <div class="full"><label>${t("lp.videoLabel")}</label><input id="lp-video" value="${escAttr(p.video||'')}" placeholder="https://.../video.mp4" style="direction:ltr;text-align:left;"></div>
       <div class="full"><label>${t("lp.videoUploadLabel")}</label><input type="file" accept="video/*" id="lp-video-file"> <span id="lp-video-status" style="font-size:calc(12px * var(--font-scale));color:var(--gold-soft);"></span></div>
       <div class="full" style="margin-top:8px;padding-top:16px;border-top:1px solid var(--line);"><label>${t("lp.video2Label")}</label><input type="file" accept="video/*" id="lp-video2-file"><span id="lp-video2-status" style="display:block;margin-top:6px;font-size:calc(12px * var(--font-scale));color:var(--gold-soft);"></span><small>${t("lp.video2Hint")}</small></div>
@@ -10436,7 +10480,7 @@ function collectLandingForm(){
   { const tv=document.getElementById('lp-type')?.value; p.type=(tv==="oneshop"||tv==="pyjama")?tv:"luxia"; }
   p.slug = slugify(document.getElementById('lp-slug').value);
   p.status=document.getElementById('lp-status').value; p.language=document.getElementById('lp-language').value;
-  ['kicker','price','oldprice','whatsapp'].forEach(k=>{const id='lp-'+k; p[k==='oldprice'?'oldPrice':k]=document.getElementById(id).value.trim();});
+  ['kicker','price','oldprice','whatsapp','rev1','rev2','rev3'].forEach(k=>{const id='lp-'+k; p[k==='oldprice'?'oldPrice':k]=document.getElementById(id).value.trim();});
   p.titleFr=document.getElementById('lp-title-fr').value.trim(); p.titleAr=document.getElementById('lp-title-ar').value.trim();
   p.subtitleFr=document.getElementById('lp-subtitle-fr').value.trim(); p.subtitleAr=document.getElementById('lp-subtitle-ar').value.trim();
   p.ctaFr=document.getElementById('lp-cta-fr').value.trim(); p.ctaAr=document.getElementById('lp-cta-ar').value.trim();
@@ -11427,9 +11471,9 @@ ${sizesSectionHTML}
 <div class="lp-testimonials">
   <div class="lp-testimonials-title">${lang==='ar'?'آراء الزبونات':'Avis clients'}</div>
   <div class="lp-testimonials-grid">
-    <div class="lp-wa-card"><div class="lp-wa-phone" dir="ltr">06 12 34 56 78</div><div class="lp-wa-msg">${lang==='ar'?'وصلني الطلب اليوم، البيجاما جميلة جداً والجودة أفضل مما توقعت ❤️ شكراً لكم.':'J’ai reçu ma commande aujourd’hui, le pyjama est magnifique et la qualité est encore meilleure que prévu ❤️ Merci !'}</div><div class="lp-wa-time">18:42&nbsp;&nbsp;✓✓</div></div>
-    <div class="lp-wa-card"><div class="lp-wa-phone" dir="ltr">06 23 45 67 89</div><div class="lp-wa-msg">${lang==='ar'?'شكراً، جاء المقاس مناسباً وكان التوصيل سريعاً. بالتأكيد سأطلب منكم مرة أخرى.':'Merci, la taille est parfaite et la livraison était rapide. Je recommanderai certainement chez vous.'}</div><div class="lp-wa-time">20:15&nbsp;&nbsp;✓✓</div></div>
-    <div class="lp-wa-card"><div class="lp-wa-phone" dir="ltr">07 34 56 78 90</div><div class="lp-wa-msg">${lang==='ar'?'وصلني الباك كاملاً كما طلبتُ، والألوان جميلة جداً 😍':'J’ai bien reçu le pack complet comme commandé, les couleurs sont magnifiques 😍'}</div><div class="lp-wa-time">16:27&nbsp;&nbsp;✓✓</div></div>
+    <div class="lp-wa-card"><div class="lp-wa-phone" dir="ltr">06 12 34 56 78</div><div class="lp-wa-msg">${p.rev1?escHtml(p.rev1):(lang==='ar'?'وصلني الطلب اليوم، البيجاما جميلة جداً والجودة أفضل مما توقعت ❤️ شكراً لكم.':'J’ai reçu ma commande aujourd’hui, le pyjama est magnifique et la qualité est encore meilleure que prévu ❤️ Merci !')}</div><div class="lp-wa-time">18:42&nbsp;&nbsp;✓✓</div></div>
+    <div class="lp-wa-card"><div class="lp-wa-phone" dir="ltr">06 23 45 67 89</div><div class="lp-wa-msg">${p.rev2?escHtml(p.rev2):(lang==='ar'?'شكراً، جاء المقاس مناسباً وكان التوصيل سريعاً. بالتأكيد سأطلب منكم مرة أخرى.':'Merci, la taille est parfaite et la livraison était rapide. Je recommanderai certainement chez vous.')}</div><div class="lp-wa-time">20:15&nbsp;&nbsp;✓✓</div></div>
+    <div class="lp-wa-card"><div class="lp-wa-phone" dir="ltr">07 34 56 78 90</div><div class="lp-wa-msg">${p.rev3?escHtml(p.rev3):(lang==='ar'?'وصلني الباك كاملاً كما طلبتُ، والألوان جميلة جداً 😍':'J’ai bien reçu le pack complet comme commandé, les couleurs sont magnifiques 😍')}</div><div class="lp-wa-time">16:27&nbsp;&nbsp;✓✓</div></div>
   </div>
 </div>
 
@@ -16234,6 +16278,33 @@ html:root body.luxia-store-home .product-grid .product-card.product-card.product
 html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.product-card:not(.gp-card) .product-price-bottom .lx-mp-cardprice{justify-content:center!important;}
 html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.gp-card.gp-card .product-price-bottom b,html:root body.luxia-store-home .product-grid .product-card.product-card.product-card.gp-card.gp-card .product-price-bottom strong{font-family:inherit!important;font-size:inherit!important;font-weight:inherit!important;color:inherit!important;}
 </style>
+<script id="lx-zoom-js">
+(function(){if(window.__lxZoom)return;window.__lxZoom=1;
+var st=document.createElement('style');st.textContent='#lxZoom{position:fixed;inset:0;z-index:2147483000;background:rgba(10,6,8,.96);display:none;align-items:center;justify-content:center;touch-action:none;overflow:hidden}#lxZoom.on{display:flex}#lxZoom img{max-width:100%;max-height:100%;transform-origin:center;user-select:none;-webkit-user-drag:none;will-change:transform}#lxZoom .x{position:absolute;top:14px;right:14px;width:42px;height:42px;border-radius:50%;border:1px solid rgba(255,255,255,.4);background:rgba(0,0,0,.5);color:#fff;font-size:20px;z-index:2;cursor:pointer}#lxZoom .n{position:absolute;bottom:18px;left:0;right:0;text-align:center;color:#fff;font:13px sans-serif;opacity:.8}#productDetailMainImage{cursor:zoom-in}';document.head.appendChild(st);
+var L=[],i=0,s=1,tx=0,ty=0,P={},d0=1,s0=1,lt=0,sx=0,mv=0,ov,im,cn;
+function ap(){im.style.transform='translate('+tx+'px,'+ty+'px) scale('+s+')';}
+function show(k){i=(k+L.length)%L.length;im.src=L[i];s=1;tx=ty=0;ap();cn.textContent=L.length>1?(i+1)+' / '+L.length:'';}
+function close(){ov.classList.remove('on');}
+function dist(){var a=Object.keys(P).map(function(k){return P[k];});return Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y)||1;}
+function build(){ov=document.getElementById('lxZoom');if(ov){im=ov.querySelector('img');cn=ov.querySelector('.n');return;}
+ov=document.createElement('div');ov.id='lxZoom';ov.innerHTML='<button class="x" type="button" aria-label="Close">\u2715</button><img alt=""><div class="n"></div>';document.documentElement.appendChild(ov);im=ov.querySelector('img');cn=ov.querySelector('.n');
+ov.querySelector('.x').addEventListener('click',close);
+ov.addEventListener('pointerdown',function(e){if(e.target.className==='x')return;P[e.pointerId]={x:e.clientX,y:e.clientY};if(Object.keys(P).length===2){d0=dist();s0=s;}else{sx=e.clientX;mv=0;}});
+ov.addEventListener('pointermove',function(e){var p=P[e.pointerId];if(!p)return;var dx=e.clientX-p.x,dy=e.clientY-p.y;p.x=e.clientX;p.y=e.clientY;mv+=Math.abs(dx)+Math.abs(dy);
+if(Object.keys(P).length===2){s=Math.min(5,Math.max(1,s0*dist()/d0));ap();}else if(s>1){tx+=dx;ty+=dy;ap();}});
+function up(e){if(!P[e.pointerId])return;var single=Object.keys(P).length===1;delete P[e.pointerId];
+if(single){var dx=e.clientX-sx;if(s<=1.02&&L.length>1&&Math.abs(dx)>60){show(i+(dx<0?1:-1));return;}
+if(mv<12){var n=Date.now();if(n-lt<320){s=s>1?1:2.5;tx=ty=0;ap();lt=0;}else lt=n;}}
+if(s<1.02){s=1;tx=ty=0;ap();}}
+ov.addEventListener('pointerup',up);ov.addEventListener('pointercancel',up);
+ov.addEventListener('wheel',function(e){e.preventDefault();s=Math.min(5,Math.max(1,s*(e.deltaY<0?1.15:.87)));if(s===1){tx=ty=0;}ap();},{passive:false});
+document.addEventListener('keydown',function(e){if(!ov.classList.contains('on'))return;if(e.key==='Escape')close();if(e.key==='ArrowRight')show(i+1);if(e.key==='ArrowLeft')show(i-1);});}
+document.addEventListener('click',function(e){var m=e.target.closest&&e.target.closest('#productDetailMainImage,.product-detail-main-image img');if(!m)return;
+var g=document.querySelectorAll('.product-detail-thumb img');L=[];for(var k=0;k<g.length;k++)L.push(g[k].src);if(!L.length)L=[m.src];
+var a=0,t=document.querySelectorAll('.product-detail-thumb');for(var j=0;j<t.length;j++)if(t[j].classList.contains('active'))a=j;
+build();ov.classList.add('on');show(a);},true);
+})();
+</script>
 </body>
 
 
