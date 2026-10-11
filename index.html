@@ -7172,6 +7172,611 @@ html[dir="rtl"] body .lx-offer-kicker{letter-spacing:0}
 .lx-ic{width:16px;height:16px;flex:none;vertical-align:-3px;margin-inline-end:7px;color:#b08a3e}
 html:root body main.lp-preview .lp-hero-clean .lp-hero-lux-tagline{margin-bottom:26px !important}
 </style>
+<style id="luxia-landing-gift-site-colors-final">
+/* =====================================================================
+   LANDING · PACK CADEAU — mêmes couleurs que le Pack cadeau du SITE
+   Thème du site : coffret champagne #fbf3e2 → #f1e2c4 → #e4cc98 · or #b88a2f · aubergine #3a1f2d · or clair #ecd7a6
+   Remplace le bordeaux (#5a1427 / #3a0b18) sur : carte fermée, carte/fenêtre ouverte, liste d'options, formulaire.
+   ⚠ Placé dans <head> : la landing remplace le <body> et efface les <style> du body.
+   Visuel uniquement — aucune logique JS modifiée.
+   ===================================================================== */
+
+/* ---------- 1. CARTE (fermée + ouverte) ---------- */
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack:not(.lp-order-success),
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack:not(.lp-order-success)[style]{
+  background:linear-gradient(165deg,#fbf3e2 0%,#f1e2c4 58%,#e4cc98 100%) !important;
+  background-color:#f1e2c4 !important;
+  color:#3a1f2d !important;
+  border:1px solid #b88a2f !important;
+  border-radius:22px !important;
+  box-shadow:inset 0 0 0 4px #f6ead0,inset 0 0 0 5px rgba(150,106,30,.45),0 18px 34px -16px rgba(58,31,45,.55) !important;
+}
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack:not(.lp-order-success) .lp-picker,
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack:not(.lp-order-success) .lp-gift-picker,
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack:not(.lp-order-success) .lp-product-card-inner{
+  background:transparent !important;background-color:transparent !important;color:#3a1f2d !important;
+}
+
+/* ---------- 2. TITRE + PRIX (plus de pastille bordeaux) ---------- */
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack:not(.lp-order-success) .lp-product-title-price-frame,
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack:not(.lp-order-success) .lp-product-title-price-frame.lp-product-head-top{
+  display:block !important;min-height:0 !important;margin:8px 0 0 !important;padding:6px 4px 0 !important;
+  background:transparent !important;background-color:transparent !important;background-image:none !important;
+  border:0 !important;border-radius:0 !important;box-shadow:none !important;color:#3a1f2d !important;text-align:center !important;
+}
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack:not(.lp-order-success) .lp-product-title-price-frame b,
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack:not(.lp-order-success) .lp-product-title-price-frame.lp-product-head-top b{
+  display:block !important;width:100% !important;max-width:100% !important;margin:0 !important;padding:0 !important;
+  background:transparent !important;background-image:none !important;border:0 !important;border-radius:0 !important;box-shadow:none !important;
+  color:#3a1f2d !important;-webkit-text-fill-color:#3a1f2d !important;text-shadow:none !important;
+  font-family:var(--font-display) !important;font-size:22px !important;font-weight:600 !important;line-height:1.2 !important;letter-spacing:.01em !important;text-align:center !important;
+}
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack:not(.lp-order-success) .lp-product-title-price-frame b::after{
+  content:"" !important;display:block !important;width:36px !important;height:1px !important;margin:9px auto 0 !important;background:#b88a2f !important;
+}
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack:not(.lp-order-success) .lp-product-price-below{
+  display:flex !important;flex-wrap:wrap !important;align-items:baseline !important;justify-content:center !important;gap:4px 10px !important;
+  width:100% !important;max-width:100% !important;margin:0 0 10px !important;padding:6px 8px 8px !important;box-sizing:border-box !important;
+  background:transparent !important;background-color:transparent !important;background-image:none !important;
+  border:0 !important;border-radius:0 !important;box-shadow:none !important;text-shadow:none !important;
+  color:#3a1f2d !important;-webkit-text-fill-color:#3a1f2d !important;
+  font-family:var(--font-display) !important;font-size:26px !important;font-weight:700 !important;line-height:1.15 !important;text-align:center !important;
+}
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack:not(.lp-order-success) .lp-product-price-below small,
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack:not(.lp-order-success) .lp-product-price-below small[style]{
+  color:#8a6d3b !important;-webkit-text-fill-color:#8a6d3b !important;opacity:1 !important;font-size:11px !important;
+}
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack:not(.lp-order-success) .lp-product-price-below .lp-landing-old-price,
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack:not(.lp-order-success) .lp-landing-old-price{
+  color:#8f8070 !important;-webkit-text-fill-color:#8f8070 !important;text-decoration-color:#8f8070 !important;opacity:1 !important;font-size:.62em !important;font-weight:500 !important;
+}
+
+/* ---------- 3. PHOTO ---------- */
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack:not(.lp-order-success) .lp-product-card-img{
+  background:#e9d7ae !important;border:1px solid rgba(150,106,30,.55) !important;
+  box-shadow:0 10px 20px -12px rgba(58,31,45,.5) !important;
+}
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack .lp-row-card-img{background:#e9d7ae !important;}
+
+/* ---------- 4. DESCRIPTION ---------- */
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack:not(.lp-order-success) .lp-product-details{
+  background:#fbf3e2 !important;background-color:#fbf3e2 !important;background-image:none !important;
+  border:1px solid rgba(150,106,30,.5) !important;border-radius:16px !important;padding:15px 16px !important;margin:14px 0 10px !important;
+  color:#3a1f2d !important;box-shadow:inset 0 1px 0 rgba(255,255,255,.6) !important;
+}
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack:not(.lp-order-success) .lp-product-details .lp-product-desc,
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack:not(.lp-order-success) .lp-product-details .lp-product-benefits{
+  background:transparent !important;background-color:transparent !important;
+}
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack:not(.lp-order-success) .lp-product-details .lp-product-details-title{
+  color:#3a1f2d !important;-webkit-text-fill-color:#3a1f2d !important;font-weight:700 !important;opacity:1 !important;
+}
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack:not(.lp-order-success) .lp-product-details .lp-product-desc p,
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack:not(.lp-order-success) .lp-product-details .lp-product-benefits,
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack:not(.lp-order-success) .lp-product-details .lp-product-benefits ul,
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack:not(.lp-order-success) .lp-product-details .lp-product-benefits li{
+  color:#4a3a32 !important;-webkit-text-fill-color:#4a3a32 !important;opacity:1 !important;
+}
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack:not(.lp-order-success) .lp-product-details .lp-product-benefits{border-top-color:rgba(150,106,30,.35) !important;}
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack:not(.lp-order-success) .lp-product-details .lp-product-benefits li::marker{color:#b88a2f !important;}
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack:not(.lp-order-success) .lp-product-order-label{color:#3a1f2d !important;-webkit-text-fill-color:#3a1f2d !important;opacity:1 !important;}
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack .lp-site-link{color:#3a1f2d !important;}
+
+/* ---------- 5. CHOIX DU PACK (pills, message, emballage) ---------- */
+html:root body .lp-preview .lp-gift-picker .lp-gift-item>b{color:#3a1f2d !important;-webkit-text-fill-color:#3a1f2d !important;}
+html:root body .lp-preview .lp-gift-picker .lp-gift-choice-group label{color:#4a3a32 !important;}
+html:root body .lp-preview .lp-gift-picker .lp-gift-choice-pill{background:#fffaf0 !important;color:#3a1f2d !important;border:1px solid rgba(150,106,30,.6) !important;box-shadow:none !important;}
+html:root body .lp-preview .lp-gift-picker .lp-gift-choice-pill:hover{border-color:#b88a2f !important;}
+html:root body .lp-preview .lp-gift-picker .lp-gift-choice-pill.selected{background:#3a1f2d !important;color:#ecd7a6 !important;border-color:#b88a2f !important;}
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack .lp-gift-picker select.lp-gift-select,
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack .lp-gift-picker .lp-gift-after-choices textarea{
+  background:#fffaf0 !important;background-color:#fffaf0 !important;color:#3a1f2d !important;border:1px solid rgba(150,106,30,.6) !important;box-shadow:inset 0 1px 2px rgba(58,31,45,.12) !important;
+}
+html:root body .lp-preview .lp-gift-picker select.lp-gift-select option{background:#fffaf0 !important;color:#3a1f2d !important;}
+html:root body .lp-preview .lp-gift-picker select.lp-gift-select:focus,
+html:root body .lp-preview .lp-gift-picker .lp-gift-after-choices textarea:focus{border-color:#b88a2f !important;box-shadow:0 0 0 3px rgba(184,138,47,.25) !important;outline:none !important;}
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack .lp-gift-picker select.lp-gift-select.is-required-missing{background:#fff1f1 !important;border:2px solid #c0392b !important;color:#3a1f2d !important;}
+html:root body .lp-preview .lp-gift-picker .lp-gift-after-choices{border-top-color:rgba(150,106,30,.35) !important;}
+html:root body .lp-preview .lp-gift-picker .lp-gift-after-choices>label:not(.lp-gift-check),
+html:root body .lp-preview .lp-gift-picker .lp-gift-check{color:#4a3a32 !important;}
+html:root body .lp-preview .lp-gift-picker .lp-gift-check input{accent-color:#3a1f2d !important;}
+
+/* ---------- 6. BOUTONS : aubergine + texte or clair (comme le site) ---------- */
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack #lp-main-add,
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack #lp-p2-add,
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack [id^="lp-x"][id$="-add"],
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack .lp-choose-btn,
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack .lp-submit,
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack .lp-cta,
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack .lp-row-card-cta{
+  background:#3a1f2d !important;background-color:#3a1f2d !important;background-image:none !important;
+  color:#ecd7a6 !important;-webkit-text-fill-color:#ecd7a6 !important;border:1px solid #b88a2f !important;
+  box-shadow:0 10px 20px -10px rgba(26,12,18,.7) !important;
+}
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack .lp-choose-btn:hover,
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack .lp-submit:hover,
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack .lp-cta:hover{
+  background:#4a2a3b !important;color:#f3dfae !important;-webkit-text-fill-color:#f3dfae !important;border-color:#b88a2f !important;
+}
+
+/* ---------- 7. CARTE FERMÉE (grille) : titre / prix ---------- */
+html:root body .lp-preview .lp-row-card.lp-gift-pack.lp-gift-pack .lp-row-card-title{color:#3a1f2d !important;-webkit-text-fill-color:#3a1f2d !important;}
+html:root body .lp-preview .lp-row-card.lp-gift-pack.lp-gift-pack .lp-row-card-price{color:#3a1f2d !important;-webkit-text-fill-color:#3a1f2d !important;}
+html:root body .lp-preview .lp-row-card.lp-gift-pack.lp-gift-pack .lp-row-card-price .lp-landing-old-price{color:#8f8070 !important;-webkit-text-fill-color:#8f8070 !important;text-decoration-color:#8f8070 !important;}
+html:root body .lp-preview .lp-row-card.lp-gift-pack.lp-gift-pack .lp-row-card-badge{background:linear-gradient(135deg,#f0dfae,#c9a45c) !important;color:#2a1620 !important;-webkit-text-fill-color:#2a1620 !important;}
+
+/* ---------- 8. FENÊTRE OUVERTE : bouton × ---------- */
+html:root body .lp-preview .lp-row-open .lp-row-close{
+  background:#3a1f2d !important;background-image:none !important;color:#ecd7a6 !important;border:1px solid #b88a2f !important;
+  box-shadow:0 6px 14px -6px rgba(26,12,18,.6) !important;
+}
+
+/* ---------- 9. FORMULAIRE DE COMMANDE (dans la fenêtre) ---------- */
+html:root body .lp-preview .lp-order.lp-gift-landing.lp-gift-landing{
+  background:#fbf3e2 !important;background-image:none !important;border:1px solid rgba(150,106,30,.5) !important;
+  box-shadow:0 12px 26px -16px rgba(58,31,45,.45) !important;color:#3a1f2d !important;
+}
+html:root body .lp-preview .lp-order.lp-gift-landing.lp-gift-landing .lp-field label{color:#3a1f2d !important;opacity:1 !important;}
+html:root body .lp-preview .lp-order.lp-gift-landing.lp-gift-landing input,
+html:root body .lp-preview .lp-order.lp-gift-landing.lp-gift-landing select,
+html:root body .lp-preview .lp-order.lp-gift-landing.lp-gift-landing textarea{
+  background:#fffaf0 !important;color:#3a1f2d !important;border:1px solid rgba(150,106,30,.6) !important;
+}
+html:root body .lp-preview .lp-order.lp-gift-landing.lp-gift-landing input::placeholder,
+html:root body .lp-preview .lp-order.lp-gift-landing.lp-gift-landing textarea::placeholder{color:#8a6d3b !important;opacity:1 !important;}
+html:root body .lp-preview .lp-order.lp-gift-landing.lp-gift-landing .lp-checkout-summary{
+  background:#f6ead0 !important;border:1px solid rgba(150,106,30,.5) !important;
+}
+html:root body .lp-preview .lp-order.lp-gift-landing.lp-gift-landing .lp-checkout-summary > div:first-child,
+html:root body .lp-preview .lp-order.lp-gift-landing.lp-gift-landing .lp-checkout-summary .row,
+html:root body .lp-preview .lp-order.lp-gift-landing.lp-gift-landing .lp-checkout-summary .lp-cart-total,
+html:root body .lp-preview .lp-order.lp-gift-landing.lp-gift-landing #lp-order-msg{color:#3a1f2d !important;}
+html:root body .lp-preview .lp-order.lp-gift-landing.lp-gift-landing .lp-checkout-summary .row > span:last-child,
+html:root body .lp-preview .lp-order.lp-gift-landing.lp-gift-landing .lp-checkout-summary .row > strong,
+html:root body .lp-preview .lp-order.lp-gift-landing.lp-gift-landing .lp-checkout-summary .lp-cart-total strong{color:#3a1f2d !important;}
+html:root body .lp-preview .lp-order.lp-gift-landing.lp-gift-landing .lp-checkout-summary .lp-cart-total{border-top-color:rgba(150,106,30,.45) !important;}
+
+/* ---------- 10. LISTE D'OPTIONS (Pointure / Taille / Couleur) : bouton + fenêtre ---------- */
+html:root body .lx-dd-btn{
+  background:#fffaf0 !important;color:#3a1f2d !important;border:1.5px solid rgba(150,106,30,.6) !important;
+  box-shadow:0 2px 0 rgba(150,106,30,.25) !important;
+}
+html:root body .lx-dd-btn[data-empty="1"] .lx-dd-val{color:#8a6d3b !important;}
+html:root body .lx-dd-btn:active{box-shadow:0 0 0 rgba(150,106,30,.25) !important;}
+html:root body .lx-dd-chev{border-color:#3a1f2d !important;}
+html:root body select.is-required-missing + .lx-dd .lx-dd-btn{border-color:#c0392b !important;box-shadow:0 0 0 3px rgba(192,57,43,.22),0 2px 0 rgba(150,106,30,.25) !important;}
+html:root body .lx-dd-ov{background:rgba(24,10,17,.72) !important;}
+html:root body .lx-dd-sheet{
+  background:linear-gradient(170deg,#fbf3e2 0%,#f1e2c4 60%,#e4cc98 100%) !important;color:#3a1f2d !important;
+  border:1.5px solid #b88a2f !important;border-bottom:0 !important;
+  box-shadow:0 -18px 40px -12px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.6) !important;
+}
+html:root body .lx-dd-grip{background:#b88a2f !important;}
+html:root body .lx-dd-title{color:#3a1f2d !important;}
+html:root body .lx-dd-sub{color:#8a6d3b !important;}
+html:root body .lx-dd-line{background:linear-gradient(90deg,transparent,rgba(150,106,30,.6),transparent) !important;}
+html:root body .lx-dd-opt{background:#fffaf0 !important;color:#3a1f2d !important;border:1px solid rgba(150,106,30,.35) !important;}
+html:root body .lx-dd-opt:active{background:#f3e5c2 !important;}
+html:root body .lx-dd-opt[aria-selected="true"]{
+  background:#3a1f2d !important;color:#ecd7a6 !important;border-color:#b88a2f !important;box-shadow:0 6px 14px -8px rgba(0,0,0,.5) !important;
+}
+</style>
+
+
+<style id="luxia-landing-gift-pack-ivoire-rosé">
+/* Landing Page uniquement — Pack Cadeau : ivoire rosé + champagne gold.
+   Palette limitée à la carte cadeau ; aucune logique ni style du site principal modifié. */
+html body .lp-preview .lp-product-card.lp-gift-pack:not(.lp-order-success){
+  background:#F8F0E5 !important;
+  background-color:#F8F0E5 !important;
+  background-image:none !important;
+  color:#51283A !important;
+  border:1px solid #C9A66B !important;
+  box-shadow:0 12px 28px rgba(81,40,58,.12), inset 0 1px 0 rgba(255,255,255,.9) !important;
+}
+html body .lp-preview .lp-product-card.lp-gift-pack:not(.lp-order-success) .lp-product-title-price-frame,
+html body .lp-preview .lp-product-card.lp-gift-pack:not(.lp-order-success) .lp-picker,
+html body .lp-preview .lp-product-card.lp-gift-pack:not(.lp-order-success) .lp-gift-picker{
+  background:transparent !important;
+  background-color:transparent !important;
+  color:#51283A !important;
+}
+html body .lp-preview .lp-product-card.lp-gift-pack:not(.lp-order-success) .lp-product-title-price-frame b,
+html body .lp-preview .lp-product-card.lp-gift-pack:not(.lp-order-success) .lp-product-title-price-frame.lp-product-head-top b{
+  background:#F8F0E5 !important;
+  background-image:none !important;
+  color:#51283A !important;
+  -webkit-text-fill-color:#51283A !important;
+  border:1px solid rgba(201,166,107,.75) !important;
+  text-shadow:none !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.8) !important;
+}
+html body .lp-preview .lp-product-card.lp-gift-pack:not(.lp-order-success) .lp-product-price-below{
+  background:#F8F0E5 !important;
+  color:#51283A !important;
+  -webkit-text-fill-color:#51283A !important;
+  border:1px solid rgba(201,166,107,.65) !important;
+  box-shadow:none !important;
+}
+html body .lp-preview .lp-product-card.lp-gift-pack:not(.lp-order-success) .lp-product-price-below small,
+html body .lp-preview .lp-product-card.lp-gift-pack:not(.lp-order-success) .lp-product-price-below small[style]{
+  color:#76616A !important;
+  -webkit-text-fill-color:#76616A !important;
+}
+html body .lp-preview .lp-product-card.lp-gift-pack:not(.lp-order-success) .lp-product-card-img,
+html body .lp-preview .lp-product-card.lp-gift-pack .lp-row-card-img{
+  background:#F8F0E5 !important;
+  border:1px solid rgba(201,166,107,.7) !important;
+  box-shadow:0 8px 18px rgba(81,40,58,.10) !important;
+}
+html body .lp-preview .lp-product-card.lp-gift-pack:not(.lp-order-success) .lp-product-details{
+  background:#FFF9F2 !important;
+  background-color:#FFF9F2 !important;
+  background-image:none !important;
+  border:1px solid rgba(201,166,107,.65) !important;
+  color:#51283A !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.95) !important;
+}
+html body .lp-preview .lp-product-card.lp-gift-pack:not(.lp-order-success) .lp-product-details .lp-product-details-title,
+html body .lp-preview .lp-product-card.lp-gift-pack:not(.lp-order-success) .lp-product-order-label,
+html body .lp-preview .lp-gift-picker .lp-gift-item>b{
+  color:#51283A !important;
+  -webkit-text-fill-color:#51283A !important;
+}
+html body .lp-preview .lp-product-card.lp-gift-pack:not(.lp-order-success) .lp-product-details .lp-product-desc p,
+html body .lp-preview .lp-product-card.lp-gift-pack:not(.lp-order-success) .lp-product-details .lp-product-benefits,
+html body .lp-preview .lp-product-card.lp-gift-pack:not(.lp-order-success) .lp-product-details .lp-product-benefits ul,
+html body .lp-preview .lp-product-card.lp-gift-pack:not(.lp-order-success) .lp-product-details .lp-product-benefits li,
+html body .lp-preview .lp-gift-picker .lp-gift-choice-group label{
+  color:#5D4A50 !important;
+  -webkit-text-fill-color:#5D4A50 !important;
+}
+html body .lp-preview .lp-product-card.lp-gift-pack:not(.lp-order-success) .lp-product-details .lp-product-benefits{
+  border-top-color:rgba(201,166,107,.45) !important;
+}
+html body .lp-preview .lp-product-card.lp-gift-pack:not(.lp-order-success) .lp-product-details .lp-product-benefits li::marker{
+  color:#C9A66B !important;
+}
+html body .lp-preview .lp-product-card.lp-gift-pack .lp-gift-picker select.lp-gift-select,
+html body .lp-preview .lp-product-card.lp-gift-pack .lp-gift-picker .lp-gift-after-choices textarea{
+  background:#FFF9F2 !important;
+  background-color:#FFF9F2 !important;
+  color:#51283A !important;
+  -webkit-text-fill-color:#51283A !important;
+  border:1px solid rgba(201,166,107,.75) !important;
+}
+html body .lp-preview .lp-product-card.lp-gift-pack .lp-gift-picker select.lp-gift-select option{
+  background:#FFF9F2 !important;
+  color:#51283A !important;
+}
+html body .lp-preview .lp-product-card.lp-gift-pack .lp-gift-picker select.lp-gift-select:focus,
+html body .lp-preview .lp-product-card.lp-gift-pack .lp-gift-picker .lp-gift-after-choices textarea:focus{
+  border-color:#C9A66B !important;
+  box-shadow:0 0 0 3px rgba(201,166,107,.18) !important;
+}
+/* Le bouton d'action reste bordeaux/or pour préserver le contraste et le style luxe. */
+html body .lp-preview .lp-product-card.lp-gift-pack #lp-main-add,
+html body .lp-preview .lp-product-card.lp-gift-pack #lp-p2-add,
+html body .lp-preview .lp-product-card.lp-gift-pack .lp-choose-btn,
+html body .lp-preview .lp-product-card.lp-gift-pack .lp-submit,
+html body .lp-preview .lp-product-card.lp-gift-pack .lp-cta{
+  background:linear-gradient(135deg,#51283A,#3A1F2D) !important;
+  color:#F8F0E5 !important;
+  -webkit-text-fill-color:#F8F0E5 !important;
+  border:1px solid #C9A66B !important;
+  box-shadow:0 8px 18px rgba(81,40,58,.18) !important;
+}
+html body .lp-preview .lp-product-card.lp-gift-pack .lp-choose-btn:hover,
+html body .lp-preview .lp-product-card.lp-gift-pack .lp-submit:hover,
+html body .lp-preview .lp-product-card.lp-gift-pack .lp-cta:hover{
+  background:#63364B !important;
+  color:#FFF9F2 !important;
+  -webkit-text-fill-color:#FFF9F2 !important;
+  border-color:#C9A66B !important;
+}
+</style>
+
+
+<style id="luxia-landing-gift-pack-ivoire-rosé-final-fix">
+/* Correctif final : priorité supérieure aux anciennes règles très spécifiques du Pack Cadeau.
+   Landing Page uniquement ; aucun JavaScript ni logique métier modifiés. */
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack:not(.lp-order-success),
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack:not(.lp-order-success)[style]{
+  background:#F8F0E5 !important;
+  background-color:#F8F0E5 !important;
+  background-image:none !important;
+  color:#51283A !important;
+  border:1px solid #C9A66B !important;
+  box-shadow:0 12px 28px rgba(81,40,58,.12),inset 0 1px 0 rgba(255,255,255,.9) !important;
+}
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack:not(.lp-order-success) .lp-product-title-price-frame,
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack:not(.lp-order-success) .lp-picker,
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack:not(.lp-order-success) .lp-gift-picker,
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack:not(.lp-order-success) .lp-product-card-inner{
+  background:transparent !important;background-color:transparent !important;color:#51283A !important;
+}
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack:not(.lp-order-success) .lp-product-title-price-frame b,
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack:not(.lp-order-success) .lp-product-title-price-frame.lp-product-head-top b{
+  background:#F8F0E5 !important;background-image:none !important;color:#51283A !important;-webkit-text-fill-color:#51283A !important;
+  border:1px solid rgba(201,166,107,.75) !important;text-shadow:none !important;box-shadow:inset 0 1px 0 rgba(255,255,255,.8) !important;
+}
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack:not(.lp-order-success) .lp-product-price-below{
+  background:#F8F0E5 !important;background-image:none !important;color:#51283A !important;-webkit-text-fill-color:#51283A !important;
+  border:1px solid rgba(201,166,107,.65) !important;box-shadow:none !important;
+}
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack:not(.lp-order-success) .lp-product-card-img,
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack .lp-row-card-img{
+  background:#F8F0E5 !important;border:1px solid rgba(201,166,107,.7) !important;box-shadow:0 8px 18px rgba(81,40,58,.10) !important;
+}
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack:not(.lp-order-success) .lp-product-details{
+  background:#FFF9F2 !important;background-color:#FFF9F2 !important;background-image:none !important;
+  border:1px solid rgba(201,166,107,.65) !important;color:#51283A !important;box-shadow:inset 0 1px 0 rgba(255,255,255,.95) !important;
+}
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack:not(.lp-order-success) .lp-product-details .lp-product-details-title,
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack:not(.lp-order-success) .lp-product-order-label,
+html:root body .lp-preview .lp-gift-picker .lp-gift-item>b{
+  color:#51283A !important;-webkit-text-fill-color:#51283A !important;
+}
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack:not(.lp-order-success) .lp-product-details .lp-product-desc p,
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack:not(.lp-order-success) .lp-product-details .lp-product-benefits,
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack:not(.lp-order-success) .lp-product-details .lp-product-benefits ul,
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack:not(.lp-order-success) .lp-product-details .lp-product-benefits li,
+html:root body .lp-preview .lp-gift-picker .lp-gift-choice-group label{
+  color:#5D4A50 !important;-webkit-text-fill-color:#5D4A50 !important;
+}
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack:not(.lp-order-success) .lp-product-details .lp-product-benefits{
+  border-top-color:rgba(201,166,107,.45) !important;
+}
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack .lp-gift-picker select.lp-gift-select,
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack .lp-gift-picker .lp-gift-after-choices textarea{
+  background:#FFF9F2 !important;background-color:#FFF9F2 !important;color:#51283A !important;-webkit-text-fill-color:#51283A !important;
+  border:1px solid rgba(201,166,107,.75) !important;
+}
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack .lp-gift-picker select.lp-gift-select option{
+  background:#FFF9F2 !important;color:#51283A !important;
+}
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack #lp-main-add,
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack #lp-p2-add,
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack .lp-choose-btn,
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack .lp-submit,
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack .lp-cta{
+  background:linear-gradient(135deg,#51283A,#3A1F2D) !important;color:#F8F0E5 !important;-webkit-text-fill-color:#F8F0E5 !important;
+  border:1px solid #C9A66B !important;box-shadow:0 8px 18px rgba(81,40,58,.18) !important;
+}
+</style>
+
+
+<style id="luxia-landing-gift-title-price-luxury-final">
+/* LANDING PAGE ONLY — titre et prix Pack Cadeau : finition éditoriale premium.
+   Visuel uniquement ; aucune logique ni interaction modifiée. */
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack:not(.lp-order-success) .lp-head-zone{
+  padding:0 0 4px !important;
+  margin:0 0 18px !important;
+}
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack:not(.lp-order-success) .lp-product-title-price-frame,
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack:not(.lp-order-success) .lp-product-title-price-frame.lp-product-head-top{
+  position:relative !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  min-height:0 !important;
+  margin:0 0 20px !important;
+  padding:8px 8px 17px !important;
+  border:0 !important;
+  outline:0 !important;
+  background:transparent !important;
+  background-color:transparent !important;
+  box-shadow:none !important;
+  text-align:center !important;
+}
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack:not(.lp-order-success) .lp-product-title-price-frame::after,
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack:not(.lp-order-success) .lp-product-title-price-frame.lp-product-head-top::after{
+  content:"" !important;
+  position:absolute !important;
+  bottom:0 !important;
+  left:calc(50% - 34px) !important;
+  width:68px !important;
+  height:2px !important;
+  border-radius:4px !important;
+  background:linear-gradient(90deg,rgba(201,166,107,.22),#C9A66B,rgba(201,166,107,.22)) !important;
+}
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack:not(.lp-order-success) .lp-product-title-price-frame b,
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack:not(.lp-order-success) .lp-product-title-price-frame.lp-product-head-top b{
+  display:block !important;
+  width:auto !important;
+  max-width:100% !important;
+  margin:0 auto !important;
+  padding:0 8px !important;
+  border:0 !important;
+  border-radius:0 !important;
+  background:transparent !important;
+  background-image:none !important;
+  color:#51283A !important;
+  -webkit-text-fill-color:#51283A !important;
+  font-family:Georgia,"Times New Roman",serif !important;
+  font-size:clamp(25px,4.8vw,34px) !important;
+  font-weight:600 !important;
+  line-height:1.35 !important;
+  letter-spacing:.035em !important;
+  text-align:center !important;
+  text-shadow:none !important;
+  box-shadow:none !important;
+}
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack:not(.lp-order-success) .lp-product-price-below{
+  display:block !important;
+  width:auto !important;
+  min-height:0 !important;
+  margin:0 0 18px !important;
+  padding:5px 4px 13px !important;
+  border:0 !important;
+  border-top:1px solid rgba(201,166,107,.35) !important;
+  border-bottom:1px solid rgba(201,166,107,.35) !important;
+  border-radius:0 !important;
+  background:transparent !important;
+  background-color:transparent !important;
+  background-image:none !important;
+  color:#51283A !important;
+  -webkit-text-fill-color:#51283A !important;
+  font-family:Georgia,"Times New Roman",serif !important;
+  font-size:clamp(28px,5.4vw,38px) !important;
+  font-weight:600 !important;
+  line-height:1.25 !important;
+  letter-spacing:.015em !important;
+  text-align:center !important;
+  box-shadow:none !important;
+}
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack:not(.lp-order-success) .lp-product-price-below .lp-landing-old-price,
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack:not(.lp-order-success) .lp-product-price-below del,
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack:not(.lp-order-success) .lp-product-price-below s{
+  color:#9A887A !important;
+  -webkit-text-fill-color:#9A887A !important;
+  font-size:.53em !important;
+  font-weight:400 !important;
+  letter-spacing:0 !important;
+  text-decoration-thickness:1px !important;
+  opacity:.9 !important;
+}
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack:not(.lp-order-success) .lp-product-price-below small{
+  color:#7B625F !important;
+  -webkit-text-fill-color:#7B625F !important;
+  font-family:inherit !important;
+  font-size:.38em !important;
+  font-weight:400 !important;
+}
+@media(max-width:520px){
+  html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack:not(.lp-order-success) .lp-product-title-price-frame,
+  html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack:not(.lp-order-success) .lp-product-title-price-frame.lp-product-head-top{
+    margin-bottom:16px !important;padding:6px 5px 15px !important;
+  }
+  html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack:not(.lp-order-success) .lp-product-price-below{
+    margin-bottom:15px !important;padding:5px 2px 11px !important;
+  }
+}
+</style>
+
+
+
+
+
+<style id="luxia-gift-title-price-match-reference-style">
+/* Pack Cadeau: reproduce the exact title/price header style used by the other landing products.
+   CSS only. Keep the existing product markup, pricing logic, cart and integrations unchanged. */
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack:not(.lp-order-success) .lp-head-zone{
+  position:relative !important;
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:center !important;
+  text-align:center !important;
+  margin:0 0 16px !important;
+  padding:22px 14px 20px !important;
+  border-radius:22px !important;
+  border:1px solid rgba(201,162,79,.28) !important;
+  background:
+    radial-gradient(120% 70% at 50% 0%,rgba(222,187,106,.22),rgba(222,187,106,0) 70%),
+    linear-gradient(180deg,#fffaf5 0%,#fbeee9 100%) !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.8) !important;
+}
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack:not(.lp-order-success) .lp-head-zone::after{
+  content:"" !important;
+  display:block !important;
+  width:56% !important;
+  max-width:220px !important;
+  height:1px !important;
+  margin:16px auto 0 !important;
+  background:linear-gradient(90deg,transparent,#c9a24f,transparent) !important;
+  position:static !important;
+}
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack:not(.lp-order-success) .lp-head-zone .lp-product-title-price-frame,
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack:not(.lp-order-success) .lp-head-zone .lp-product-title-price-frame.lp-product-head-top{
+  display:block !important;
+  width:100% !important;
+  min-height:0 !important;
+  margin:0 !important;
+  padding:0 !important;
+  background:transparent !important;
+  background-color:transparent !important;
+  border:0 !important;
+  border-radius:0 !important;
+  box-shadow:none !important;
+}
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack:not(.lp-order-success) .lp-head-zone .lp-product-title-price-frame b,
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack:not(.lp-order-success) .lp-head-zone .lp-product-title-price-frame.lp-product-head-top b{
+  display:block !important;
+  width:100% !important;
+  max-width:100% !important;
+  margin:0 !important;
+  padding:14px 8px !important;
+  box-sizing:border-box !important;
+  background:
+    linear-gradient(90deg,transparent,#c9a24f 18%,#c9a24f 82%,transparent) top/100% 1px no-repeat,
+    linear-gradient(90deg,transparent,#c9a24f 18%,#c9a24f 82%,transparent) bottom/100% 1px no-repeat !important;
+  border:0 !important;
+  border-radius:0 !important;
+  box-shadow:none !important;
+  text-shadow:none !important;
+  color:#5a1628 !important;
+  -webkit-text-fill-color:#5a1628 !important;
+  font-family:var(--font-display) !important;
+  font-size:calc(29px * var(--font-scale)) !important;
+  font-weight:600 !important;
+  letter-spacing:.03em !important;
+  line-height:1.2 !important;
+  text-align:center !important;
+}
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack:not(.lp-order-success) .lp-head-zone .lp-product-price-below{
+  display:flex !important;
+  flex-wrap:wrap !important;
+  align-items:baseline !important;
+  justify-content:center !important;
+  gap:4px 10px !important;
+  width:100% !important;
+  max-width:100% !important;
+  margin:14px 0 0 !important;
+  padding:0 !important;
+  background:transparent !important;
+  background-color:transparent !important;
+  border:0 !important;
+  border-radius:0 !important;
+  box-shadow:none !important;
+  text-shadow:none !important;
+  color:#7b2a3d !important;
+  -webkit-text-fill-color:#7b2a3d !important;
+  font-family:var(--font-display) !important;
+  font-size:calc(34px * var(--font-scale)) !important;
+  font-weight:700 !important;
+  letter-spacing:.02em !important;
+  line-height:1.1 !important;
+  text-align:center !important;
+}
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack:not(.lp-order-success) .lp-head-zone .lp-product-price-below .lp-landing-old-price,
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack:not(.lp-order-success) .lp-head-zone .lp-product-price-below s{
+  margin:0 !important;
+  font-size:calc(17px * var(--font-scale)) !important;
+  font-weight:500 !important;
+  color:#9b8f8f !important;
+  -webkit-text-fill-color:#9b8f8f !important;
+  text-decoration-line:line-through !important;
+  text-decoration-color:#9b8f8f !important;
+  opacity:1 !important;
+}
+html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack:not(.lp-order-success) .lp-head-zone .lp-product-price-below small{
+  flex-basis:100% !important;
+  text-align:center !important;
+}
+@media(max-width:520px){
+  html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack:not(.lp-order-success) .lp-head-zone{
+    padding:22px 14px 20px !important;
+  }
+  html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack:not(.lp-order-success) .lp-head-zone .lp-product-title-price-frame b,
+  html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack:not(.lp-order-success) .lp-head-zone .lp-product-title-price-frame.lp-product-head-top b{
+    font-size:calc(29px * var(--font-scale)) !important;
+  }
+  html:root body .lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack:not(.lp-order-success) .lp-head-zone .lp-product-price-below{
+    font-size:calc(34px * var(--font-scale)) !important;
+  }
+}
+</style>
+
 </head>
 <body class="luxia-store-home">
 
