@@ -12610,7 +12610,7 @@ function bindAdminOfferCard(){
   const btn=document.getElementById('offerSaveBtn'); if(!btn) return;
   btn.addEventListener('click',async()=>{
     const pct=Number(document.getElementById('offer-percent').value);
-    if(!Number.isFinite(pct)||pct<1||pct>90){ showToast('Remise : entre 1 et 90'); return; }
+    if(!Number.isFinite(pct)||pct<1||pct>90){ adminSaveResult(btn,false,'Remise : entre 1 et 90'); return; }
     const val=id=>(document.getElementById(id)?.value||'').trim();
     const data={enabled:!!document.getElementById('offer-enabled')?.checked,percent:Math.round(pct),textFr:val('offer-text-fr'),textAr:val('offer-text-ar'),subFr:val('offer-sub-fr'),subAr:val('offer-sub-ar')};
     btn.disabled=true;
@@ -12618,8 +12618,8 @@ function bindAdminOfferCard(){
       const json=JSON.stringify(data);
       const content={fr:{...(SITE_CONTENT.fr||{}),__offer:json},ar:{...(SITE_CONTENT.ar||{}),__offer:json}};
       await saveSiteContent(content);
-      renderProducts(); openProductId=openProductId; renderAdminProducts(); showToast('Offre enregistrée');
-    }catch(err){ console.error(err); showToast(err?.message||t('admin.backendWriteError')); btn.disabled=false; }
+      renderProducts(); openProductId=openProductId; renderAdminProducts(); adminSaveResult(btn,true,'Offre enregistrée');
+    }catch(err){ console.error(err); adminSaveResult(btn,false,err?.message||t('admin.backendWriteError'),err); btn.disabled=false; }
   });
 }
 function oldPriceHTML(id){ const o=getProductOldPrice(id); return o?` <s class="lx-old-price">${o} ${t('unit.dh')}</s>`:''; }
@@ -13356,7 +13356,9 @@ async function uploadProductVideoToStorage(file, productId){
 }
 async function deleteProductImageFromStorage(url){
   const path = storagePathFromUrl(url);
-  if(!path || !isAdminAuthenticated()) return;
+  /* Images hosted outside our Supabase Storage do not need a Storage DELETE. */
+  if(!path) return;
+  if(!isAdminAuthenticated()) throw new Error("Storage delete skipped: admin is not authenticated.");
   const res = await fetch(`${SUPABASE_STORAGE_OBJECT_URL}/${storageObjectPath(path)}`, {
     method:"DELETE",
     headers:{
@@ -13368,6 +13370,27 @@ async function deleteProductImageFromStorage(url){
     let detail="";
     try{ detail=await res.text(); }catch(e){}
     throw new Error(`Storage delete ${res.status}: ${detail||res.statusText}`);
+  }
+}
+/* Nettoyage Storage : supprime définitivement les fichiers liés à un élément supprimé (évite l'accumulation de quota). */
+function collectStorageUrls(data){
+  let txt=""; try{ txt=JSON.stringify(data)||""; }catch(e){ return []; }
+  const marker=SUPABASE_STORAGE_PUBLIC_URL+"/";
+  const out=new Set(); let i=0;
+  while((i=txt.indexOf(marker,i))!==-1){
+    let j=i+marker.length;
+    while(j<txt.length && !/["'\\\s)<>]/.test(txt[j])) j++;
+    out.add(txt.slice(i,j)); i=j;
+  }
+  return Array.from(out);
+}
+async function purgeStorageUrls(urls,pathFilter){
+  for(const u of (urls||[])){
+    try{
+      const path=storagePathFromUrl(u);
+      if(!path || (pathFilter && !pathFilter(path))) continue;
+      await deleteProductImageFromStorage(u);
+    }catch(e){ console.warn("Storage cleanup failed:",u,e); }
   }
 }
 function loadProductGallery(){ try{ return JSON.parse(localStorage.getItem(PRODUCT_GALLERY_KEY)||'{}'); }catch(e){ return {}; } }
@@ -13909,6 +13932,47 @@ function diagAppend(event, targetId){
 /* Bound helper for the Landing Page panel specifically, so it can be
    passed directly as an onDiag callback (which only receives `event`). */
 function lpDiagAppend(event){ diagAppend(event, "lpDiagLog"); }
+/* ============================================================
+   NOTICE DE SAUVEGARDE ADMIN : vert = enregistré avec succès, rouge = échec,
+   affichée juste à côté du bouton + ligne ajoutée au diagnostic admin.
+   ============================================================ */
+let __adminSaveLast=null, __adminSaveSeq=0;
+const ADMIN_UPLOAD_OK_TXT="\u2705 \u062a\u0645 \u0631\u0641\u0639 \u0627\u0644\u0645\u0644\u0641 \u2014 \u0627\u0636\u063a\u0637 \u00ab\u062d\u0641\u0638\u00bb \u0644\u062a\u062b\u0628\u064a\u062a \u0627\u0644\u062a\u0639\u062f\u064a\u0644 / Fichier t\u00e9l\u00e9vers\u00e9, cliquez sur Enregistrer";
+function adminSaveShow(rec){
+  if(!rec) return;
+  let host=rec.id?document.getElementById(rec.id):null;
+  if(host && host.offsetParent===null) host=null; /* bouton/champ masqué -> bandeau en haut */
+  let span=null, banner=false;
+  if(host && host.id!=="settingsSaveDiagStatus"){
+    span=document.getElementById("admin-save-fb-"+rec.id);
+    if(!span){ span=document.createElement("span"); span.id="admin-save-fb-"+rec.id; span.setAttribute("role","status"); span.setAttribute("aria-live","polite"); host.insertAdjacentElement("afterend",span); }
+  }else{
+    span=document.getElementById("settingsSaveDiagStatus");
+    if(!span){
+      span=document.getElementById("admin-save-banner"); banner=true;
+      const wrap=document.getElementById("adminWrap");
+      if(!span && wrap){ span=document.createElement("div"); span.id="admin-save-banner"; span.setAttribute("role","status"); span.setAttribute("aria-live","polite"); wrap.insertAdjacentElement("afterbegin",span); }
+    }
+  }
+  if(!span) return;
+  span.style.cssText="display:"+(banner?"block":"inline-block")+";margin:8px 8px 0;padding:8px 12px;border-radius:10px;font-size:13px;font-weight:600;line-height:1.4;max-width:100%;"
+    +(rec.ok?"background:rgba(60,170,80,.18);border:1px solid rgba(110,220,130,.55);color:#c9f7d0;":"background:rgba(220,50,50,.22);border:1px solid rgba(255,100,100,.65);color:#ffb3b3;");
+  span.textContent=rec.text;
+  try{ span.scrollIntoView({block:"nearest",behavior:"smooth"}); }catch(e){}
+}
+function adminSaveResult(btn,ok,msg,err,okText){
+  try{ showToast(msg); }catch(e){}
+  if(btn && btn.nodeType===1 && !btn.id && btn.isConnected) btn.id="admin-save-auto-"+(++__adminSaveSeq);
+  const id=(btn&&btn.id)||"settingsSaveDiagStatus";
+  const m=String(msg||"");
+  __adminSaveLast={id,ok,t:Date.now(),text:ok?(okText||"\u2705 \u062a\u0645 \u0627\u0644\u062d\u0641\u0638 \u0628\u0646\u062c\u0627\u062d / Enregistr\u00e9 avec succ\u00e8s"):"\u274c \u062a\u0639\u0630\u0651\u0631 \u0627\u0644\u062d\u0641\u0638 / \u00c9chec : "+m};
+  adminSaveShow(__adminSaveLast);
+  const line=(ok?"OK":"ERREUR")+" ["+id+"] "+m+(err?" | "+(err.message||String(err)):"");
+  try{ diagAppend(line); diagAppend(line,"lpDiagLog"); }catch(e){}
+}
+function adminSaveRestore(){
+  if(__adminSaveLast && Date.now()-__adminSaveLast.t<20000) adminSaveShow(__adminSaveLast);
+}
 
 /* ============================================================
    VARIANT MODAL (choose color/size/qty, add to cart)
@@ -14977,7 +15041,7 @@ async function renderAdminSettings(){
         okEl.style.color="#bff2bf";
         okEl.textContent="✅ تم الحفظ بنجاح.";
       }
-      showToast(t("admin.settingsSaved"));
+      adminSaveResult(btn,true,t("admin.settingsSaved"));
     }catch(err){
       const detail=err?.message||String(err);
       diagAppend(`DONE: threw error -> ${detail}`);
@@ -14990,7 +15054,7 @@ async function renderAdminSettings(){
         errEl.style.color="#ffd0d0";
         errEl.textContent=`❌ مشكلة في الحفظ: ${detail}`;
       }
-      showToast(detail || t("admin.backendWriteError"));
+      adminSaveResult(btn,false,detail || t("admin.backendWriteError"),err);
     }
     finally{ btn.disabled=false; }
   });
@@ -15000,10 +15064,10 @@ async function renderAdminSettings(){
     const pass1=document.getElementById("adminNewPass").value;
     const pass2=document.getElementById("adminNewPassConfirm").value;
     const email=getAdminEmail();
-    if(email && !currentPass){ showToast("أدخل كلمة السر الحالية أولاً"); return; }
-    if(!pass1 || pass1.length<8){ showToast("يجب أن تكون كلمة السر 8 حروف/أرقام على الأقل"); return; }
-    if(pass1!==pass2){ showToast("كلمتا السر غير متطابقتين"); return; }
-    if(currentPass && pass1===currentPass){ showToast("يجب أن تكون كلمة السر الجديدة مختلفة عن القديمة"); return; }
+    if(email && !currentPass){ adminSaveResult(savePassBtn,false,"أدخل كلمة السر الحالية أولاً"); return; }
+    if(!pass1 || pass1.length<8){ adminSaveResult(savePassBtn,false,"يجب أن تكون كلمة السر 8 حروف/أرقام على الأقل"); return; }
+    if(pass1!==pass2){ adminSaveResult(savePassBtn,false,"كلمتا السر غير متطابقتين"); return; }
+    if(currentPass && pass1===currentPass){ adminSaveResult(savePassBtn,false,"يجب أن تكون كلمة السر الجديدة مختلفة عن القديمة"); return; }
     savePassBtn.disabled=true;
     try{
       /* We only know the admin's email when they logged in normally (not via a
@@ -15014,7 +15078,7 @@ async function renderAdminSettings(){
           method:"POST", headers:supabaseHeaders(SUPABASE_PUBLISHABLE_KEY),
           body:JSON.stringify({email, password:currentPass})
         });
-        if(!verify.ok){ showToast("كلمة السر الحالية غير صحيحة"); savePassBtn.disabled=false; return; }
+        if(!verify.ok){ adminSaveResult(savePassBtn,false,"كلمة السر الحالية غير صحيحة"); savePassBtn.disabled=false; return; }
       }
       const res=await fetch(`${SUPABASE_AUTH_URL}/user`,{
         method:"PUT", headers:supabaseHeaders(getAdminToken()),
@@ -15024,15 +15088,15 @@ async function renderAdminSettings(){
       document.getElementById("adminCurrentPass").value="";
       document.getElementById("adminNewPass").value="";
       document.getElementById("adminNewPassConfirm").value="";
-      showToast("تم تغيير كلمة السر بنجاح");
-    }catch(err){ console.error(err); showToast("تعذّر تغيير كلمة السر، حاول مرة أخرى"); }
+      adminSaveResult(savePassBtn,true,"تم تغيير كلمة السر بنجاح");
+    }catch(err){ console.error(err); adminSaveResult(savePassBtn,false,"تعذّر تغيير كلمة السر، حاول مرة أخرى",err); }
     finally{ savePassBtn.disabled=false; }
   });
   const waBtn=document.getElementById("saveSiteWhatsappBtn");
   if(waBtn) waBtn.addEventListener("click",async()=>{
     const raw=document.getElementById("siteWhatsappNumber").value.trim();
     const digits=raw.replace(/[^0-9]/g,'');
-    if(!digits){ showToast("أدخل رقماً صحيحاً"); return; }
+    if(!digits){ adminSaveResult(waBtn,false,"أدخل رقماً صحيحاً"); return; }
     diagClear();
     diagAppend("saveSiteWhatsappBtn click received — starting saveSiteContent()");
     waBtn.disabled=true;
@@ -15041,10 +15105,10 @@ async function renderAdminSettings(){
       content.fr.__whatsapp_number=digits; content.ar.__whatsapp_number=digits;
       await saveSiteContent(content, diagAppend);
       diagAppend("DONE: saved successfully");
-      showToast(t("admin.settingsSaved"));
+      adminSaveResult(waBtn,true,t("admin.settingsSaved"));
     }catch(err){
       diagAppend(`DONE: threw error -> ${err?.message||err}`);
-      console.error(err); showToast(err?.message || t("admin.backendWriteError"));
+      console.error(err); adminSaveResult(waBtn,false,err?.message || t("admin.backendWriteError"),err);
     }finally{ waBtn.disabled=false; }
   });
   const adminLinkBtn=document.getElementById("saveSiteAdminLinkBtn");
@@ -15056,8 +15120,8 @@ async function renderAdminSettings(){
       content.fr.__show_admin_link=show?"1":"0"; content.ar.__show_admin_link=show?"1":"0";
       await saveSiteContent(content);
       applySiteAdminLink();
-      showToast(t("admin.settingsSaved"));
-    }catch(err){ console.error(err); showToast(err?.message || t("admin.backendWriteError")); }
+      adminSaveResult(adminLinkBtn,true,t("admin.settingsSaved"));
+    }catch(err){ console.error(err); adminSaveResult(adminLinkBtn,false,err?.message || t("admin.backendWriteError"),err); }
     finally{ adminLinkBtn.disabled=false; }
   });
   const showWaBtn=document.getElementById("saveSiteShowWhatsappBtn");
@@ -15069,8 +15133,8 @@ async function renderAdminSettings(){
       content.fr.__show_whatsapp=show?"1":"0"; content.ar.__show_whatsapp=show?"1":"0";
       await saveSiteContent(content);
       applySiteWhatsapp();
-      showToast(t("admin.settingsSaved"));
-    }catch(err){ console.error(err); showToast(err?.message || t("admin.backendWriteError")); }
+      adminSaveResult(showWaBtn,true,t("admin.settingsSaved"));
+    }catch(err){ console.error(err); adminSaveResult(showWaBtn,false,err?.message || t("admin.backendWriteError"),err); }
     finally{ showWaBtn.disabled=false; }
   });
   const shippingBtn=document.getElementById("saveShippingSettingsBtn");
@@ -15079,9 +15143,9 @@ async function renderAdminSettings(){
     const otherVal=document.getElementById("shippingOtherInput").value;
     const freeEnabled=document.getElementById("freeShippingEnabledInput").checked;
     const thresholdVal=document.getElementById("freeShippingThresholdInput").value;
-    if(casaVal===""||isNaN(Number(casaVal))||Number(casaVal)<0){ showToast("أدخل سعراً صحيحاً للتوصيل إلى الدار البيضاء"); return; }
-    if(otherVal===""||isNaN(Number(otherVal))||Number(otherVal)<0){ showToast("أدخل سعراً صحيحاً للتوصيل لباقي المدن"); return; }
-    if(freeEnabled && (thresholdVal===""||isNaN(Number(thresholdVal))||Number(thresholdVal)<0)){ showToast("أدخل مبلغاً صحيحاً للتوصيل المجاني"); return; }
+    if(casaVal===""||isNaN(Number(casaVal))||Number(casaVal)<0){ adminSaveResult(shippingBtn,false,"أدخل سعراً صحيحاً للتوصيل إلى الدار البيضاء"); return; }
+    if(otherVal===""||isNaN(Number(otherVal))||Number(otherVal)<0){ adminSaveResult(shippingBtn,false,"أدخل سعراً صحيحاً للتوصيل لباقي المدن"); return; }
+    if(freeEnabled && (thresholdVal===""||isNaN(Number(thresholdVal))||Number(thresholdVal)<0)){ adminSaveResult(shippingBtn,false,"أدخل مبلغاً صحيحاً للتوصيل المجاني"); return; }
     diagClear();
     diagAppend("saveShippingSettingsBtn click received — starting saveSiteContent()");
     shippingBtn.disabled=true;
@@ -15093,10 +15157,10 @@ async function renderAdminSettings(){
       content.fr.__free_shipping_threshold=String(Number(thresholdVal||500)); content.ar.__free_shipping_threshold=String(Number(thresholdVal||500));
       await saveSiteContent(content, diagAppend);
       diagAppend("DONE: saved successfully");
-      showToast(t("admin.settingsSaved"));
+      adminSaveResult(shippingBtn,true,t("admin.settingsSaved"));
     }catch(err){
       diagAppend(`DONE: threw error -> ${err?.message||err}`);
-      console.error(err); showToast(err?.message || t("admin.backendWriteError"));
+      console.error(err); adminSaveResult(shippingBtn,false,err?.message || t("admin.backendWriteError"),err);
     }finally{ shippingBtn.disabled=false; }
   });
   document.getElementById("saveFrontTextsBtn").addEventListener("click",async()=>{
@@ -15131,11 +15195,11 @@ async function renderAdminSettings(){
       await saveSiteContent(content, diagAppend);
       diagAppend("DONE: saved successfully");
       applyTranslations();
-      showToast(t("admin.settingsSaved"));
+      adminSaveResult(btn,true,t("admin.settingsSaved"));
     }catch(err){
       diagAppend(`DONE: threw error -> ${err?.message||err}`);
       console.error("Erreur sauvegarde textes:",err);
-      showToast(err?.message || t("admin.backendWriteError"));
+      adminSaveResult(btn,false,err?.message || t("admin.backendWriteError"),err);
     }finally{
       btn.disabled=false;
     }
@@ -15145,7 +15209,7 @@ async function renderAdminSettings(){
   const bgBtn=document.getElementById("saveSiteBackgroundBtn");
   if(bgBtn) bgBtn.addEventListener("click",async()=>{
     const file=document.getElementById("siteBackgroundFile")?.files?.[0];
-    if(!file){ showToast("اختر صورة الخلفية أولاً"); return; }
+    if(!file){ adminSaveResult(bgBtn,false,"اختر صورة الخلفية أولاً"); return; }
     bgBtn.disabled=true;
     try{
       const url=await uploadSiteBackground(file);
@@ -15153,9 +15217,9 @@ async function renderAdminSettings(){
       content.fr.__background_url=url; content.ar.__background_url=url;
       setBackgroundHistory(content,[url,...getBackgroundHistory()]);
       await saveSiteContent(content);
-      showToast(t("admin.settingsSaved"));
+      adminSaveResult(bgBtn,true,t("admin.settingsSaved"));
       await renderAdminSettings();
-    }catch(err){ console.error(err); showToast(err?.message||t("admin.backendWriteError")); }
+    }catch(err){ console.error(err); adminSaveResult(bgBtn,false,err?.message||t("admin.backendWriteError"),err); }
     finally{ bgBtn.disabled=false; }
   });
   document.querySelectorAll("[data-bg-pick]").forEach(b=>b.addEventListener("click",async()=>{
@@ -15164,8 +15228,8 @@ async function renderAdminSettings(){
       const content={fr:{...(SITE_CONTENT.fr||{})},ar:{...(SITE_CONTENT.ar||{})}};
       content.fr.__background_url=url; content.ar.__background_url=url;
       await saveSiteContent(content);
-      showToast(t("admin.settingsSaved")); await renderAdminSettings();
-    }catch(err){ console.error(err); showToast(err?.message||t("admin.backendWriteError")); }
+      adminSaveResult(b,true,t("admin.settingsSaved")); await renderAdminSettings();
+    }catch(err){ console.error(err); adminSaveResult(b,false,err?.message||t("admin.backendWriteError"),err); }
   }));
   document.querySelectorAll("[data-bg-del]").forEach(b=>b.addEventListener("click",async e=>{
     e.stopPropagation();
@@ -15174,8 +15238,8 @@ async function renderAdminSettings(){
     try{
       const content={fr:{...(SITE_CONTENT.fr||{})},ar:{...(SITE_CONTENT.ar||{})}};
       hist.splice(i,1); setBackgroundHistory(content,hist);
-      await saveSiteContent(content); await renderAdminSettings();
-    }catch(err){ console.error(err); showToast(err?.message||t("admin.backendWriteError")); }
+      await saveSiteContent(content); adminSaveResult(b,true,t("admin.settingsSaved")); await renderAdminSettings();
+    }catch(err){ console.error(err); adminSaveResult(b,false,err?.message||t("admin.backendWriteError"),err); }
   }));
   const clearBg=document.getElementById("clearSiteBackgroundBtn");
   if(clearBg) clearBg.addEventListener("click",async()=>{
@@ -15186,8 +15250,8 @@ async function renderAdminSettings(){
       const cur=content.fr.__background_url||content.ar.__background_url;
       if(cur) setBackgroundHistory(content,[cur,...getBackgroundHistory()]);
       delete content.fr.__background_url; delete content.ar.__background_url;
-      await saveSiteContent(content); showToast(t("admin.settingsSaved")); await renderAdminSettings();
-    }catch(err){ console.error(err); showToast(err?.message||t("admin.backendWriteError")); }
+      await saveSiteContent(content); adminSaveResult(clearBg,true,t("admin.settingsSaved")); await renderAdminSettings();
+    }catch(err){ console.error(err); adminSaveResult(clearBg,false,err?.message||t("admin.backendWriteError"),err); }
     finally{ clearBg.disabled=false; }
   });
   const brandBtn=document.getElementById("saveBrandNameBtn");
@@ -15200,8 +15264,8 @@ async function renderAdminSettings(){
       else{ delete content.fr.__brand_name; delete content.ar.__brand_name; }
       await saveSiteContent(content);
       SITE_BRAND_NAME=name; applyBrandName();
-      showToast(t("admin.settingsSaved"));
-    }catch(err){ console.error(err); showToast(err?.message||t("admin.backendWriteError")); }
+      adminSaveResult(brandBtn,true,t("admin.settingsSaved"));
+    }catch(err){ console.error(err); adminSaveResult(brandBtn,false,err?.message||t("admin.backendWriteError"),err); }
     finally{ brandBtn.disabled=false; }
   });
   const themeBtn=document.getElementById("saveThemeBtn");
@@ -15217,8 +15281,8 @@ async function renderAdminSettings(){
       });
       await saveSiteContent(content);
       applySiteTheme();
-      showToast(t("admin.settingsSaved"));
-    }catch(err){ console.error(err); showToast(err?.message||t("admin.backendWriteError")); }
+      adminSaveResult(themeBtn,true,t("admin.settingsSaved"));
+    }catch(err){ console.error(err); adminSaveResult(themeBtn,false,err?.message||t("admin.backendWriteError"),err); }
     finally{ themeBtn.disabled=false; }
   });
   const resetThemeBtn=document.getElementById("resetThemeBtn");
@@ -15232,11 +15296,12 @@ async function renderAdminSettings(){
       });
       await saveSiteContent(content);
       applySiteTheme();
-      showToast(t("admin.settingsSaved"));
+      adminSaveResult(resetThemeBtn,true,t("admin.settingsSaved"));
       await renderAdminSettings();
-    }catch(err){ console.error(err); showToast(err?.message||t("admin.backendWriteError")); }
+    }catch(err){ console.error(err); adminSaveResult(resetThemeBtn,false,err?.message||t("admin.backendWriteError"),err); }
     finally{ resetThemeBtn.disabled=false; }
   });
+  adminSaveRestore();
 }
 
 
@@ -15335,7 +15400,11 @@ async function saveLandingPage(page, onDiag){
   return landingNormalize(rows[0]);
 }
 async function deleteLandingPage(id){
+  let __lpUrls=[];
+  try{ const __row=await supabaseRequest(`${SUPABASE_LANDING_URL}?id=eq.${encodeURIComponent(id)}&select=*`,{token:getAdminToken()}); __lpUrls=collectStorageUrls(__row); }catch(e){}
   await supabaseRequest(`${SUPABASE_LANDING_URL}?id=eq.${encodeURIComponent(id)}`,{method:"DELETE",headers:{"Prefer":"return=minimal"},token:getAdminToken()});
+  /* Après suppression réussie de la ligne : supprime ses fichiers (dossiers landing-* uniquement). */
+  await purgeStorageUrls(__lpUrls,path=>path.startsWith("landing-"));
 }
 async function getPublicLanding(slug, onDiag){
   const url=`${SUPABASE_LANDING_URL}?slug=eq.${encodeURIComponent(slug)}&status=eq.published&select=*`;
@@ -15592,8 +15661,9 @@ async function renderAdminLandingPages(){
   document.getElementById('adminWrap').innerHTML=html; bindAdminTabs();
   document.getElementById('adminLogoutBtn')?.addEventListener('click',signOutAdmin); document.getElementById('lp-new')?.addEventListener('click',()=>{LANDING_EDIT_ID='__new__';LANDING_PAGES.push({...landingDefaults(),id:'__new__'});renderAdminLandingPages();});
   document.querySelectorAll('[data-lp-edit]').forEach(b=>b.addEventListener('click',()=>{LANDING_EDIT_ID=b.dataset.lpEdit;renderAdminLandingPages();}));
-  document.querySelectorAll('[data-lp-delete]').forEach(b=>b.addEventListener('click',async()=>{if(!confirm(t("lp.confirmDelete")))return;try{await deleteLandingPage(b.dataset.lpDelete);showToast(t("lp.deletedToast"));await renderAdminLandingPages();}catch(e){showToast(e?.message||t("admin.backendWriteError"));}}));
+  document.querySelectorAll('[data-lp-delete]').forEach(b=>b.addEventListener('click',async()=>{if(!confirm(t("lp.confirmDelete")))return;try{await deleteLandingPage(b.dataset.lpDelete);adminSaveResult(b,true,t("lp.deletedToast"),null,"\u2705 \u062a\u0645 \u0627\u0644\u062d\u0630\u0641 \u0646\u0647\u0627\u0626\u064a\u0627\u064b / Supprim\u00e9e d\u00e9finitivement");await renderAdminLandingPages();}catch(e){adminSaveResult(b,false,e?.message||t("admin.backendWriteError"),e);}}));
   document.querySelectorAll('[data-lp-copy-url]').forEach(b=>b.addEventListener('click',()=>copyLandingPublicUrl(b.dataset.lpCopyUrl,b)));
+  adminSaveRestore();
 }
 function bindLandingEditor(){
   /* ---- Slug (public URL) auto-follows the landing page's title ----
@@ -15697,7 +15767,7 @@ function bindLandingEditor(){
   document.getElementById('lp-back')?.addEventListener('click',()=>{LANDING_EDIT_ID=null;renderAdminLandingPages();});
   document.getElementById('lp-copy-public-url')?.addEventListener('click',()=>copyLandingPublicUrl(document.getElementById('lp-public-url')?.value,document.getElementById('lp-copy-public-url')));
   document.getElementById('lp-add-image')?.addEventListener('click',()=>{const u=document.getElementById('lp-image-choice').value;if(!u)return;const list=document.getElementById('lp-images-list');const i=list.querySelectorAll('[data-lpimg]').length;list.insertAdjacentHTML('beforeend',`<div class="lp-image-row"><img src="${escAttr(u)}"><input value="${escAttr(u)}" data-lpimg="${i}"><button class="btn btn-ghost" data-remove-lpimg="${i}">🗑️</button></div>`);bindLandingImageRemove();});
-  document.getElementById('lp-image-file')?.addEventListener('change',async e=>{const f=e.target.files?.[0];if(!f)return;try{const slug=document.getElementById('lp-slug').value.trim()||('landing-'+Date.now());const u=await uploadProductImageToStorage(f,'landing-'+slug);const list=document.getElementById('lp-images-list');const i=list.querySelectorAll('[data-lpimg]').length;list.insertAdjacentHTML('beforeend',`<div class="lp-image-row"><img src="${escAttr(u)}"><input value="${escAttr(u)}" data-lpimg="${i}"><button class="btn btn-ghost" data-remove-lpimg="${i}">🗑️</button></div>`);bindLandingImageRemove();showToast(t("lp.imageAddedToast"));}catch(err){showToast(err?.message||t("lp.uploadError"));}});
+  document.getElementById('lp-image-file')?.addEventListener('change',async e=>{const f=e.target.files?.[0];if(!f)return;try{const slug=document.getElementById('lp-slug').value.trim()||('landing-'+Date.now());const u=await uploadProductImageToStorage(f,'landing-'+slug);const list=document.getElementById('lp-images-list');const i=list.querySelectorAll('[data-lpimg]').length;list.insertAdjacentHTML('beforeend',`<div class="lp-image-row"><img src="${escAttr(u)}"><input value="${escAttr(u)}" data-lpimg="${i}"><button class="btn btn-ghost" data-remove-lpimg="${i}">🗑️</button></div>`);bindLandingImageRemove();adminSaveResult(e.target,true,t("lp.imageAddedToast"),null,ADMIN_UPLOAD_OK_TXT);}catch(err){adminSaveResult(e.target,false,err?.message||t("lp.uploadError"),err);}});
   document.getElementById('lp-video-file')?.addEventListener('change',async e=>{
     const f=e.target.files?.[0]; if(!f)return;
     const statusEl=document.getElementById('lp-video-status');
@@ -15708,11 +15778,11 @@ function bindLandingEditor(){
       const u=await uploadProductVideoToStorage(f,'landing-'+slug);
       if(urlInput) urlInput.value=u;
       if(statusEl) statusEl.textContent=t("admin.videoUploaded");
-      showToast(t("admin.videoUploadToast"));
+      adminSaveResult(e.target,true,t("admin.videoUploadToast"),null,ADMIN_UPLOAD_OK_TXT);
     }catch(err){
       console.error(err);
       if(statusEl) statusEl.textContent="";
-      showToast(err?.message||t("lp.uploadError"));
+      adminSaveResult(e.target,false,err?.message||t("lp.uploadError"),err);
     }
     e.target.value="";
   });
@@ -15728,16 +15798,16 @@ function bindLandingEditor(){
       LANDING_PAGES = LANDING_PAGES.map(x=>x.id===LANDING_EDIT_ID?{...x,video2:u}:x);
       const current=window.__luneaLandingVideo2Temp || {}; current[LANDING_EDIT_ID||'__new__']=u; window.__luneaLandingVideo2Temp=current;
       if(statusEl) statusEl.textContent=t("admin.videoUploaded");
-      showToast(t("admin.videoUploadToast"));
+      adminSaveResult(e.target,true,t("admin.videoUploadToast"),null,ADMIN_UPLOAD_OK_TXT);
     }catch(err){
       console.error(err);
       if(statusEl) statusEl.textContent="";
-      showToast(err?.message||t("lp.uploadError"));
+      adminSaveResult(e.target,false,err?.message||t("lp.uploadError"),err);
     }
     e.target.value="";
   });
   bindLandingImageRemove();
-  document.getElementById('lp-save')?.addEventListener('click',async()=>{const b=document.getElementById('lp-save');diagClear('lpDiagLog');lpDiagAppend('lp-save click received — starting saveLandingPage()');b.disabled=true;try{const p=collectLandingForm();if(!p.slug||!(p.titleFr||p.titleAr))throw new Error(t("lp.slugTitleRequired"));const saved=await saveLandingPage(p,lpDiagAppend);lpDiagAppend('DONE: saved successfully');LANDING_PAGES=LANDING_PAGES.filter(x=>x.id!==LANDING_EDIT_ID);LANDING_PAGES.unshift(saved);LANDING_EDIT_ID=null;showToast(t("lp.savedToast"));await renderAdminLandingPages();}catch(e){lpDiagAppend(`DONE: threw error -> ${e?.message||e}`);console.error(e);showToast(e?.message||t("lp.saveError"));}finally{b.disabled=false;}});
+  document.getElementById('lp-save')?.addEventListener('click',async()=>{const b=document.getElementById('lp-save');diagClear('lpDiagLog');lpDiagAppend('lp-save click received — starting saveLandingPage()');b.disabled=true;try{const p=collectLandingForm();if(!p.slug||!(p.titleFr||p.titleAr))throw new Error(t("lp.slugTitleRequired"));const saved=await saveLandingPage(p,lpDiagAppend);lpDiagAppend('DONE: saved successfully');LANDING_PAGES=LANDING_PAGES.filter(x=>x.id!==LANDING_EDIT_ID);LANDING_PAGES.unshift(saved);LANDING_EDIT_ID=null;adminSaveResult(b,true,t("lp.savedToast"));await renderAdminLandingPages();}catch(e){lpDiagAppend(`DONE: threw error -> ${e?.message||e}`);console.error(e);adminSaveResult(b,false,e?.message||t("lp.saveError"),e);}finally{b.disabled=false;}});
   const openLandingPreview=()=>{
     try{
       const p=collectLandingForm();
@@ -18161,14 +18231,14 @@ async function __saveProductEditsInner(id){
     normalizeLuxiaVariants();
     renderStoreCategoriesUI();
     renderProducts();
-    showToast(enabled?t('admin.productSaved'):'تم الحفظ، لكن المنتج غير مفعّل — لن يظهر في الموقع حتى تفعّله — Enregistré, mais désactivé : invisible sur le site');
+    adminSaveResult(document.querySelector('[data-save="'+id+'"]'),true,enabled?t('admin.productSaved'):'تم الحفظ، لكن المنتج غير مفعّل — لن يظهر في الموقع حتى تفعّله — Enregistré, mais désactivé : invisible sur le site');
     /* Saving is complete: close the product editor instead of reopening it. */
     openProductId=null; lxDropDraft(id);
-    renderAdminProducts();
+    renderAdminProducts(); adminSaveRestore();
   }catch(err){
     Object.assign(p,prev.p);I18N.fr[p.nameKey]=prev.i18n.nameFr;I18N.ar[p.nameKey]=prev.i18n.nameAr;I18N.fr[p.descKey]=prev.i18n.descFr;I18N.ar[p.descKey]=prev.i18n.descAr;I18N.fr[p.badgeKey]=prev.i18n.badgeFr;I18N.ar[p.badgeKey]=prev.i18n.badgeAr;PRODUCT_VARIANTS[id]=prev.v;saveProductVariants(PRODUCT_VARIANTS);
     console.error(err);
-    showToast((err?.message||t('admin.backendWriteError'))+' — vos modifications restent dans le formulaire, réessayez.');
+    adminSaveResult(document.querySelector('[data-save="'+id+'"]'),false,(err?.message||t('admin.backendWriteError'))+' — vos modifications restent dans le formulaire, réessayez.',err);
     openProductId=id; /* le formulaire n'est PAS re-rendu : rien n'est perdu */
   }
 }
@@ -18213,9 +18283,16 @@ async function addNewProductAdmin(){
 async function deleteProductAdmin(id){
   if(!confirm("هل أنت متأكد من حذف هذا المنتج؟ لا يمكن التراجع عن ذلك لاحقاً.")) return;
   try{
+    const __prodUrls=collectStorageUrls([PRODUCT_IMAGE_GALLERY[id],PRODUCT_IMAGES[id],(PRODUCTS.find(x=>x.id===id)||{}).video,PRODUCT_VARIANTS[id],PRODUCT_BACKEND_ROWS[id]]);
     const __deleted = await supabaseRequest(`${SUPABASE_PRODUCTS_URL}?id=eq.${encodeURIComponent(id)}&select=id`, {method:"DELETE", headers:{"Prefer":"return=representation"}, token:getAdminToken()});
     if(!Array.isArray(__deleted) || !__deleted.length){
       throw new Error("La suppression a été refusée par Supabase (aucune ligne supprimée). Ajoutez une policy DELETE sur la table products.");
+    }
+    /* Ne supprime pas un fichier encore référencé par une landing page (les landing pages réutilisent les URLs du produit). */
+    let __lpTxt=null;
+    try{ __lpTxt=JSON.stringify(await supabaseRequest(`${SUPABASE_LANDING_URL}?select=*`,{token:getAdminToken()})); }catch(e){}
+    if(__lpTxt!==null){
+      await purgeStorageUrls(__prodUrls.filter(u=>!__lpTxt.includes(u)),path=>path.startsWith(String(id)+"/"));
     }
     try{ const __ov=loadProductOverrides(); delete __ov[id]; saveProductOverrides(__ov); }catch(e){}
     try{ const __pv=loadProductVariants(); delete __pv[id]; saveProductVariants(__pv); }catch(e){}
@@ -18332,13 +18409,22 @@ function bindProductImageEvents(){
       }
       try{
         if(isAdminAuthenticated()) await saveProductToSupabase(id);
-        if(removed) deleteProductImageFromStorage(removed).catch(()=>{});
-        renderProducts(); openProductId=id; renderAdminProducts();
       }catch(err){
         PRODUCT_IMAGE_GALLERY[id]=oldGallery; syncPrimaryImage(id);
         saveProductGallery({...loadProductGallery(), [id]:oldGallery});
         console.error(err); showToast(t("admin.backendWriteError"));
+        return;
       }
+      /* Wait for Storage deletion and surface failures instead of silently swallowing them. */
+      if(removed){
+        try{
+          await deleteProductImageFromStorage(removed);
+        }catch(err){
+          console.error("Product image was removed from the gallery, but Storage deletion failed:",err);
+          showToast(err?.message || t("admin.backendWriteError"));
+        }
+      }
+      renderProducts(); openProductId=id; renderAdminProducts();
     });
   });
 
@@ -18380,11 +18466,11 @@ function bindProductImageEvents(){
         const newUrl = await uploadProductVideoToStorage(file, id);
         if(urlInput) urlInput.value = newUrl;
         if(statusEl) statusEl.textContent = t("admin.videoUploaded");
-        showToast(t("admin.videoUploadToast"));
+        adminSaveResult(inp,true,t("admin.videoUploadToast"),null,ADMIN_UPLOAD_OK_TXT);
       }catch(err){
         console.error(err);
         if(statusEl) statusEl.textContent = "";
-        showToast(err?.message || t("admin.backendWriteError"));
+        adminSaveResult(inp,false,err?.message || t("admin.backendWriteError"),err);
       }
       inp.value = "";
     });
