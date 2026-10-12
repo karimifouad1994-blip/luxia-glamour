@@ -13357,7 +13357,7 @@ async function uploadProductVideoToStorage(file, productId){
 async function deleteProductImageFromStorage(url){
   const path = storagePathFromUrl(url);
   /* Images hosted outside our Supabase Storage do not need a Storage DELETE. */
-  if(!path) return;
+  if(!path) return "skipped";
   if(!isAdminAuthenticated()) throw new Error("Storage delete skipped: admin is not authenticated.");
   const res = await fetch(`${SUPABASE_STORAGE_OBJECT_URL}/${storageObjectPath(path)}`, {
     method:"DELETE",
@@ -13371,6 +13371,7 @@ async function deleteProductImageFromStorage(url){
     try{ detail=await res.text(); }catch(e){}
     throw new Error(`Storage delete ${res.status}: ${detail||res.statusText}`);
   }
+  return res.status===404?"notfound":"deleted";
 }
 /* Nettoyage Storage : supprime définitivement les fichiers liés à un élément supprimé (évite l'accumulation de quota). */
 function collectStorageUrls(data){
@@ -13385,13 +13386,51 @@ function collectStorageUrls(data){
   return Array.from(out);
 }
 async function purgeStorageUrls(urls,pathFilter){
+  const r={deleted:[],notfound:[],skipped:[],failed:[]};
   for(const u of (urls||[])){
     try{
       const path=storagePathFromUrl(u);
-      if(!path || (pathFilter && !pathFilter(path))) continue;
-      await deleteProductImageFromStorage(u);
-    }catch(e){ console.warn("Storage cleanup failed:",u,e); }
+      if(!path || (pathFilter && !pathFilter(path))){ r.skipped.push(u); continue; }
+      const st=await deleteProductImageFromStorage(u);
+      (st==="notfound"?r.notfound:r.deleted).push(u);
+    }catch(e){ console.warn("Storage cleanup failed:",u,e); r.failed.push({url:u,err:e}); }
   }
+  return r;
+}
+/* Liste les fichiers d'un dossier du bucket (nécessite une policy SELECT sur storage.objects). */
+async function listStorageFolderFiles(folder){
+  if(!isAdminAuthenticated()) throw new Error("Storage list skipped: admin is not authenticated.");
+  const res=await fetch(`${SUPABASE_URL}/storage/v1/object/list/${SUPABASE_STORAGE_BUCKET}`,{
+    method:"POST",
+    headers:{"apikey":SUPABASE_PUBLISHABLE_KEY,"Authorization":`Bearer ${getAdminToken()}`,"Content-Type":"application/json"},
+    body:JSON.stringify({prefix:folder,limit:1000,offset:0})
+  });
+  if(!res.ok){ let d=""; try{ d=await res.text(); }catch(e){} throw new Error(`Storage list ${res.status}: ${d||res.statusText}`); }
+  const rows=await res.json();
+  return (Array.isArray(rows)?rows:[]).filter(r=>r&&r.name&&r.id).map(r=>folder+"/"+r.name);
+}
+/* Supprime TOUT le contenu des dossiers donnés (+ les URLs connues), sauf les fichiers encore référencés dans keepTxt. */
+async function purgeStorageFolders(folders,extraUrls,keepTxt,pathFilter){
+  const urls=new Set(extraUrls||[]); const listErrors=[];
+  for(const f of (folders||[])){
+    try{ (await listStorageFolderFiles(f)).forEach(path=>urls.add(storagePublicUrl(path))); }
+    catch(e){ console.warn("Storage list failed:",f,e); listErrors.push(e); }
+  }
+  const all=Array.from(urls);
+  const keep=all.filter(u=>keepTxt&&keepTxt.includes(u));
+  const rep=await purgeStorageUrls(all.filter(u=>!keep.includes(u)),pathFilter);
+  rep.skipped.push(...keep);
+  listErrors.forEach(e=>rep.failed.push({url:"(list)",err:e}));
+  return rep;
+}
+/* Résumé lisible du nettoyage Storage (affiché dans la notice admin + diagnostic). */
+function adminCleanupSummary(r){
+  if(!r) return "";
+  const parts=[r.deleted.length+" \u0645\u0644\u0641 \u062a\u0645\u0633\u062d \u0645\u0646 Storage"];
+  if(r.notfound.length) parts.push(r.notfound.length+" \u0645\u0627 \u062a\u0644\u0627\u0642\u0627\u0634 (\u062a\u0645\u0633\u062d \u0645\u0646 \u0642\u0628\u0644 \u0623\u0648 \u0645\u0634\u0643\u0644 \u0635\u0644\u0627\u062d\u064a\u0627\u062a)");
+  if(r.skipped.length) parts.push(r.skipped.length+" \u0628\u0642\u0627\u0648 (\u0645\u0633\u062a\u0639\u0645\u0644\u064a\u0646 \u0641\u0645\u0643\u0627\u0646 \u0622\u062e\u0631)");
+  if(r.failed.length) parts.push(r.failed.length+" \u0641\u0634\u0644: "+(r.failed[0].err&&r.failed[0].err.message||""));
+  return parts.join(" \u2014 ");
 }
 function loadProductGallery(){ try{ return JSON.parse(localStorage.getItem(PRODUCT_GALLERY_KEY)||'{}'); }catch(e){ return {}; } }
 function saveProductGallery(g){
@@ -13956,7 +13995,7 @@ function adminSaveShow(rec){
   }
   if(!span) return;
   span.style.cssText="display:"+(banner?"block":"inline-block")+";margin:8px 8px 0;padding:8px 12px;border-radius:10px;font-size:13px;font-weight:600;line-height:1.4;max-width:100%;"
-    +(rec.ok?"background:rgba(60,170,80,.18);border:1px solid rgba(110,220,130,.55);color:#c9f7d0;":"background:rgba(220,50,50,.22);border:1px solid rgba(255,100,100,.65);color:#ffb3b3;");
+    +(rec.ok?"background:#1e7a3c;border:1px solid #145c2b;color:#ffffff;":"background:#c62828;border:1px solid #8e1b1b;color:#ffffff;")+"box-shadow:0 2px 8px rgba(0,0,0,.18);text-shadow:none;opacity:1;";
   span.textContent=rec.text;
   try{ span.scrollIntoView({block:"nearest",behavior:"smooth"}); }catch(e){}
 }
@@ -14817,9 +14856,9 @@ async function runSettingsDiagnostic(){
   const setStatus=(ok,msg)=>{
     if(!statusEl) return;
     statusEl.style.display="inline-block";
-    statusEl.style.background=ok ? "rgba(90,180,90,.14)" : "rgba(210,70,70,.16)";
-    statusEl.style.border=ok ? "1px solid rgba(120,210,120,.45)" : "1px solid rgba(240,110,110,.5)";
-    statusEl.style.color=ok ? "#bff2bf" : "#ffd0d0";
+    statusEl.style.background=ok ? "#1e7a3c" : "#c62828";
+    statusEl.style.border=ok ? "1px solid #145c2b" : "1px solid #8e1b1b";
+    statusEl.style.color=ok ? "#ffffff" : "#ffffff";
     statusEl.textContent=msg;
   };
   const lines=[];
@@ -15036,9 +15075,9 @@ async function renderAdminSettings(){
       const okEl=document.getElementById("settingsSaveDiagStatus");
       if(okEl){
         okEl.style.display="inline-block";
-        okEl.style.background="rgba(90,180,90,.14)";
-        okEl.style.border="1px solid rgba(120,210,120,.45)";
-        okEl.style.color="#bff2bf";
+        okEl.style.background="#1e7a3c";
+        okEl.style.border="1px solid #145c2b";
+        okEl.style.color="#ffffff";
         okEl.textContent="✅ تم الحفظ بنجاح.";
       }
       adminSaveResult(btn,true,t("admin.settingsSaved"));
@@ -15049,9 +15088,9 @@ async function renderAdminSettings(){
       const errEl=document.getElementById("settingsSaveDiagStatus");
       if(errEl){
         errEl.style.display="inline-block";
-        errEl.style.background="rgba(210,70,70,.16)";
-        errEl.style.border="1px solid rgba(240,110,110,.5)";
-        errEl.style.color="#ffd0d0";
+        errEl.style.background="#c62828";
+        errEl.style.border="1px solid #8e1b1b";
+        errEl.style.color="#ffffff";
         errEl.textContent=`❌ مشكلة في الحفظ: ${detail}`;
       }
       adminSaveResult(btn,false,detail || t("admin.backendWriteError"),err);
@@ -15400,11 +15439,18 @@ async function saveLandingPage(page, onDiag){
   return landingNormalize(rows[0]);
 }
 async function deleteLandingPage(id){
-  let __lpUrls=[];
-  try{ const __row=await supabaseRequest(`${SUPABASE_LANDING_URL}?id=eq.${encodeURIComponent(id)}&select=*`,{token:getAdminToken()}); __lpUrls=collectStorageUrls(__row); }catch(e){}
+  let __lpUrls=[], __others="", __slug="";
+  try{
+    const __rows=await supabaseRequest(`${SUPABASE_LANDING_URL}?select=*`,{token:getAdminToken()});
+    const __list=Array.isArray(__rows)?__rows:[];
+    __lpUrls=collectStorageUrls(__list.filter(r=>String(r.id)===String(id)));
+    __slug=String((__list.find(r=>String(r.id)===String(id))||{}).slug||"");
+    __others=JSON.stringify(__list.filter(r=>String(r.id)!==String(id)))||"";
+  }catch(e){}
   await supabaseRequest(`${SUPABASE_LANDING_URL}?id=eq.${encodeURIComponent(id)}`,{method:"DELETE",headers:{"Prefer":"return=minimal"},token:getAdminToken()});
-  /* Après suppression réussie de la ligne : supprime ses fichiers (dossiers landing-* uniquement). */
-  await purgeStorageUrls(__lpUrls,path=>path.startsWith("landing-"));
+  /* Après suppression réussie de la ligne : supprime ses fichiers (dossiers landing-* uniquement, jamais ceux d'une autre landing page). */
+  const __folders=Array.from(new Set([...__lpUrls.map(u=>(storagePathFromUrl(u)||"").split("/")[0]),...(__slug?["landing-"+__slug,"landing-"+__slug+"-video2"]:[])].filter(f=>f.startsWith("landing-"))));
+  return await purgeStorageFolders(__folders,__lpUrls,__others,path=>path.startsWith("landing-"));
 }
 async function getPublicLanding(slug, onDiag){
   const url=`${SUPABASE_LANDING_URL}?slug=eq.${encodeURIComponent(slug)}&status=eq.published&select=*`;
@@ -15661,7 +15707,7 @@ async function renderAdminLandingPages(){
   document.getElementById('adminWrap').innerHTML=html; bindAdminTabs();
   document.getElementById('adminLogoutBtn')?.addEventListener('click',signOutAdmin); document.getElementById('lp-new')?.addEventListener('click',()=>{LANDING_EDIT_ID='__new__';LANDING_PAGES.push({...landingDefaults(),id:'__new__'});renderAdminLandingPages();});
   document.querySelectorAll('[data-lp-edit]').forEach(b=>b.addEventListener('click',()=>{LANDING_EDIT_ID=b.dataset.lpEdit;renderAdminLandingPages();}));
-  document.querySelectorAll('[data-lp-delete]').forEach(b=>b.addEventListener('click',async()=>{if(!confirm(t("lp.confirmDelete")))return;try{await deleteLandingPage(b.dataset.lpDelete);adminSaveResult(b,true,t("lp.deletedToast"),null,"\u2705 \u062a\u0645 \u0627\u0644\u062d\u0630\u0641 \u0646\u0647\u0627\u0626\u064a\u0627\u064b / Supprim\u00e9e d\u00e9finitivement");await renderAdminLandingPages();}catch(e){adminSaveResult(b,false,e?.message||t("admin.backendWriteError"),e);}}));
+  document.querySelectorAll('[data-lp-delete]').forEach(b=>b.addEventListener('click',async()=>{if(!confirm(t("lp.confirmDelete")))return;try{const __rep=await deleteLandingPage(b.dataset.lpDelete);const __sum=adminCleanupSummary(__rep);if(__rep.failed.length||__rep.notfound.length){adminSaveResult(b,false,"\u062a\u0645 \u062d\u0630\u0641 \u0627\u0644\u0635\u0641\u062d\u0629 \u0644\u0643\u0646 \u062a\u0646\u0638\u064a\u0641 Storage \u063a\u064a\u0631 \u0643\u0627\u0645\u0644: "+__sum,__rep.failed[0]&&__rep.failed[0].err);}else{adminSaveResult(b,true,t("lp.deletedToast"),null,"\u2705 \u062a\u0645 \u0627\u0644\u062d\u0630\u0641 \u0646\u0647\u0627\u0626\u064a\u0627\u064b / Supprim\u00e9e \u2014 "+__sum);}diagAppend("lp-delete: "+__sum,"lpDiagLog");await renderAdminLandingPages();}catch(e){adminSaveResult(b,false,e?.message||t("admin.backendWriteError"),e);}}));
   document.querySelectorAll('[data-lp-copy-url]').forEach(b=>b.addEventListener('click',()=>copyLandingPublicUrl(b.dataset.lpCopyUrl,b)));
   adminSaveRestore();
 }
@@ -15807,7 +15853,7 @@ function bindLandingEditor(){
     e.target.value="";
   });
   bindLandingImageRemove();
-  document.getElementById('lp-save')?.addEventListener('click',async()=>{const b=document.getElementById('lp-save');diagClear('lpDiagLog');lpDiagAppend('lp-save click received — starting saveLandingPage()');b.disabled=true;try{const p=collectLandingForm();if(!p.slug||!(p.titleFr||p.titleAr))throw new Error(t("lp.slugTitleRequired"));const saved=await saveLandingPage(p,lpDiagAppend);lpDiagAppend('DONE: saved successfully');LANDING_PAGES=LANDING_PAGES.filter(x=>x.id!==LANDING_EDIT_ID);LANDING_PAGES.unshift(saved);LANDING_EDIT_ID=null;adminSaveResult(b,true,t("lp.savedToast"));await renderAdminLandingPages();}catch(e){lpDiagAppend(`DONE: threw error -> ${e?.message||e}`);console.error(e);adminSaveResult(b,false,e?.message||t("lp.saveError"),e);}finally{b.disabled=false;}});
+  document.getElementById('lp-save')?.addEventListener('click',async()=>{const b=document.getElementById('lp-save');diagClear('lpDiagLog');lpDiagAppend('lp-save click received — starting saveLandingPage()');b.disabled=true;try{const p=collectLandingForm();if(!p.slug||!(p.titleFr||p.titleAr))throw new Error(t("lp.slugTitleRequired"));const __old=LANDING_PAGES.find(x=>x.id===LANDING_EDIT_ID);const saved=await saveLandingPage(p,lpDiagAppend);lpDiagAppend('DONE: saved successfully');let __cl=null;try{const __oldU=collectStorageUrls(__old||{});const __newTxt=JSON.stringify(saved)||'';const __othTxt=JSON.stringify(LANDING_PAGES.filter(x=>x.id!==LANDING_EDIT_ID))||'';__cl=await purgeStorageUrls(__oldU.filter(u=>!__newTxt.includes(u)&&!__othTxt.includes(u)),path=>path.startsWith('landing-'));if(__cl.deleted.length||__cl.failed.length||__cl.notfound.length)lpDiagAppend('cleanup: '+adminCleanupSummary(__cl));}catch(e2){lpDiagAppend('cleanup error: '+(e2?.message||e2));}LANDING_PAGES=LANDING_PAGES.filter(x=>x.id!==LANDING_EDIT_ID);LANDING_PAGES.unshift(saved);LANDING_EDIT_ID=null;adminSaveResult(b,true,t("lp.savedToast"));await renderAdminLandingPages();}catch(e){lpDiagAppend(`DONE: threw error -> ${e?.message||e}`);console.error(e);adminSaveResult(b,false,e?.message||t("lp.saveError"),e);}finally{b.disabled=false;}});
   const openLandingPreview=()=>{
     try{
       const p=collectLandingForm();
@@ -17828,7 +17874,7 @@ function renderAdminProducts(){
 function __renderAdminProductsRaw(){
   let html=adminLanguageSwitcherHTML();
   html+=adminTabsHTML('products');
-  html+=`<div class="admin-page-head"><div><div class="admin-kicker">${t('admin.productsTab')}</div><h2>${t('admin.productsTitle')}</h2><p>${t('admin.productsHint')}</p></div><div class="admin-head-actions"><button class="btn btn-primary" id="addProductBtn">+ ${t('admin.newProduct')}</button><button class="btn btn-ghost" id="addGiftPackBtn">🎁 + Pack cadeau</button><button class="btn btn-ghost" id="adminLogoutBtn">${t('admin.logout')}</button></div></div>`;
+  html+=`<div class="admin-page-head"><div><div class="admin-kicker">${t('admin.productsTab')}</div><h2>${t('admin.productsTitle')}</h2><p>${t('admin.productsHint')}</p></div><div class="admin-head-actions"><button class="btn btn-primary" id="addProductBtn">+ ${t('admin.newProduct')}</button><button class="btn btn-ghost" id="addGiftPackBtn">🎁 + Pack cadeau</button><button class="btn btn-ghost" id="storageCleanupBtn">🧹 تنظيف Storage</button><button class="btn btn-ghost" id="adminLogoutBtn">${t('admin.logout')}</button></div></div>`;
   html+=adminOfferCardHTML();
   const __adminColOf=p=>{const v=PRODUCT_VARIANTS[p.id]||{};return v.unassigned?'':(v.collectionId||getStoreProductCollection(p));};
   const __adminCardHTML=p=>{
@@ -17901,6 +17947,7 @@ function __renderAdminProductsRaw(){
   document.querySelectorAll('[data-save]').forEach(btn=>btn.addEventListener('click',async e=>{e.preventDefault();e.stopPropagation();await saveProductEdits(String(btn.dataset.save));}));
   document.querySelectorAll('[data-deleteproduct]').forEach(btn=>btn.addEventListener('click',async e=>{e.preventDefault();e.stopPropagation();await deleteProductAdmin(String(btn.dataset.deleteproduct));}));
   document.getElementById('addProductBtn')?.addEventListener('click',async()=>{ const k=await lxChooseProductKind(); if(!k) return; window.__lxNewKind=k; try{ await addNewProductAdmin(); }catch(err){ console.error(err); showToast('Erreur: '+((err&&err.message)||err)); }finally{ window.__lxNewKind=null; } });
+  document.getElementById('storageCleanupBtn')?.addEventListener('click',e=>{ e.preventDefault(); luxiaStorageCleanup(e.currentTarget); });
   document.getElementById('adminLogoutBtn')?.addEventListener('click',()=>signOutAdmin());
   bindProductImageEvents(); bindProductVariantEvents(); bindAdminPackEvents(); bindAdminCatalogTypeEvents(); bindAdminSmartContent(); bindAdminOfferCard(); bindAdminDirectLinks();
 }
@@ -18227,7 +18274,8 @@ async function __saveProductEditsInner(id){
   saveProductVariants(PRODUCT_VARIANTS);
   const overrides=loadProductOverrides();overrides[id]={price:p.price,enabled:p.enabled,video:p.video,name:{fr:I18N.fr[p.nameKey],ar:I18N.ar[p.nameKey]},desc:{fr:I18N.fr[p.descKey],ar:I18N.ar[p.descKey]},badge:{fr:I18N.fr[p.badgeKey],ar:I18N.ar[p.badgeKey]}};saveProductOverrides(overrides);
   try{
-    if(isAdminAuthenticated()) await saveProductToSupabase(id);
+    if(isAdminAuthenticated()) await saveProductToSupabase(id); /* Nettoyage Storage : ancienne video du produit supprimee si remplacee ou videe (sauf si encore utilisee par une landing page). */
+    try{ const __ov0=prev.p.video; if(__ov0 && __ov0!==p.video && isAdminAuthenticated()){ const __lpT=JSON.stringify(await supabaseRequest(`${SUPABASE_LANDING_URL}?select=*`,{token:getAdminToken()}))||""; const __cl=await purgeStorageUrls([__ov0].filter(u=>!__lpT.includes(u)),path=>path.startsWith(id+"/")); try{ diagAppend("product-video-cleanup: "+adminCleanupSummary(__cl)); }catch(e3){} } }catch(e2){ console.warn("Product video cleanup skipped:",e2); }
     normalizeLuxiaVariants();
     renderStoreCategoriesUI();
     renderProducts();
@@ -18280,6 +18328,57 @@ async function addNewProductAdmin(){
     console.error(err); showToast(err?.message || t("admin.backendWriteError"));
   }
 }
+/* ============================================================
+   NETTOYAGE STORAGE MANUEL (admin)
+   Garde uniquement les fichiers encore references par products / landing_pages /
+   site_settings / Orders et supprime tout le reste du bucket product-images.
+   ============================================================ */
+async function luxiaListAllStorageFiles(prefix){
+  const out=[]; let offset=0;
+  for(;;){
+    const res=await fetch(`${SUPABASE_URL}/storage/v1/object/list/${SUPABASE_STORAGE_BUCKET}`,{method:"POST",headers:{"apikey":SUPABASE_PUBLISHABLE_KEY,"Authorization":`Bearer ${getAdminToken()}`,"Content-Type":"application/json"},body:JSON.stringify({prefix:prefix,limit:100,offset:offset})});
+    if(!res.ok){ let d=""; try{ d=await res.text(); }catch(e){} throw new Error(`Storage list ${res.status}: ${d||res.statusText}`); }
+    const rows=await res.json();
+    if(!Array.isArray(rows)||!rows.length) break;
+    for(const r of rows){
+      if(!r||!r.name) continue;
+      const full=prefix?prefix+"/"+r.name:r.name;
+      if(r.id) out.push({path:full,size:Number(r.metadata&&r.metadata.size)||0,t:Date.parse(r.created_at||r.updated_at||"")||0});
+      else out.push(...await luxiaListAllStorageFiles(full));
+    }
+    if(rows.length<100) break;
+    offset+=100;
+  }
+  return out;
+}
+async function luxiaStorageCleanup(btn){
+  if(!isAdminAuthenticated()){ showToast("\u064a\u062c\u0628 \u062a\u0633\u062c\u064a\u0644 \u0627\u0644\u062f\u062e\u0648\u0644 \u0643\u0623\u062f\u0645\u0646"); return; }
+  const oldTxt=btn?btn.textContent:""; if(btn){ btn.disabled=true; btn.textContent="\u23f3 ..."; }
+  try{
+    const files=(await luxiaListAllStorageFiles("")).filter(f=>!f.path.split("/").pop().startsWith("."));
+    let refs="";
+    const prod=await supabaseRequest(`${SUPABASE_PRODUCTS_URL}?select=*`,{token:getAdminToken()});
+    const lps=await supabaseRequest(`${SUPABASE_LANDING_URL}?select=*`,{token:getAdminToken()});
+    const sets=await supabaseRequest(`${SUPABASE_SETTINGS_URL}?select=*`,{token:getAdminToken()});
+    /* Securite : si products ou site_settings reviennent vides (RLS), on arrete pour ne rien supprimer par erreur. */
+    if(!Array.isArray(prod)||!prod.length||!Array.isArray(sets)||!sets.length) throw new Error("\u0642\u0631\u0627\u0621\u0629 products \u0623\u0648 site_settings \u0641\u0627\u0631\u063a\u0629 - \u062a\u0645 \u0627\u0644\u0625\u064a\u0642\u0627\u0641 \u0628\u062f\u0648\u0646 \u062d\u0630\u0641 \u0623\u064a \u0645\u0644\u0641");
+    if(!Array.isArray(lps)) throw new Error("\u0642\u0631\u0627\u0621\u0629 landing_pages \u0641\u0634\u0644\u062a - \u062a\u0645 \u0627\u0644\u0625\u064a\u0642\u0627\u0641");
+    refs+=JSON.stringify(prod)+JSON.stringify(lps)+JSON.stringify(sets);
+    try{ refs+=JSON.stringify(await supabaseRequest(`${SUPABASE_ORDERS_URL}?select=*`,{token:getAdminToken()}))||""; }catch(e){}
+    if(files.length && !refs.includes(SUPABASE_STORAGE_PUBLIC_URL)) throw new Error("\u0645\u0627 \u0644\u0642\u064a\u062a \u062d\u062a\u0649 \u0631\u0627\u0628\u0637 Storage \u0641\u0627\u0644\u062c\u062f\u0627\u0648\u0644 - \u062a\u0645 \u0627\u0644\u0625\u064a\u0642\u0627\u0641 \u0628\u062f\u0648\u0646 \u062d\u0630\u0641");
+    const minAge=30*60*1000, now=Date.now();
+    const orphans=files.filter(f=>!refs.includes(f.path)&&!refs.includes(storageObjectPath(f.path))&&f.t&&(now-f.t)>minAge);
+    if(!orphans.length){ alert("\u2705 Storage \u0646\u0638\u064a\u0641: \u0645\u0627\u0643\u0627\u064a\u0646 \u062d\u062a\u0649 \u0645\u0644\u0641 \u0632\u0627\u0626\u062f (\u0645\u0646 \u0645\u062c\u0645\u0648\u0639 "+files.length+" \u0645\u0644\u0641)."); return; }
+    const mb=(orphans.reduce((s,f)=>s+f.size,0)/1048576).toFixed(1);
+    const sample=orphans.slice(0,12).map(f=>"- "+f.path).join("\n")+(orphans.length>12?"\n... +"+(orphans.length-12):"");
+    if(!confirm("\u0644\u0642\u064a\u062a "+orphans.length+" \u0645\u0644\u0641 \u0645\u0627\u0634\u064a \u0645\u0633\u062a\u0639\u0645\u0644 (\u062d\u0648\u0627\u0644\u064a "+mb+" MB) \u0645\u0646 \u0645\u062c\u0645\u0648\u0639 "+files.length+".\n\n"+sample+"\n\n\u0628\u063a\u064a\u062a\u064a \u062a\u0645\u0633\u062d\u0647\u0645 \u0646\u0647\u0627\u0626\u064a\u0627\u064b\u061f")) return;
+    const rep=await purgeStorageUrls(orphans.map(f=>storagePublicUrl(f.path)));
+    try{ diagAppend("storage-cleanup: "+adminCleanupSummary(rep)); }catch(e){}
+    alert((rep.failed.length?"\u26a0\ufe0f ":"\u2705 ")+adminCleanupSummary(rep));
+  }catch(err){
+    console.error(err); alert("\u274c "+((err&&err.message)||err));
+  }finally{ if(btn){ btn.disabled=false; btn.textContent=oldTxt; } }
+}
 async function deleteProductAdmin(id){
   if(!confirm("هل أنت متأكد من حذف هذا المنتج؟ لا يمكن التراجع عن ذلك لاحقاً.")) return;
   try{
@@ -18292,7 +18391,9 @@ async function deleteProductAdmin(id){
     let __lpTxt=null;
     try{ __lpTxt=JSON.stringify(await supabaseRequest(`${SUPABASE_LANDING_URL}?select=*`,{token:getAdminToken()})); }catch(e){}
     if(__lpTxt!==null){
-      await purgeStorageUrls(__prodUrls.filter(u=>!__lpTxt.includes(u)),path=>path.startsWith(String(id)+"/"));
+      const __pr=await purgeStorageFolders([String(id)],__prodUrls,__lpTxt,path=>path.startsWith(String(id)+"/"));
+      try{ diagAppend("product-delete: "+adminCleanupSummary(__pr)); }catch(e){}
+      if(__pr.failed.length||__pr.notfound.length){ try{ adminSaveResult(null,false,"\u062a\u0645 \u062d\u0630\u0641 \u0627\u0644\u0645\u0646\u062a\u062c \u0644\u0643\u0646 \u062a\u0646\u0638\u064a\u0641 Storage \u063a\u064a\u0631 \u0643\u0627\u0645\u0644: "+adminCleanupSummary(__pr),__pr.failed[0]&&__pr.failed[0].err); }catch(e){} }
     }
     try{ const __ov=loadProductOverrides(); delete __ov[id]; saveProductOverrides(__ov); }catch(e){}
     try{ const __pv=loadProductVariants(); delete __pv[id]; saveProductVariants(__pv); }catch(e){}
@@ -18304,6 +18405,7 @@ async function deleteProductAdmin(id){
     showToast("تم حذف المنتج");
     renderProducts();
     renderAdminProducts();
+    adminSaveRestore();
   }catch(err){ console.error(err); showToast(err?.message || t("admin.backendWriteError")); }
 }
 
