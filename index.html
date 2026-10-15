@@ -376,12 +376,7 @@ nav.main-nav a:hover,
 nav.main-nav button:hover{
   color:var(--gold-soft);
 }
-@media(min-width:900px){
-  nav.main-nav{
-    display:flex;
-    align-items:center;
-  }
-}
+/* LUXIA: même en-tête (menu burger) sur ordinateur et sur mobile -> la nav inline reste masquée */
 .header-actions{
   display:flex;
   align-items:center;
@@ -4015,15 +4010,8 @@ body.luxia-store-home.store-menu-open{
   }
 }
 @media(min-width:900px){
-  body.luxia-store-home .store-menu-trigger{
-    display:none;
-  }
   body.luxia-store-home .collection{
     padding-top:70px;
-  }
-  body.luxia-store-home .store-menu,
-  body.luxia-store-home .store-menu-backdrop{
-    display:none !important;
   }
 }
 :root{
@@ -12166,10 +12154,108 @@ html[data-lx-lp-theme="dark"] body main.lp-preview .lp-row-card-gift .lp-row-car
 .lx-gift-inline svg{display:block;width:100%;height:100%;filter:drop-shadow(0 1px 2px rgba(0,0,0,.35))}
 </style>
 <style id="luxia-menu-title-swap">.store-menu-head b{font-weight:inherit}.store-menu-head .lx-mt-light{display:none}</style>
+<style id="lx-mq-css">
+/* LUXIA — bandeau livraison défilant (site + landing, thèmes clair / sombre). Dans le head car le body est remplacé au rendu d'une landing. */
+.lx-mq{flex:1 1 auto;min-width:0;height:100%;overflow:hidden;display:flex;align-items:center;direction:ltr;text-align:left;
+  -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 28px,#000 calc(100% - 28px),transparent 100%);
+  mask-image:linear-gradient(90deg,transparent 0,#000 28px,#000 calc(100% - 28px),transparent 100%)}
+.lx-mq-track{display:flex;flex:none;width:max-content;align-items:center;will-change:transform;
+  animation:lxMqScroll 30s linear infinite}
+.lx-mq[data-lang="ar"] .lx-mq-track{animation-direction:reverse}
+.lx-mq-group{display:flex;flex:none;align-items:center}
+.lx-mq-item,.lx-mq-sep{display:inline-block;white-space:nowrap;line-height:1}
+.lx-mq-item{padding:0 4px}
+.lx-mq-item b{font-weight:700}
+.lx-mq-sep{padding:0 18px;font-size:.8em;opacity:.7}
+@keyframes lxMqScroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+/* on remplace l'ancienne icône camion (::before) : le défilement porte déjà l'info */
+.promo-bar.lx-mq-on::before,.lp-promo-bar.lx-mq-on::before{display:none!important}
+.promo-bar.lx-mq-on,.lp-promo-bar.lx-mq-on{padding-left:0!important;padding-right:0!important}
+/* thème CLAIR : texte crème sur fond #292622, séparateur doré doux */
+.lx-mq-sep{color:#c9a24f}
+/* thème SOMBRE (site) */
+html[data-lx-theme="dark"] .promo-bar .lx-mq-sep{color:#c9a24f;opacity:.9}
+html[data-lx-theme="dark"] .promo-bar .lx-mq-item b{color:#ecd49a}
+/* thème SOMBRE (landing) */
+html[data-lx-lp-theme="dark"] .lp-promo-bar .lx-mq-sep{color:#c9a24f;opacity:.9}
+html[data-lx-lp-theme="dark"] .lp-promo-bar .lx-mq-item b{color:#ecd49a;-webkit-text-fill-color:#ecd49a}
+@media (prefers-reduced-motion:reduce){
+  .lx-mq{overflow-x:auto;-webkit-mask-image:none;mask-image:none;scrollbar-width:none}
+  .lx-mq::-webkit-scrollbar{display:none}
+  .lx-mq-track{animation:none!important;transform:none!important}
+}
+</style>
+<script id="lx-mq-js">
+/* LUXIA — contenu du bandeau livraison : valeurs réelles du site (tarifs, délais, gratuité, paiement). */
+function lxPromoMarqueeItems(lang){
+  var ar=(lang==='ar');
+  var casa=(typeof SITE_SHIPPING_CASA!=='undefined')?SITE_SHIPPING_CASA:20;
+  var other=(typeof SITE_SHIPPING_OTHER!=='undefined')?SITE_SHIPPING_OTHER:35;
+  var freeOn=(typeof SITE_FREE_SHIPPING_ENABLED!=='undefined')&&SITE_FREE_SHIPPING_ENABLED;
+  var freeAt=(typeof SITE_FREE_SHIPPING_THRESHOLD!=='undefined')?SITE_FREE_SHIPPING_THRESHOLD:500;
+  var items=[];
+  var P=function(n){return '<b dir="ltr">'+n+' DH</b>';};
+  if(ar){
+    items.push('التوصيل إلى الدار البيضاء '+P(casa)+' · خلال 24 ساعة');
+    items.push('التوصيل خارج الدار البيضاء '+P(other)+' · خلال 24–48 ساعة');
+    if(freeOn) items.push('التوصيل مجاني ابتداءً من '+P(freeAt));
+    items.push('الدفع عند الاستلام');
+  }else{
+    items.push('Livraison à Casablanca '+P(casa)+' · 24h');
+    items.push('Livraison hors Casablanca '+P(other)+' · 24–48h');
+    if(freeOn) items.push('Livraison gratuite dès '+P(freeAt));
+    items.push('Paiement à la livraison');
+  }
+  return items;
+}
+function lxPromoMarqueeSig(lang){
+  return lang+'|'+lxPromoMarqueeItems(lang).join('~');
+}
+function lxPromoMarqueeInner(lang,reps){
+  var ar=(lang==='ar'), n=reps||1, g='';
+  var its=lxPromoMarqueeItems(lang);
+  for(var r=0;r<n;r++){
+    its.forEach(function(t){
+      g+='<span class="lx-mq-item"'+(ar?' dir="rtl"':'')+'>'+t+'</span><span class="lx-mq-sep" aria-hidden="true">✦</span>';
+    });
+  }
+  return '<div class="lx-mq-track"><div class="lx-mq-group">'+g+'</div><div class="lx-mq-group" aria-hidden="true">'+g+'</div></div>';
+}
+/* Remplit un conteneur .lx-mq, répète le contenu jusqu'à remplir la largeur, règle la vitesse (≈ 45 px/s). */
+function lxPromoMarqueeFill(box,lang){
+  if(!box) return;
+  box.setAttribute('data-lang',lang);
+  box.setAttribute('data-sig',lxPromoMarqueeSig(lang));
+  box.setAttribute('role','marquee');
+  var bar=box.parentElement; if(bar) bar.classList.add('lx-mq-on');
+  box.innerHTML=lxPromoMarqueeInner(lang,1);
+  var fit=function(){
+    var tr=box.querySelector('.lx-mq-track'); if(!tr) return;
+    var g=tr.firstElementChild, gw=g?g.getBoundingClientRect().width:0, cw=box.getBoundingClientRect().width;
+    if(!gw||!cw) return;
+    var reps=Math.max(1,Math.ceil(cw/gw));
+    if(reps>1){ box.innerHTML=lxPromoMarqueeInner(lang,reps); tr=box.querySelector('.lx-mq-track'); gw=tr.firstElementChild.getBoundingClientRect().width; }
+    tr.style.animationDuration=Math.max(14,Math.round(gw/45))+'s';
+  };
+  requestAnimationFrame(fit);
+  if(document.fonts&&document.fonts.ready) document.fonts.ready.then(function(){ requestAnimationFrame(fit); });
+}
+/* Site : (re)construit quand la langue ou les tarifs changent (chargés après coup depuis la base). */
+function lxPromoMarqueeSync(){
+  document.querySelectorAll('.lx-mq').forEach(function(box){
+    var isLp=!!box.closest('.lp-promo-bar');
+    var lang=isLp?(box.getAttribute('data-lang')||'fr'):((typeof currentLang!=='undefined'&&currentLang)||'fr');
+    if(box.getAttribute('data-sig')!==lxPromoMarqueeSig(lang)||!box.querySelector('.lx-mq-track')) lxPromoMarqueeFill(box,lang);
+  });
+}
+setInterval(lxPromoMarqueeSync,700);
+document.addEventListener('DOMContentLoaded',lxPromoMarqueeSync);
+window.addEventListener('resize',function(){ document.querySelectorAll('.lx-mq').forEach(function(b){ b.removeAttribute('data-sig'); }); lxPromoMarqueeSync(); });
+</script>
 </head>
 <body class="luxia-store-home">
 
-<div class="promo-bar"><span data-i18n="promo.text">Livraison partout au Maroc</span></div>
+<div class="promo-bar"><div class="lx-mq" data-lx-mq="site"><span data-i18n="promo.text">Livraison partout au Maroc</span></div></div>
 
 <header>
   <div class="container header-inner">
@@ -15368,6 +15454,21 @@ async function renderAdminSettings(){
       <button class="btn btn-primary" id="saveSiteAdminLinkBtn" style="margin-top:12px;">حفظ / Enregistrer</button>
     </div>
     <div style="height:1px; background:var(--line); margin:30px 0;"></div>
+    <h3 style="font-family:var(--font-display); font-size:calc(24px * var(--font-scale)); margin-bottom:10px;">تيم الموقع (Thème)</h3>
+    <p style="color:var(--ivory-dim); font-size:calc(12px * var(--font-scale)); margin-bottom:14px;">اختاري المظهر العام للموقع. التيم الأصلي هو الحالي بلا أي تغيير. التيم الدارك أسود وذهبي بحال صفحة الفهد، ويشمل كل صفحات الموقع (الخلفية، القائمة، الكروت، السلة، الدفع، الإشعارات، البانرات...) ما عدا لوحة الأدمين.</p>
+    <div class="field" style="max-width:700px; display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px;">
+      <label style="display:block; cursor:pointer; padding:12px; border:1px solid var(--line); border-radius:12px;">
+        <div style="height:46px; border-radius:8px; background:#f7f4ee; color:#292622; border:1px solid #ddd6cc; display:flex; align-items:center; justify-content:center; font-family:serif; font-size:18px; margin-bottom:10px;">Aa</div>
+        <input type="radio" name="siteThemeMode" value="original" ${getSiteThemeMode()==="original"?"checked":""} style="accent-color:var(--gold);"> <span style="margin-inline-start:6px;">التيم الأصلي (Original)</span>
+      </label>
+      <label style="display:block; cursor:pointer; padding:12px; border:1px solid var(--line); border-radius:12px;">
+        <div style="height:46px; border-radius:8px; background:#0a0807; color:#ecd49a; border:1px solid #8f6f2c; display:flex; align-items:center; justify-content:center; font-family:serif; font-size:18px; margin-bottom:10px;">Aa</div>
+        <input type="radio" name="siteThemeMode" value="dark" ${getSiteThemeMode()==="dark"?"checked":""} style="accent-color:var(--gold);"> <span style="margin-inline-start:6px;">التيم الدارك (Dark)</span>
+      </label>
+    </div>
+    <button class="btn btn-primary" id="saveSiteThemeModeBtn" style="margin-top:14px;">حفظ التيم</button>
+    <p style="color:var(--ivory-dim); font-size:calc(11px * var(--font-scale)); margin-top:10px;">ملاحظة: الألوان الموجودة في الأسفل (ألوان واجهة الموقع) كتخدم غير مع التيم الأصلي.</p>
+    <div style="height:1px; background:var(--line); margin:30px 0;"></div>
     <h3 style="font-family:var(--font-display); font-size:calc(24px * var(--font-scale)); margin-bottom:10px;">زر WhatsApp في الموقع وصفحات اللاندينغ</h3>
     <div class="field" style="max-width:700px;">
       <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
@@ -15421,21 +15522,6 @@ async function renderAdminSettings(){
       <input type="text" id="siteBrandName" value="${escAttr(SITE_BRAND_NAME)}" placeholder="LUXIA" style="width:100%; padding:12px 14px; border-radius:12px; background:#ffffff10; border:1px solid var(--line); color:var(--ivory);">
       <button class="btn btn-primary" id="saveBrandNameBtn" style="margin-top:12px;">حفظ الاسم</button>
     </div>
-    <div style="height:1px; background:var(--line); margin:30px 0;"></div>
-    <h3 style="font-family:var(--font-display); font-size:calc(24px * var(--font-scale)); margin-bottom:10px;">تيم الموقع (Thème)</h3>
-    <p style="color:var(--ivory-dim); font-size:calc(12px * var(--font-scale)); margin-bottom:14px;">اختاري المظهر العام للموقع. التيم الأصلي هو الحالي بلا أي تغيير. التيم الدارك أسود وذهبي بحال صفحة الفهد، ويشمل كل صفحات الموقع (الخلفية، القائمة، الكروت، السلة، الدفع، الإشعارات، البانرات...) ما عدا لوحة الأدمين.</p>
-    <div class="field" style="max-width:700px; display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px;">
-      <label style="display:block; cursor:pointer; padding:12px; border:1px solid var(--line); border-radius:12px;">
-        <div style="height:46px; border-radius:8px; background:#f7f4ee; color:#292622; border:1px solid #ddd6cc; display:flex; align-items:center; justify-content:center; font-family:serif; font-size:18px; margin-bottom:10px;">Aa</div>
-        <input type="radio" name="siteThemeMode" value="original" ${getSiteThemeMode()==="original"?"checked":""} style="accent-color:var(--gold);"> <span style="margin-inline-start:6px;">التيم الأصلي (Original)</span>
-      </label>
-      <label style="display:block; cursor:pointer; padding:12px; border:1px solid var(--line); border-radius:12px;">
-        <div style="height:46px; border-radius:8px; background:#0a0807; color:#ecd49a; border:1px solid #8f6f2c; display:flex; align-items:center; justify-content:center; font-family:serif; font-size:18px; margin-bottom:10px;">Aa</div>
-        <input type="radio" name="siteThemeMode" value="dark" ${getSiteThemeMode()==="dark"?"checked":""} style="accent-color:var(--gold);"> <span style="margin-inline-start:6px;">التيم الدارك (Dark)</span>
-      </label>
-    </div>
-    <button class="btn btn-primary" id="saveSiteThemeModeBtn" style="margin-top:14px;">حفظ التيم</button>
-    <p style="color:var(--ivory-dim); font-size:calc(11px * var(--font-scale)); margin-top:10px;">ملاحظة: الألوان الموجودة في الأسفل (ألوان واجهة الموقع) كتخدم غير مع التيم الأصلي.</p>
     <div style="height:1px; background:var(--line); margin:30px 0;"></div>
     <h3 style="font-family:var(--font-display); font-size:calc(24px * var(--font-scale)); margin-bottom:10px;">ألوان واجهة الموقع</h3>
     <p style="color:var(--ivory-dim); font-size:calc(12px * var(--font-scale)); margin-bottom:14px;">غيّري الألوان كما تريدين (بيج، كراميل، بني...). يظهر التغيير مباشرة في كل الموقع.</p>
@@ -17017,7 +17103,8 @@ function renderLandingPublic(p, isPreview){
        its height (LP_PROMO_H) via inline styles below. */
     const LP_PROMO_H = 38;
     const LP_PROMO_TEXT = lang==='ar' ? 'التوصيل إلى جميع أنحاء المغرب' : 'Livraison partout au Maroc';
-    const lpPromoBarHTML = `<div class="lp-promo-bar" style="position:fixed;top:0;left:0;right:0;z-index:981;height:${LP_PROMO_H}px;display:flex;align-items:center;justify-content:center;background:#292622;color:#f8f5ef;font-size:10px;letter-spacing:.18em;text-transform:uppercase;font-weight:500;padding:0 12px;text-align:center;box-sizing:border-box;">${escHtml(LP_PROMO_TEXT)}</div>`;
+    const lpPromoBarHTML = `<div class="lp-promo-bar lx-mq-on" style="position:fixed;top:0;left:0;right:0;z-index:981;height:${LP_PROMO_H}px;display:flex;align-items:center;justify-content:center;background:#292622;color:#f8f5ef;font-size:10px;letter-spacing:.18em;text-transform:uppercase;font-weight:500;padding:0 12px;text-align:center;box-sizing:border-box;"><div class="lx-mq" data-lx-mq="lp" data-lang="${lang}" data-sig="${lxPromoMarqueeSig(lang).replace(/"/g,'&quot;')}" role="marquee">${lxPromoMarqueeInner(lang,1)}</div></div>`;
+    setTimeout(function(){ try{ lxPromoMarqueeSync(); document.querySelectorAll('.lp-promo-bar .lx-mq').forEach(function(b){ lxPromoMarqueeFill(b,lang); }); }catch(e){} },0);
     const collectionHeaderHTML = `<div class="lp-collection-header" style="top:${LP_PROMO_H}px;">
       ${p.showMenuButton!==false ? `<button type="button" id="lp-collection-menu-btn" class="lp-collection-menu-btn" aria-label="Menu" aria-controls="lp-collection-drawer" aria-expanded="false"><span></span><span></span><span></span></button>` : ''}
       <span class="lp-collection-logo">LUXIA<span class="lp-collection-logo-heart">✦</span></span>
