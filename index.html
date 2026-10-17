@@ -1516,10 +1516,11 @@ html[dir="rtl"] #footer .mark{
   font-weight:600;
 }
 .lx-chip .lx-dot{
-  width:13px;
-  height:13px;
+  width:15px;
+  height:15px;
   border-radius:50%;
-  border:1px solid rgba(128,128,128,.55);
+  border:1px solid rgba(128,128,128,.6);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.35);
   flex:none;
 }
 .lx-current-label{
@@ -5727,12 +5728,25 @@ body.luxia-store-home .product-info .btn-order:hover{
 .lx-det-orn::before,.lx-det-orn::after{content:"";width:48px;height:1px;background:linear-gradient(90deg,transparent,#b08a3e)}
 .lx-det-orn::after{transform:scaleX(-1)}
 .lx-det-orn i{width:8px;height:8px;background:#b08a3e;transform:rotate(45deg)}
-.lx-det-slider{overflow:hidden}
-.lx-det-slides{display:flex;gap:12px;direction:ltr;transform:translateX(calc(var(--k,0)*-1*(90% + 12px)));transition:transform .8s cubic-bezier(.65,0,.25,1)}
-.lx-det-slide{flex:0 0 90%;min-width:0;box-sizing:border-box;aspect-ratio:1/1;overflow:hidden;border:1px solid #b08a3e;border-radius:22px;cursor:zoom-in}
+.admin-two-col.lx-pair-stack{grid-template-columns:1fr}
+.lx-text-pair{display:flex;flex-direction:column;gap:10px;padding:12px;border:1px solid var(--line);border-radius:14px}
+.lx-text-pair .field{margin:0}
+.lx-det-slider{position:relative;overflow:hidden;touch-action:pan-y;user-select:none;-webkit-user-select:none}
+.lx-det-slides{display:flex;gap:12px;direction:ltr;transform:translateX(calc(var(--k,0)*-1*(var(--lxw,90%) + 12px) + var(--dx,0px)));transition:transform .8s cubic-bezier(.65,0,.25,1)}
+.lx-det-slider.is-drag .lx-det-slides{transition:none;cursor:grabbing}
+.lx-det-slide{flex:0 0 var(--lxw,90%);min-width:0;box-sizing:border-box;aspect-ratio:1/1;overflow:hidden;border:1px solid #b08a3e;border-radius:22px;cursor:zoom-in}
 .lx-det-slide img{display:block;width:100%;height:100%;object-fit:cover;object-position:center}
 .lx-det-dots{display:flex;justify-content:center;gap:13px;direction:ltr;margin:16px 0 4px}
-.lx-det-dots i{width:9px;height:9px;border:1px solid #b08a3e;transform:rotate(45deg);transition:background .4s,transform .4s}
+.lx-det-dots i{position:relative;width:9px;height:9px;border:1px solid #b08a3e;transform:rotate(45deg);transition:background .4s,transform .4s}
+.lx-det-dots i[data-k]{cursor:pointer}
+.lx-det-dots i[data-k]::after{content:"";position:absolute;inset:-9px}
+.lx-det-nav{position:absolute;top:50%;z-index:2;width:40px;height:40px;margin-top:-20px;padding:0 0 3px;display:flex;align-items:center;justify-content:center;border-radius:50%;border:1px solid #b08a3e;background:rgba(255,250,240,.9);color:#8f6f2c;font:400 28px/1 'Cormorant Garamond',serif;cursor:pointer;box-shadow:0 4px 14px rgba(60,40,10,.22);-webkit-tap-highlight-color:transparent;transition:background .25s,color .25s,transform .25s}
+.lx-det-prev{left:10px}
+.lx-det-next{right:calc(100% - var(--lxw,90%) + 10px)}
+.lx-det-slider[data-frame="story"]{--lxw:90%}
+.lx-det-slider[data-frame="story"] .lx-det-slide{aspect-ratio:9/16}
+.lx-det-nav:hover,.lx-det-nav:focus-visible{background:#b08a3e;color:#fff;outline:none}
+.lx-det-nav:active{transform:scale(.92)}
 .lx-det-dots i.on{background:#b08a3e;transform:rotate(45deg) scale(1.3)}
 .lx-gift-mark{display:flex;justify-content:center;margin:2px 0}
 .lx-gift-mark svg{width:34px;height:34px;filter:drop-shadow(0 1px 2px rgba(143,111,44,.35))}
@@ -12662,8 +12676,15 @@ function getProductDescription(prod,lang){
   }
   const gen=v.generatedContent||{};
   const __manual=lang==='ar'?gen.manualAr:gen.manualFr;
-  if(!__manual){ const a=lxSmartFor(prod); const tx=a?(lang==='ar'?a.ar:a.fr):''; if(tx) return tx; }
+  if(!__manual&&lxTextMode(prod.id)==='auto'){ const a=lxSmartFor(prod); const tx=a?(lang==='ar'?a.ar:a.fr):''; if(tx) return tx; }
+  if(__manual){ const __own=lang==='ar'?I18N.ar[prod?.descKey]:I18N.fr[prod?.descKey]; if(typeof __own==='string') return __own; }
   return lang==='ar'?(I18N.ar[prod?.descKey]||b.desc_ar||''):(I18N.fr[prod?.descKey]||b.desc_fr||'');
+}
+/* Mode des textes d'un produit : 'auto' (générés), 'manual' (écrits à la main) ou '' (nouveau produit : choix pas encore fait).
+   Les produits déjà existants (sans « mode » enregistré) restent en automatique, exactement comme avant. */
+function lxTextMode(id){
+  try{ const g=(PRODUCT_VARIANTS[id]||{}).generatedContent; if(g&&Object.prototype.hasOwnProperty.call(g,'mode')) return g.mode||''; }catch(e){}
+  return 'auto';
 }
 /* Sécurité : si un texte saisi à la main contient un titre « Avantages / المميزات » seul sur sa ligne, on ne l'affiche pas. */
 function lxStripBenefitsHeading(t){
@@ -12686,13 +12707,15 @@ function getProductBenefits(prod,lang){
     }catch(e){}
   }
   { const __g=v.generatedContent||{}; const __mb=lang==='ar'?__g.manualBenAr:__g.manualBenFr; const __lst=lang==='ar'?__g.benefitsAr:__g.benefitsFr;
-    if(__mb && Array.isArray(__lst) && __lst.length) return __lst.slice(); }
+    if(__mb && Array.isArray(__lst)) return __lst.slice(); }
   const raw=lang==='ar'?b.benefits_ar:b.benefits_fr;
   if(Array.isArray(raw)){ const __r=raw.filter(Boolean); if(__r.length) return __r; }
   if(typeof raw==='string'&&raw.trim()) return raw.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
-  const __auto=lxSmartFor(prod);
-  const generated=__auto?(lang==='ar'?__auto.benefitsAr:__auto.benefitsFr):null;
-  if(Array.isArray(generated)&&generated.length) return generated.slice();
+  if(lxTextMode(prod.id)==='auto'){
+    const __auto=lxSmartFor(prod);
+    const generated=__auto?(lang==='ar'?__auto.benefitsAr:__auto.benefitsFr):null;
+    if(Array.isArray(generated)&&generated.length) return generated.slice();
+  }
   return (PRODUCT_BENEFITS[prod.id]?.[lang]||[]).slice();
 }
 /* SOURCE UNIQUE : « ce produit est-il un Pack Cadeau ? » — utilisée par le site, la landing page et le thème des fenêtres. */
@@ -12750,6 +12773,43 @@ const DEFAULT_COLORS = [
   { id:"blanc", fr:"Blanc", ar:"أبيض", hex:"#f4ede4" },
   { id:"beige", fr:"Beige", ar:"بيج",  hex:"#c9a877" },
 ];
+/* ===== PALETTE DE COULEURS : source unique (nom FR + nom AR + pastille à la vraie couleur du nom) =====
+   Les 16 premières gardent leur ordre d'origine ; les nouvelles sont ajoutées à la suite. */
+const LX_COLOR_PALETTE=[
+  {id:"noir",fr:"Noir",ar:"أسود",hex:"#1a1a1a"},{id:"blanc",fr:"Blanc",ar:"أبيض",hex:"#f4ede4"},
+  {id:"beige",fr:"Beige",ar:"بيج",hex:"#c9a877"},{id:"creme",fr:"Crème",ar:"كريمي",hex:"#f3e6c8"},
+  {id:"gris",fr:"Gris",ar:"رمادي",hex:"#8c8c8c"},{id:"marron",fr:"Marron",ar:"بني",hex:"#6b4423"},
+  {id:"rouge",fr:"Rouge",ar:"أحمر",hex:"#c8102e"},{id:"rose",fr:"Rose",ar:"وردي",hex:"#e8a0b4"},
+  {id:"bordeaux",fr:"Bordeaux",ar:"عنابي",hex:"#6d1a2c"},{id:"marine",fr:"Bleu marine",ar:"كحلي",hex:"#1b2a49"},
+  {id:"ciel",fr:"Bleu ciel",ar:"أزرق سماوي",hex:"#8ec5e8"},{id:"vert",fr:"Vert",ar:"أخضر",hex:"#2e7d4f"},
+  {id:"kaki",fr:"Kaki",ar:"كاكي",hex:"#78794a"},{id:"jaune",fr:"Jaune",ar:"أصفر",hex:"#f2c230"},
+  {id:"orange",fr:"Orange",ar:"برتقالي",hex:"#e87722"},{id:"violet",fr:"Violet",ar:"بنفسجي",hex:"#6f3d8f"},
+  /* nouvelles couleurs */
+  {id:"beige-nude",fr:"Beige nude",ar:"بيج ترابي",hex:"#d4b595"},{id:"rose-poudre",fr:"Rose poudré",ar:"وردي غباري",hex:"#e8b9c0"},
+  {id:"vieux-rose",fr:"Vieux rose",ar:"وردي قديم",hex:"#c08497"},{id:"fuchsia",fr:"Fuchsia",ar:"فوشيا",hex:"#d81b7a"},
+  {id:"corail",fr:"Corail",ar:"مرجاني",hex:"#f26f5f"},{id:"lilas",fr:"Lilas",ar:"ليلكي",hex:"#c9a7d8"},
+  {id:"prune",fr:"Prune",ar:"برقوقي",hex:"#5a2a4e"},{id:"bleu-roi",fr:"Bleu roi",ar:"أزرق ملكي",hex:"#2b4fc1"},
+  {id:"bleu-petrole",fr:"Bleu pétrole",ar:"أزرق بيترولي",hex:"#14495f"},{id:"vert-eau",fr:"Vert eau",ar:"أخضر مائي",hex:"#3fb8af"},
+  {id:"vert-menthe",fr:"Vert menthe",ar:"أخضر نعناعي",hex:"#a9ddc3"},{id:"vert-emeraude",fr:"Vert émeraude",ar:"أخضر زمردي",hex:"#0f8a62"},
+  {id:"camel",fr:"Camel",ar:"جملي",hex:"#c19a6b"},{id:"moutarde",fr:"Moutarde",ar:"خردلي",hex:"#d4a017"},
+  {id:"ivoire",fr:"Ivoire",ar:"عاجي",hex:"#f5efe0"},{id:"dore",fr:"Doré",ar:"ذهبي",hex:"#c9a227"},
+  {id:"argent",fr:"Argent",ar:"فضي",hex:"#c0c0c0"}
+];
+const lxColKey=x=>String(x==null?'':x).normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim().toLowerCase();
+function lxPaletteFind(c){ return LX_COLOR_PALETTE.find(p=>(c.id&&c.id===p.id)||(c.fr&&lxColKey(c.fr)===lxColKey(p.fr))||(c.ar&&lxColKey(c.ar)===lxColKey(p.ar))); }
+/* Pastille juste : si la couleur n'a pas de teinte (ou la teinte par défaut #c9a877) et que son nom est dans la palette, on prend la vraie teinte du nom. */
+function lxColorHexFor(fr,ar,hex){
+  const hx=String(hex||'').trim().toLowerCase();
+  if(hx&&hx!=='#c9a877') return hex;
+  const p=lxPaletteFind({fr:fr,ar:ar});
+  return p?p.hex:(hex||'#c9a877');
+}
+function lxFixVariantColorHexes(v){
+  try{
+    const fix=c=>{ if(!c||typeof c!=='object') return; const hx=String(c.hex||'').trim().toLowerCase(); if(hx&&hx!=='#c9a877') return; const p=lxPaletteFind(c); if(p&&p.hex.toLowerCase()!==hx) c.hex=p.hex; };
+    (v.colors||[]).forEach(fix); ((v.pack&&v.pack.colors)||[]).forEach(fix);
+  }catch(e){}
+}
 const DEFAULT_SIZES = ["S","M","L","XL"];
 const DEFAULT_PACK_PIECES = {};
 const PRODUCT_VARIANTS_KEY = "lunea_product_variants";
@@ -12771,6 +12831,7 @@ function buildProductVariants(){
       pack:   s.pack || null,
       oldPrice: (s.oldPrice!=null && s.oldPrice!=='' && !isNaN(Number(s.oldPrice))) ? Number(s.oldPrice) : null
     };
+    lxFixVariantColorHexes(result[p.id]);
   });
   return result;
 }
@@ -12836,11 +12897,11 @@ function adminOfferCardHTML(){
       <div class="field"><label>Remise en % — نسبة الخصم</label><input type="number" min="1" max="90" step="1" id="offer-percent" value="${o.percent}"></div>
       <div class="field"><label>&nbsp;</label><small class="admin-help">Utilisez {pct} dans les textes pour insérer le pourcentage.</small></div>
     </div>
-    <div class="admin-two-col">
+    <div class="admin-two-col lx-pair-stack">
       <div class="field"><label>Texte principal (FR)</label><input type="text" id="offer-text-fr" value="${eA(o.textFr)}"></div>
       <div class="field"><label>النص الرئيسي (AR)</label><input type="text" id="offer-text-ar" value="${eA(o.textAr)}"></div>
     </div>
-    <div class="admin-two-col">
+    <div class="admin-two-col lx-pair-stack">
       <div class="field"><label>Sous-texte (FR)</label><input type="text" id="offer-sub-fr" value="${eA(o.subFr)}"></div>
       <div class="field"><label>النص الفرعي (AR)</label><input type="text" id="offer-sub-ar" value="${eA(o.subAr)}"></div>
     </div>
@@ -13969,19 +14030,68 @@ function lxDetailBlockHTML(id,lang,gallery){
   const group=one.repeat(reps);
   const strip=items.length?`<div class="lx-det-strip"><div class="lx-det-track" style="--lx-det-dur:${items.length*reps*4}s"><div class="lx-det-group">${group}</div><div class="lx-det-group" aria-hidden="true">${group}</div></div></div>`:'';
   const head=`<div class="lx-det-head"><div class="lx-det-kicker">${ar?'التفاصيل':'Le détail'}</div><div class="lx-det-title">${ar?'كل تفصيل، بصمة':'Chaque détail, une signature'}</div><div class="lx-det-orn"><i></i></div></div>`;
-  const slider=extra.length?`<div class="lx-det-slider"><div class="lx-det-slides">${extra.map((src,i)=>`<div class="lx-det-slide" data-i="${i}" role="button" tabindex="0"><img src="${escAttr(src)}" alt="${i+1}" loading="lazy" draggable="false"></div>`).join('')}</div></div><div class="lx-det-dots">${extra.map((_,i)=>`<i class="${i===0?'on':''}"></i>`).join('')}</div>`:'';
+  const multi=extra.length>1;
+  const slider=extra.length?`<div class="lx-det-slider"${((PRODUCT_VARIANTS[id]||{}).detFrame==='story')?' data-frame="story"':''}><div class="lx-det-slides">${extra.map((src,i)=>`<div class="lx-det-slide" data-i="${i}" role="button" tabindex="0"><img src="${escAttr(src)}" alt="${i+1}" loading="lazy" draggable="false"></div>`).join('')}</div>${multi?`<button type="button" class="lx-det-nav lx-det-prev" aria-label="${ar?'الصورة السابقة':'Photo précédente'}">&#8249;</button><button type="button" class="lx-det-nav lx-det-next" aria-label="${ar?'الصورة التالية':'Photo suivante'}">&#8250;</button>`:''}</div><div class="lx-det-dots">${extra.map((_,i)=>`<i class="${i===0?'on':''}"${multi?` data-k="${i}" role="button" tabindex="0" aria-label="${i+1}/${extra.length}"`:''}></i>`).join('')}</div>`:'';
   return `<div class="lx-det${ar?' is-ar':''}">${strip}${extra.length?head+slider:''}</div>`;
 }
 /* Bloc « Le détail » partagé : site (fenêtre produit) + landing pages. Défilement auto toutes les 4 s. */
 function lpDetailBlock(prod,imgs,lang,gal){ return lxDetailBlockHTML(prod?prod.id:'',lang,gal?imgs:imgs.slice(0,1)); }
 function lxDetSlide(box){
   const sl=box.querySelector('.lx-det-slides'), n=sl?sl.children.length:0; if(n<2) return null;
-  const dots=box.querySelectorAll('.lx-det-dots i'); let k=0;
+  if(box._lxDetT) return box._lxDetT;
+  const slider=box.querySelector('.lx-det-slider'), dots=[...box.querySelectorAll('.lx-det-dots i')];
+  let k=0, last=Date.now(), drag=null;
+  /* Aller à la photo k (en boucle) : sert au défilement auto, aux flèches, aux points et au glissement. */
+  const go=v=>{
+    k=((v%n)+n)%n; last=Date.now();
+    sl.style.setProperty('--k',k);
+    dots.forEach((d,j)=>d.classList.toggle('on',j===k));
+  };
+  /* Défilement auto toutes les 4 s ; chaque action manuelle repart d'un nouveau délai de 4 s. */
   const t=setInterval(()=>{
     if(!sl.isConnected){ clearInterval(t); return; }
-    k=(k+1)%n; sl.style.setProperty('--k',k);
-    dots.forEach((d,j)=>d.classList.toggle('on',j===k));
-  },4000);
+    if(!drag && Date.now()-last>=4000) go(k+1);
+  },400);
+  const prev=box.querySelector('.lx-det-prev'), next=box.querySelector('.lx-det-next');
+  if(prev) prev.addEventListener('click',e=>{ e.stopPropagation(); go(k-1); });
+  if(next) next.addEventListener('click',e=>{ e.stopPropagation(); go(k+1); });
+  dots.forEach(d=>{
+    const pick=e=>{ e.stopPropagation(); go(Number(d.dataset.k)||0); };
+    d.addEventListener('click',pick);
+    d.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); pick(e); } });
+  });
+  if(slider){
+    slider.addEventListener('keydown',e=>{
+      if(e.key==='ArrowRight'){ e.preventDefault(); go(k+1); }
+      if(e.key==='ArrowLeft'){ e.preventDefault(); go(k-1); }
+    });
+    /* Glissement au doigt / à la souris ; un glissement n'ouvre pas l'agrandissement. */
+    slider.addEventListener('pointerdown',e=>{
+      if(e.target.closest('.lx-det-nav')||(e.pointerType==='mouse'&&e.button!==0)) return;
+      drag={x:e.clientX,dx:0,id:e.pointerId};
+    });
+    slider.addEventListener('pointermove',e=>{
+      if(!drag||e.pointerId!==drag.id) return;
+      drag.dx=e.clientX-drag.x;
+      if(Math.abs(drag.dx)>8){
+        if(!slider.classList.contains('is-drag')){ slider.classList.add('is-drag'); try{ slider.setPointerCapture(e.pointerId); }catch(_){} }
+        sl.style.setProperty('--dx',drag.dx+'px');
+      }
+    });
+    const end=e=>{
+      if(!drag||e.pointerId!==drag.id) return;
+      const dx=drag.dx; drag=null;
+      if(slider.classList.contains('is-drag')){
+        window.__lxDetDragged=true; setTimeout(()=>{ window.__lxDetDragged=false; },350);
+        slider.classList.remove('is-drag');
+      }
+      sl.style.setProperty('--dx','0px');
+      if(Math.abs(dx)>50) go(k+(dx<0?1:-1)); else last=Date.now();
+    };
+    slider.addEventListener('pointerup',end);
+    slider.addEventListener('pointercancel',end);
+  }
+  box._lxDetT=t;
   return t;
 }
 function openProductDetailModal(id){
@@ -14515,6 +14625,20 @@ document.getElementById('addToCartBtn').addEventListener('click',()=>{
    ============================================================ */
 function openModal(overlay){ overlay.classList.add("open"); document.body.style.overflow = "hidden"; }
 function closeModal(overlay){ overlay.classList.remove("open"); document.body.style.overflow = ""; }
+/* Fermeture en touchant le fond (zone vide autour de la fenêtre) : même effet que le bouton ✕ de la fenêtre,
+   donc chaque fenêtre garde sa propre logique de fermeture. Le ✕ continue de fonctionner comme avant.
+   Le geste doit commencer ET finir sur le fond (un glissement parti de l'intérieur ne ferme rien). */
+(function lxBackdropClose(){
+  let down=null;
+  document.addEventListener('pointerdown',e=>{ down=e.target; },true);
+  document.addEventListener('click',e=>{
+    const o=e.target, start=down; down=null;
+    if(!o||!o.matches||start!==o) return;
+    if(!o.matches('.modal-overlay.open:not(.product-detail-overlay),#giftModal.open')) return; /* la fenêtre produit gère déjà son fond */
+    const x=[...o.querySelectorAll('.modal-close,.gf-x')].find(b=>b.getClientRects().length);
+    if(x) x.click(); else if(o.classList.contains('modal-overlay')) closeModal(o); /* sans bouton ✕ visible : fermeture simple */
+  });
+})();
 
 /* ============================================================
    CART PANEL
@@ -15501,8 +15625,7 @@ async function renderAdminSettings(){
     <h3 style="font-family:var(--font-display); font-size:calc(24px * var(--font-scale)); margin-bottom:16px;">${t("admin.frontTexts")}</h3>
     <p style="color:var(--ivory-dim); font-size:calc(12px * var(--font-scale)); margin-bottom:16px;">جميع النصوص الظاهرة للزبونة — العربية والفرنسية</p>
     <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:16px; max-width:1100px;">
-      ${keys.map(([key])=>{const safe=key.replace(/[^a-z0-9]+/gi,'-'); return `<div class="field"><label>${escHtml(key)} — Français</label><textarea id="front-fr-${safe}" rows="3" style="width:100%;">${escHtml(I18N.fr[key]||'')}</textarea></div>`;}).join('')}
-      ${keys.map(([key])=>{const safe=key.replace(/[^a-z0-9]+/gi,'-'); return `<div class="field"><label>${escHtml(key)} — العربية</label><textarea id="front-ar-${safe}" rows="3" style="width:100%;" dir="rtl">${escHtml(I18N.ar[key]||'')}</textarea></div>`;}).join('')}
+      ${keys.map(([key])=>{const safe=key.replace(/[^a-z0-9]+/gi,'-'); return `<div class="lx-text-pair"><div class="field"><label>${escHtml(key)} — Français</label><textarea id="front-fr-${safe}" rows="3" style="width:100%;">${escHtml(I18N.fr[key]||'')}</textarea></div><div class="field"><label>${escHtml(key)} — العربية</label><textarea id="front-ar-${safe}" rows="3" style="width:100%;" dir="rtl">${escHtml(I18N.ar[key]||'')}</textarea></div></div>`;}).join('')}
     </div>
     <button class="btn btn-primary" id="saveFrontTextsBtn" style="margin-top:18px;">${t("admin.frontSave")}</button>
     <div style="height:1px; background:var(--line); margin:30px 0;"></div>
@@ -16075,8 +16198,8 @@ function landingEditorHTML(p){
     <div class="admin-card"><h3 style="margin-bottom:16px">${t("lp.product2Title")}</h3>
       <div class="lp-admin-grid">
         <div class="full"><label>${t("lp.product2SelectLabel")}</label><select id="lp-product2-source"><option value="">${t("lp.product2NoneOption")}</option>${PRODUCTS.filter(x=>x.enabled!==false).map(x=>{const nfr=I18N.fr[x.nameKey]||x.id;return `<option value="${escAttr(x.id)}" ${p.product2Id===x.id?'selected':''}>${escHtml(nfr)} — ${escHtml(String(x.price))} DH</option>`;}).join('')}</select>${typeof lpProductPickerHTML==='function'?lpProductPickerHTML('lp-product2-source',p.product2Id||'',t("lp.product2NoneOption")):''}<small>${t("lp.product2Hint")}</small></div>
-        <div><label>${t("lp.product2NameLabel")} (FR)</label><input id="lp-product2-name-fr" value="${escAttr(p.product2NameFr||'')}"></div>
-        <div><label>${t("lp.product2NameLabel")} (AR)</label><input id="lp-product2-name-ar" value="${escAttr(p.product2NameAr||'')}" dir="rtl"></div>
+        <div class="full"><label>${t("lp.product2NameLabel")} (FR)</label><input id="lp-product2-name-fr" value="${escAttr(p.product2NameFr||'')}"></div>
+        <div class="full"><label>${t("lp.product2NameLabel")} (AR)</label><input id="lp-product2-name-ar" value="${escAttr(p.product2NameAr||'')}" dir="rtl"></div>
         <div><label>${t("lp.product2PriceLabel")}</label><input id="lp-product2-price" value="${escAttr(p.product2Price||'')}"></div>
         <div class="full"><label>${t("lp.product2ImageLabel")}</label><input id="lp-product2-image" value="${escAttr(p.product2Image||'')}" style="direction:ltr;text-align:left;"></div>
         <input type="hidden" id="lp-product2-id" value="${escAttr(p.product2Id||'')}">
@@ -16117,31 +16240,27 @@ function landingEditorHTML(p){
       <div class="full" style="margin-top:8px;padding-top:16px;border-top:1px solid var(--line);"><label>${t("lp.video2Label")}</label><input type="file" accept="video/*" id="lp-video2-file"><span id="lp-video2-status" style="display:block;margin-top:6px;font-size:calc(12px * var(--font-scale));color:var(--gold-soft);"></span><small>${t("lp.video2Hint")}</small></div>
       <div class="full" style="margin-top:8px;padding-top:14px;border-top:1px solid var(--line);"><label style="display:flex;align-items:flex-start;gap:8px;color:var(--ivory)"><input type="checkbox" id="lp-video-muted" ${p.videoStartMuted?'checked':''} style="width:auto;margin-top:4px"><span>🔇 Vidéos en sourdine au départ — la cliente appuie sur 🔊 pour activer le son · الفيديو يبدأ بلا صوت والزبونة كتضغط على 🔊<br><small style="opacity:.75">Décoché = comportement actuel : son au départ si le navigateur l'autorise, sinon sourdine.</small></span></label></div>
     </div></div>
-    <div class="admin-card"><h3 style="margin-bottom:16px">Contenu — Français</h3><div class="lp-admin-grid">
+    <div class="admin-card"><h3 style="margin-bottom:16px">Contenu · المحتوى — Français / العربية</h3><div class="lp-admin-grid">
       <div class="full"><label>${t("lp.titleLabel")} (FR)</label><input id="lp-title-fr" value="${escAttr(p.titleFr||'')}"></div>
+      <div class="full" dir="rtl"><label>${t("lp.titleLabel")} (AR)</label><input id="lp-title-ar" value="${escAttr(p.titleAr||'')}"></div>
       <div class="full"><label>${t("lp.subtitleLabel")} (FR)</label><textarea id="lp-subtitle-fr" rows="2">${escHtml(p.subtitleFr||'')}</textarea></div>
-      <div><label>${t("lp.ctaLabel")} (FR)</label><input id="lp-cta-fr" value="${escAttr(p.ctaFr||'')}"></div>
+      <div class="full" dir="rtl"><label>${t("lp.subtitleLabel")} (AR)</label><textarea id="lp-subtitle-ar" rows="2">${escHtml(p.subtitleAr||'')}</textarea></div>
+      <div class="full"><label>${t("lp.ctaLabel")} (FR)</label><input id="lp-cta-fr" value="${escAttr(p.ctaFr||'')}"></div>
+      <div class="full" dir="rtl"><label>${t("lp.ctaLabel")} (AR)</label><input id="lp-cta-ar" value="${escAttr(p.ctaAr||'')}"></div>
       <div class="full"><label>${t("lp.descriptionLabel")} (FR)</label><textarea id="lp-description-fr" rows="4">${escHtml(p.descriptionFr||'')}</textarea></div>
-    </div></div>
-    <div class="admin-card" dir="rtl"><h3 style="margin-bottom:16px">المحتوى — بالعربية</h3><div class="lp-admin-grid">
-      <div class="full"><label>${t("lp.titleLabel")} (AR)</label><input id="lp-title-ar" value="${escAttr(p.titleAr||'')}"></div>
-      <div class="full"><label>${t("lp.subtitleLabel")} (AR)</label><textarea id="lp-subtitle-ar" rows="2">${escHtml(p.subtitleAr||'')}</textarea></div>
-      <div><label>${t("lp.ctaLabel")} (AR)</label><input id="lp-cta-ar" value="${escAttr(p.ctaAr||'')}"></div>
-      <div class="full"><label>${t("lp.descriptionLabel")} (AR)</label><textarea id="lp-description-ar" rows="4">${escHtml(p.descriptionAr||'')}</textarea></div>
+      <div class="full" dir="rtl"><label>${t("lp.descriptionLabel")} (AR)</label><textarea id="lp-description-ar" rows="4">${escHtml(p.descriptionAr||'')}</textarea></div>
     </div></div>
     <div class="admin-card"><h3>${t("lp.imagesTitle")}</h3><small>${t("lp.imagesHint")}</small><div id="lp-images-list" style="margin-top:14px">${imgs.map((u,i)=>`<div class="lp-image-row"><img src="${escAttr(u)}"><input value="${escAttr(u)}" data-lpimg="${i}"><button class="btn btn-ghost" data-remove-lpimg="${i}">🗑️</button></div>`).join('')}</div>
       <div style="margin-top:12px"><select id="lp-image-choice"><option value="">${t("lp.imageChoiceDefault")}</option>${choices.map(u=>`<option value="${escAttr(u)}">${escAttr(u.slice(-55))}</option>`).join('')}</select> <button class="btn btn-ghost" id="lp-add-image">${t("lp.addImageBtn")}</button></div>
       <div style="margin-top:12px"><label>${t("lp.imageUploadLabel")}</label><input type="file" id="lp-image-file" accept="image/*"></div>
     </div>
-    <div class="admin-card"><h3>${t("lp.sectionsTitle")} — Français</h3><div class="lp-admin-grid">
-      <div><label>${t("lp.benefitsLabel")} (FR)</label><textarea id="lp-benefits-fr" rows="5">${escHtml(landingArrayText(p.benefitsFr))}</textarea></div>
-      <div><label>${t("lp.reviewsLabel")} (FR)</label><textarea id="lp-reviews-fr" rows="5">${escHtml(landingArrayText(p.reviewsFr))}</textarea></div>
-      <div><label>${t("lp.faqLabel")} (FR)</label><textarea id="lp-faq-fr" rows="5">${escHtml((p.faqsFr||[]).map(x=>`${x.q||x.question||''} | ${x.a||x.answer||''}`).join('\n'))}</textarea></div>
-    </div></div>
-    <div class="admin-card" dir="rtl"><h3>${t("lp.sectionsTitle")} — بالعربية</h3><div class="lp-admin-grid">
-      <div><label>${t("lp.benefitsLabel")} (AR)</label><textarea id="lp-benefits-ar" rows="5">${escHtml(landingArrayText(p.benefitsAr))}</textarea></div>
-      <div><label>${t("lp.reviewsLabel")} (AR)</label><textarea id="lp-reviews-ar" rows="5">${escHtml(landingArrayText(p.reviewsAr))}</textarea></div>
-      <div><label>${t("lp.faqLabel")} (AR)</label><textarea id="lp-faq-ar" rows="5">${escHtml((p.faqsAr||[]).map(x=>`${x.q||x.question||''} | ${x.a||x.answer||''}`).join('\n'))}</textarea></div>
+    <div class="admin-card"><h3>${t("lp.sectionsTitle")} — Français / العربية</h3><div class="lp-admin-grid">
+      <div class="full"><label>${t("lp.benefitsLabel")} (FR)</label><textarea id="lp-benefits-fr" rows="5">${escHtml(landingArrayText(p.benefitsFr))}</textarea></div>
+      <div class="full" dir="rtl"><label>${t("lp.benefitsLabel")} (AR)</label><textarea id="lp-benefits-ar" rows="5">${escHtml(landingArrayText(p.benefitsAr))}</textarea></div>
+      <div class="full"><label>${t("lp.reviewsLabel")} (FR)</label><textarea id="lp-reviews-fr" rows="5">${escHtml(landingArrayText(p.reviewsFr))}</textarea></div>
+      <div class="full" dir="rtl"><label>${t("lp.reviewsLabel")} (AR)</label><textarea id="lp-reviews-ar" rows="5">${escHtml(landingArrayText(p.reviewsAr))}</textarea></div>
+      <div class="full"><label>${t("lp.faqLabel")} (FR)</label><textarea id="lp-faq-fr" rows="5">${escHtml((p.faqsFr||[]).map(x=>`${x.q||x.question||''} | ${x.a||x.answer||''}`).join('\n'))}</textarea></div>
+      <div class="full" dir="rtl"><label>${t("lp.faqLabel")} (AR)</label><textarea id="lp-faq-ar" rows="5">${escHtml((p.faqsAr||[]).map(x=>`${x.q||x.question||''} | ${x.a||x.answer||''}`).join('\n'))}</textarea></div>
     </div><div style="display:flex;gap:18px;flex-wrap:wrap;margin-top:14px">
       ${[['lp-show-form','showOrderForm','lp.toggleOrderForm'],['lp-show-wa','showWhatsapp','lp.toggleWhatsapp'],['lp-show-gallery','showGallery','lp.toggleGallery'],['lp-show-benefits','showBenefits','lp.toggleBenefits'],['lp-show-reviews','showReviews','lp.toggleReviews'],['lp-show-faq','showFaq','lp.toggleFaq'],['lp-show-menu','showMenuButton','lp.toggleMenuButton'],['lp-show-success-wa','showSuccessWhatsapp','lp.toggleSuccessWa']].map(([id,k,labelKey])=>`<label style="display:flex;align-items:center;gap:8px;color:var(--ivory)"><input type="checkbox" id="${id}" ${p[k]!==false?'checked':''} style="width:auto"> ${t(labelKey)}</label>`).join('')}
     </div></div>
@@ -18257,23 +18376,31 @@ function lxCollectionKind(id){
   const x=lxN(lxCollectionLabel(id));
   if(/pyjama|pijama/.test(x)) return 'pyjama';
   if(/nuisette|chemise de nuit|chemise/.test(x)) return 'nuisette';
-  if(/lingerie|soutien|ensemble/.test(x)) return 'lingerie';
   if(/pantouf|chausson|chaussure/.test(x)) return 'pantoufles';
   if(/peignoir|robe de chambre/.test(x)) return 'robechambre';
-  if(/\b(short|shorts|bas|culottes?|slips?|strings?|boxers?)\b/.test(x)) return 'sousvetement';
+  if(/soutien|brassiere|bralette/.test(x)) return 'soutiengorge';
+  if(/ensemble/.test(x)) return 'ensemble';
+  if(/\b(strings?|tangas?)\b/.test(x)) return 'string';
+  if(/\b(culottes?|slips?|shorty|bikinis?)\b/.test(x)) return 'culotte';
+  if(/lingerie/.test(x)) return 'lingerie';
+  if(/\b(short|shorts|bas|boxers?)\b/.test(x)) return 'sousvetement';
   return 'generic';
 }
 
-/* ===== LUXIA SMART CONTENT v2 : Titre + Type de tissu + Collection (+ promos/packs) ===== */
+/* ===== LUXIA SMART CONTENT : Titre + Type de tissu + Collection (+ promos/packs) ===== */
 function lxFold(s){return String(s==null?'':s).normalize('NFD').replace(/[\u0300-\u036f\u064B-\u065F\u0640]/g,'').toLowerCase().replace(/[أإآ]/g,'ا').replace(/ة/g,'ه').replace(/ى/g,'ي');}
 function lxTokens(f){return f.split(/[^\p{L}\p{N}]+/u).filter(Boolean).map(w=>w.replace(/^(ال|و)(?=.{3,})/,''));}
 const LX_KIND_RULES=[
   ['pyjama',/\b(pyjamas?|pijamas?)\b/,['بيجامه','بيجامات','بيجاما','بيجامتين'],[]],
   ['nuisette',/\b(nuisettes?|chemises? de nuit|robes? de nuit|chemises?)\b/,[],['قميص نوم','قمصان نوم','قميصي نوم','قميص النوم']],
   ['robechambre',/\b(peignoirs?|robes? de chambre|kimonos?)\b/,['روب','ارواب','برنوس','كيمونو'],[]],
-  ['pantoufles',/\b(pantoufles?|chaussons?|mules?)\b/,['خف','خفاف','صندل','شبشب'],[]],
-  ['lingerie',/\b(lingerie|soutiens?-gorge|ensembles?|bodys?|bodysuits?|brassieres?)\b/,['لانجري','طقم','اطقم','سوتيان','بودي'],[]],
-  ['sousvetement',/\b(shorts?|culottes?|slips?|strings?|boxers?|tangas?|shorty)\b/,['شورت','كولوط','سليب','سترينج'],[]]
+  ['pantoufles',/\b(pantoufles?|chaussons?|mules?)\b/,['خف','خفاف','صندل','شبشب','نعال','نعل'],['نعال منزليه']],
+  ['ensemble',/\b(ensembles?|sets?)\b/,['طقم','اطقم'],[]],
+  ['soutiengorge',/\b(soutiens?[- ]?gorges?|soutifs?|brassieres?|bralettes?)\b/,['سوتيان','سوتيانات','حماله','حمالات','براليت'],['حماله صدر','حمالات صدر']],
+  ['string',/\b(strings?|tangas?)\b/,['سترينغ','سترينج','سترينجات','تانغا'],[]],
+  ['culotte',/\b(culottes?|slips?|shorty|shorties|bikinis?)\b/,['كولوط','كيلوط','سليب','بيكيني'],['سروال داخلي']],
+  ['lingerie',/\b(lingerie|bodys?|bodysuits?)\b/,['لانجري','بودي'],[]],
+  ['sousvetement',/\b(shorts?|boxers?)\b/,['شورت'],[]]
 ];
 function lxKindFromTitle(f){
   if(!f||!f.trim()) return '';
@@ -18297,9 +18424,31 @@ function lxInferFabric(f){
   }
   return '';
 }
-function lxTitleCues(f){
-  const tk=lxTokens(f||''); const has=(re,arr)=>re.test(f)||(arr||[]).some(w=>tk.includes(lxFold(w)));
+const LX_LINGERIE_KINDS=['lingerie','soutiengorge','culotte','string','ensemble'];
+/* Détails de lingerie : ajoutés UNIQUEMENT si le mot figure dans le titre (jamais inventés). */
+const LX_LINGERIE_DETAILS=[
+  {id:'dentelle',re:/\bdentelles?\b/,ar:['دانتيل'],fr:'Les détails en dentelle ajoutent une touche délicate.',arT:'تفاصيل الدانتيل تضيف لمسة رقيقة.',bfr:'Détails en dentelle',bar:'تفاصيل من الدانتيل',fab:'dentelle'},
+  {id:'pushup',re:/\bpush[- ]?up\b/,ar:['بوش اب','بوشاب'],fr:'Son effet push-up met la poitrine en valeur.',arT:'تأثير الرفع (بوش أب) يبرز الصدر.',bfr:'Effet push-up',bar:'تأثير الرفع (بوش أب)',only:['soutiengorge','ensemble','lingerie']},
+  {id:'sansarm',re:/\bsans[- ]armatures?\b/,ar:['بدون سلك','بدون اسلاك'],fr:'Sans armatures, pour un confort accru.',arT:'بدون سلك لراحة أكبر.',bfr:'Sans armatures pour plus de confort',bar:'بدون سلك لراحة أكبر',only:['soutiengorge','ensemble','lingerie']},
+  {id:'rembourre',re:/\brembourre(?:e|es|s)?\b/,ar:['مبطن','مبطنه','محشي'],fr:'Un rembourrage confortable pour plus d’aisance.',arT:'حشوة مريحة لراحة أكبر.',bfr:'Rembourrage confortable',bar:'حشوة مريحة',only:['soutiengorge','ensemble','lingerie']},
+  {id:'sanscout',re:/\bsans[- ]coutures?\b/,ar:['بدون خياطه'],fr:'Sans coutures apparentes pour un rendu discret.',arT:'بدون خياطة ظاهرة لمظهر ناعم.',bfr:'Sans coutures apparentes',bar:'بدون خياطة ظاهرة'},
+  {id:'taillehaute',re:/\btaille[- ]haute\b/,ar:['خصر عالي','خصر مرتفع'],fr:'La taille haute apporte confort et couverture.',arT:'الخصر العالي يمنح راحة وتغطية.',bfr:'Taille haute',bar:'خصر عالي'},
+  {id:'taillebasse',re:/\btaille[- ]basse\b/,ar:['خصر منخفض'],fr:'La taille basse offre une coupe moderne et discrète.',arT:'الخصر المنخفض يمنح قصة عصرية ومريحة.',bfr:'Taille basse',bar:'خصر منخفض'},
+  {id:'brode',re:/\b(?:brode(?:e|es|s)?|broderies?)\b/,ar:['مطرز','مطرزه','تطريز'],fr:'Les broderies délicates ajoutent du charme.',arT:'التطريز الرقيق يضيف جمالا.',bfr:'Broderies délicates',bar:'تطريز رقيق'},
+  {id:'tulle',re:/\btulle\b/,ar:['تول'],fr:'Les détails en tulle ajoutent de la délicatesse.',arT:'تفاصيل التول تضيف رقة.',bfr:'Détails en tulle',bar:'تفاصيل من التول',fab:'tulle'},
+  {id:'satin',re:/\bsatin\b/,ar:['ساتان'],fr:'L’aspect satiné apporte une touche élégante.',arT:'مظهر الساتان يضيف لمسة أنيقة.',bfr:'Aspect satiné élégant',bar:'مظهر ساتان أنيق',fab:'satin'}
+];
+function lxTitleCues(f,kind,fabricId){
+  f=f||''; const tk=lxTokens(f);
+  const has=(re,arr)=>re.test(f)||(arr||[]).some(w=>{const x=lxFold(w); return x.indexOf(' ')>-1?f.includes(x):tk.includes(x);});
   const out=[];
+  if(LX_LINGERIE_KINDS.indexOf(kind)>-1||kind==='sousvetement'){
+    LX_LINGERIE_DETAILS.forEach(d=>{
+      if(d.only&&d.only.indexOf(kind)<0) return;
+      if(d.fab&&d.fab===fabricId) return;
+      if(has(d.re,d.ar)) out.push({fr:d.fr,ar:d.arT,bfr:d.bfr,bar:d.bar});
+    });
+  }
   if(has(/\b(mariee|mariage|lune de miel|bridal|noces)\b/,['عروس','عرايس','زفاف','عروسه'])||/شهر العسل/.test(f)) out.push({
     fr:'Un choix raffiné pour les moments spéciaux.',ar:'خيار راقٍ للحظات الخاصة.',bfr:'Idéale pour les moments spéciaux',bar:'مثالية للحظات الخاصة'});
   const lg=has(/\b(manches longues?|pantalon|longue?s?)\b/,['طويل','طويله','بنطلون','سروال']);
@@ -18316,7 +18465,11 @@ const LX_PACK_NOUNS={
   pyjama:{fr:'pyjamas',ap:'بيجامات',ad:'بيجامتين'},
   nuisette:{fr:'nuisettes',ap:'قمصان نوم',ad:'قميصي نوم'},
   lingerie:{fr:'ensembles de lingerie',ap:'أطقم لانجري',ad:'طقمي لانجري'},
-  pantoufles:{fr:'paires de pantoufles',ap:'أزواج من الخفاف',ad:'زوجين من الخفاف'},
+  ensemble:{fr:'ensembles de lingerie',ap:'أطقم لانجري',ad:'طقمي لانجري'},
+  soutiengorge:{fr:'soutiens-gorge',ap:'حمالات صدر',ad:'حمالتي صدر'},
+  culotte:{fr:'culottes',ap:'بيكينيات',ad:'بيكينيين'},
+  string:{fr:'strings',ap:'سترينغات',ad:'سترينغين'},
+  pantoufles:{fr:'paires de pantoufles',ap:'أزواج من النعال المنزلية',ad:'زوجين من النعال المنزلية'},
   robechambre:{fr:'peignoirs',ap:'أرواب',ad:'روبين'},
   sousvetement:{fr:'pièces',ap:'قطع',ad:'قطعتين'},
   generic:{fr:'pièces',ap:'قطع',ad:'قطعتين'}
@@ -18328,7 +18481,7 @@ function lxSmartPack(titleFr,titleAr,collectionId,fabricId,pieces){
   if(!fabricId||fabricId==='none'){const inf=lxInferFabric(tf); if(inf) fabricId=inf;}
   const f=lxFabricById(fabricId), hasF=f.id!=='none';
   const kind=lxKindFromTitle(tf)||lxCollectionKind(collectionId); const N=LX_PACK_NOUNS[kind]||LX_PACK_NOUNS.generic;
-  const fabFr=hasF?` en ${f.fr.toLowerCase()}`:'', fabAr=hasF?` من ${f.ar}`:'';
+  const fabFr=hasF?` en ${f.fr.toLowerCase()}`:'', fabAr=hasF?` من ${lxArFab(f)}`:'';
   const cnt=n===2?N.ad:`${n} ${N.ap}`;
   return {
     name:{fr:`Pack ${n} ${N.fr}`,ar:`باك ${cnt}`},
@@ -18387,6 +18540,7 @@ function lxPackAutoFor(id){
 function lxApplyAutoPack(id){
   try{
     const v=PRODUCT_VARIANTS[id], pk=v&&v.pack; if(!pk||typeof pk!=='object') return;
+    if(lxTextMode(id)!=='auto') return;
     const auto=lxPackAutoFor(id); if(!auto) return;
     const hasFlags=pk.manual&&typeof pk.manual==='object';
     ['name','contents','badge','label'].forEach(g=>['fr','ar'].forEach(l=>{
@@ -18400,71 +18554,400 @@ function lxPackField(id,g,l){
   const st=String((pk[g]&&pk[g][l])||'');
   const manual=(pk.manual&&typeof pk.manual==='object')?!!pk.manual[g+'_'+l]:!!st.trim();
   if(manual) return {value:st,manual:true};
+  if(lxTextMode(id)!=='auto') return {value:st,manual:false};
   const a=lxPackAutoFor(id); return {value:a?a[g][l]:st,manual:false};
 }
 function lxPackAttr(id,g,l){const f=lxPackField(id,g,l);return `value="${escAttr(f.value)}"${f.manual?' data-lx-manual="1"':''}`;}
 
+/* ===== BANQUE DE TEXTES v3 : plusieurs variantes par type de produit (FR + AR fusha) =====
+   df/da = 3 descriptions FR/AR ; bf/ba = 7 avantages FR/AR. {f} = tissu (ajouté seulement s'il est connu).
+   Un produit reçoit 1 description + 4 avantages, choisis de façon STABLE à partir de son titre :
+   le même produit garde toujours le même texte, deux produits différents ne se ressemblent pas. */
+const LX_TEXT_BANK={
+ "pyjama": {
+  "df": [
+   "Un pyjama{f} pensé pour la douceur et le confort de vos moments de détente, avec un style simple et élégant.",
+   "Un pyjama{f} agréable à porter du soir au matin, à la coupe confortable et au look soigné.",
+   "Pour vos soirées à la maison, un pyjama{f} qui allie confort, douceur et petit côté chic."
+  ],
+  "da": [
+   "بيجامة{f}، مصممة لتمنحك النعومة والراحة في لحظات الاسترخاء، بتصميم بسيط وأنيق.",
+   "بيجامة{f} مريحة للارتداء من المساء حتى الصباح، بقصة مريحة ومظهر أنيق.",
+   "لسهراتك في البيت، بيجامة{f} تجمع بين الراحة والنعومة ولمسة أنيقة."
+  ],
+  "bf": [
+   "Toucher doux et agréable",
+   "Coupe confortable",
+   "Idéal pour la maison",
+   "Agréable à porter toute la nuit",
+   "Design simple et élégant",
+   "Pièce facile à assortir",
+   "Parfait pour se détendre"
+  ],
+  "ba": [
+   "ملمس ناعم ومريح",
+   "قصة مريحة",
+   "مثالية للبيت",
+   "مريحة طوال الليل",
+   "تصميم بسيط وأنيق",
+   "سهلة التنسيق",
+   "مناسبة للاسترخاء"
+  ]
+ },
+ "nuisette": {
+  "df": [
+   "Une nuisette{f} au style féminin et élégant, pour une allure raffinée dans un confort total.",
+   "Une nuisette{f} délicate et féminine, pensée pour vos soirées spéciales.",
+   "Élégante et agréable à porter, cette nuisette{f} met en valeur votre féminité avec simplicité."
+  ],
+  "da": [
+   "قميص نوم{f} بتصميم أنثوي وأنيق، يمنحك مظهرا راقيا مع راحة تامة.",
+   "قميص نوم{f} رقيق وأنثوي، مناسب لسهراتك الخاصة.",
+   "أنيق ومريح في الارتداء، قميص نوم{f} يبرز أنوثتك ببساطة."
+  ],
+  "bf": [
+   "Coupe féminine et élégante",
+   "Toucher agréable",
+   "Confort pour la nuit",
+   "Détails soignés",
+   "Parfaite pour les soirées spéciales",
+   "Design délicat",
+   "Facile à porter"
+  ],
+  "ba": [
+   "قصة أنثوية وأنيقة",
+   "ملمس مريح",
+   "راحة طوال الليل",
+   "تفاصيل أنيقة",
+   "مثالي للسهرات الخاصة",
+   "تصميم رقيق",
+   "سهل الارتداء"
+  ]
+ },
+ "lingerie": {
+  "df": [
+   "Un ensemble de lingerie{f} au style féminin et raffiné, pensé pour vous faire sentir belle et à l'aise.",
+   "Une lingerie{f} délicate, aux détails soignés, qui allie élégance et confort.",
+   "Féminine et raffinée, cette lingerie{f} s'adapte à vous avec douceur et élégance."
+  ],
+  "da": [
+   "طقم لانجري{f} بتصميم أنثوي وراق، يمنحك الثقة والراحة.",
+   "لانجري{f} رقيق بتفاصيل أنيقة، يجمع بين الأناقة والراحة.",
+   "أنثوي وراق، لانجري{f} يناسبك بنعومة وأناقة."
+  ],
+  "bf": [
+   "Design féminin et raffiné",
+   "Détails élégants",
+   "Toucher agréable",
+   "Confort au quotidien",
+   "Design qui met en valeur le corps",
+   "Coupe soignée",
+   "Parfait pour les occasions spéciales"
+  ],
+  "ba": [
+   "تصميم أنثوي وراق",
+   "تفاصيل أنيقة",
+   "ملمس مريح",
+   "راحة يومية",
+   "تصميم يبرز جمال الجسم",
+   "قصة متقنة",
+   "مناسب للمناسبات الخاصة"
+  ]
+ },
+ "pantoufles": {
+  "df": [
+   "Des pantoufles{f} douillettes, pensées pour le confort et la douceur de vos journées à la maison.",
+   "Des pantoufles{f} agréables à enfiler, parfaites pour marcher à la maison en tout confort.",
+   "Douces et pratiques, ces pantoufles{f} accompagnent vos moments de détente chez vous."
+  ],
+  "da": [
+   "نعال منزلية{f} مريحة، مصممة لراحة ونعومة أيامك في البيت.",
+   "نعال منزلية{f} سهلة اللبس، مثالية للمشي في البيت براحة تامة.",
+   "ناعمة وعملية، نعال منزلية{f} ترافقك في لحظات الاسترخاء داخل البيت."
+  ],
+  "bf": [
+   "Confort agréable",
+   "Douceur au quotidien",
+   "Faciles à enfiler",
+   "Idéales pour la maison",
+   "Design simple et soigné",
+   "Agréables à porter longtemps",
+   "Parfaites en cadeau"
+  ],
+  "ba": [
+   "راحة كبيرة",
+   "نعومة يومية",
+   "سهلة اللبس",
+   "مثالية للبيت",
+   "تصميم بسيط وأنيق",
+   "مريحة للارتداء لوقت طويل",
+   "مناسبة كهدية"
+  ]
+ },
+ "robechambre": {
+  "df": [
+   "Une robe de chambre{f} pensée pour les moments de détente, qui allie confort et allure soignée.",
+   "Une robe de chambre{f} enveloppante, idéale pour se détendre à la maison avec élégance.",
+   "Confortable et élégante, cette robe de chambre{f} vous accompagne matin et soir."
+  ],
+  "da": [
+   "روب منزلي{f} مخصص لأوقات الاسترخاء، يجمع بين الراحة والمظهر الأنيق.",
+   "روب منزلي{f} مريح، مثالي للاسترخاء في البيت بأناقة.",
+   "مريح وأنيق، روب منزلي{f} يرافقك صباحا ومساء."
+  ],
+  "bf": [
+   "Confort agréable",
+   "Style soigné",
+   "Idéale pour la détente",
+   "Pratique à la maison",
+   "Facile à enfiler",
+   "Coupe élégante",
+   "Parfaite en cadeau"
+  ],
+  "ba": [
+   "راحة كبيرة",
+   "تصميم أنيق",
+   "مثالي للاسترخاء",
+   "عملي في البيت",
+   "سهل الارتداء",
+   "قصة أنيقة",
+   "مناسب كهدية"
+  ]
+ },
+ "sousvetement": {
+  "df": [
+   "Une pièce{f} pensée pour le confort et la douceur au quotidien, avec une finition soignée.",
+   "Simple et confortable, cette pièce{f} vous accompagne toute la journée.",
+   "Une pièce{f} douce et discrète, conçue pour un confort de tous les jours."
+  ],
+  "da": [
+   "قطعة{f} مصممة للراحة والنعومة كل يوم، بخياطة متقنة.",
+   "بسيطة ومريحة، قطعة{f} ترافقك طوال اليوم.",
+   "ناعمة وبسيطة، قطعة{f} مصممة لراحة الاستعمال اليومي."
+  ],
+  "bf": [
+   "Confort au quotidien",
+   "Toucher agréable",
+   "Coutures soignées",
+   "Style féminin et simple",
+   "Facile à porter",
+   "Pratique",
+   "Discrète sous les vêtements"
+  ],
+  "ba": [
+   "راحة يومية",
+   "ملمس مريح",
+   "خياطة متقنة",
+   "تصميم أنثوي بسيط",
+   "سهلة الارتداء",
+   "عملية",
+   "غير ظاهرة تحت الملابس"
+  ]
+ },
+ "generic": {
+  "df": [
+   "Une pièce{f} au style soigné, pensée pour offrir confort et douceur au quotidien.",
+   "Élégante et confortable, cette pièce{f} s'adapte à tous vos moments de détente.",
+   "Une pièce{f} simple et raffinée, conçue pour votre confort."
+  ],
+  "da": [
+   "قطعة{f} بتصميم أنيق، مصممة لتمنحك الراحة والنعومة كل يوم.",
+   "أنيقة ومريحة، قطعة{f} تناسب جميع لحظات الاسترخاء.",
+   "قطعة{f} بسيطة وراقية، مصممة لراحتك."
+  ],
+  "bf": [
+   "Confort agréable",
+   "Toucher agréable",
+   "Coutures soignées",
+   "Design élégant",
+   "Facile à porter",
+   "Pièce polyvalente",
+   "Qualité soignée"
+  ],
+  "ba": [
+   "راحة كبيرة",
+   "ملمس مريح",
+   "خياطة متقنة",
+   "تصميم أنيق",
+   "سهلة الارتداء",
+   "قطعة متعددة الاستعمال",
+   "جودة متقنة"
+  ]
+ },
+ "soutiengorge": {
+  "df": [
+   "Un soutien-gorge{f} au design féminin et soigné, pensé pour allier confort et élégance au quotidien.",
+   "Délicat et élégant, ce soutien-gorge{f} met en valeur votre féminité avec douceur.",
+   "Un soutien-gorge{f} aux détails raffinés, conçu pour se porter avec confort et confiance."
+  ],
+  "da": [
+   "حمالة صدر{f} بتصميم أنثوي أنيق، تجمع بين الراحة والأناقة كل يوم.",
+   "رقيقة وأنيقة، حمالة صدر{f} تبرز أنوثتك بنعومة.",
+   "حمالة صدر{f} بتفاصيل راقية، مصممة لتمنحك الراحة والثقة."
+  ],
+  "bf": [
+   "Design féminin et élégant",
+   "Finitions soignées",
+   "Confort au quotidien",
+   "Détails raffinés",
+   "Coupe élégante",
+   "Toucher agréable",
+   "Facile à porter"
+  ],
+  "ba": [
+   "تصميم أنثوي وأنيق",
+   "خياطة متقنة",
+   "راحة يومية",
+   "تفاصيل راقية",
+   "قصة أنيقة",
+   "ملمس مريح",
+   "سهلة الارتداء"
+  ]
+ },
+ "culotte": {
+  "df": [
+   "Une culotte{f} confortable et féminine, pensée pour un port agréable toute la journée.",
+   "Simple et élégante, cette culotte{f} allie douceur et finitions soignées.",
+   "Une culotte{f} au design délicat, conçue pour votre confort au quotidien."
+  ],
+  "da": [
+   "بيكيني{f} مريح وأنثوي، مصمم ليكون مريحا طوال اليوم.",
+   "بسيط وأنيق، بيكيني{f} يجمع بين النعومة والخياطة المتقنة.",
+   "بيكيني{f} بتصميم رقيق، مصمم لراحتك كل يوم."
+  ],
+  "bf": [
+   "Confort toute la journée",
+   "Coupe féminine",
+   "Coutures soignées",
+   "Toucher agréable",
+   "Design délicat",
+   "Facile à porter",
+   "Discrète sous les vêtements"
+  ],
+  "ba": [
+   "راحة طوال اليوم",
+   "قصة أنثوية",
+   "خياطة متقنة",
+   "ملمس مريح",
+   "تصميم رقيق",
+   "سهل الارتداء",
+   "غير ظاهر تحت الملابس"
+  ]
+ },
+ "string": {
+  "df": [
+   "Un string{f} fin et féminin, pensé pour un confort discret au quotidien.",
+   "Délicat et élégant, ce string{f} se fait oublier tout en gardant un style raffiné.",
+   "Un string{f} au design léger et soigné, conçu pour se porter avec aisance."
+  ],
+  "da": [
+   "سترينغ{f} رقيق وأنثوي، مصمم لراحة خفيفة كل يوم.",
+   "رقيق وأنيق، سترينغ{f} يمنحك راحة تنسيك أنك ترتديه، بمظهر راق.",
+   "سترينغ{f} بتصميم خفيف وأنيق، مصمم ليسهل ارتداؤه."
+  ],
+  "bf": [
+   "Design fin et discret",
+   "Coupe féminine",
+   "Confort au quotidien",
+   "Détails soignés",
+   "Toucher agréable",
+   "Facile à porter",
+   "Idéal sous les vêtements ajustés"
+  ],
+  "ba": [
+   "تصميم رقيق وغير ظاهر",
+   "قصة أنثوية",
+   "راحة يومية",
+   "تفاصيل أنيقة",
+   "ملمس مريح",
+   "سهل الارتداء",
+   "مناسب تحت الملابس الضيقة"
+  ]
+ },
+ "ensemble": {
+  "df": [
+   "Un ensemble de lingerie{f} aux pièces assorties, au style féminin et raffiné, pensé pour votre confort et votre élégance.",
+   "Un ensemble assorti{f}, délicat et soigné, qui allie féminité et confort.",
+   "Féminin et harmonieux, cet ensemble de lingerie{f} se porte avec douceur et élégance."
+  ],
+  "da": [
+   "طقم لانجري{f} بقطع متناسقة، بتصميم أنثوي وراق، يجمع بين الراحة والأناقة.",
+   "طقم متناسق{f}، رقيق وأنيق، يجمع بين الأنوثة والراحة.",
+   "أنثوي ومتناسق، طقم لانجري{f} يمنحك الراحة والأناقة."
+  ],
+  "bf": [
+   "Pièces assorties",
+   "Design féminin et raffiné",
+   "Détails élégants",
+   "Confort au quotidien",
+   "Coupe soignée",
+   "Toucher agréable",
+   "Idéal en cadeau"
+  ],
+  "ba": [
+   "قطع متناسقة",
+   "تصميم أنثوي وراق",
+   "تفاصيل أنيقة",
+   "راحة يومية",
+   "قصة متقنة",
+   "ملمس مريح",
+   "مناسب كهدية"
+  ]
+ }
+};
+function lxHash(s){let h=0;s=String(s||'');for(let i=0;i<s.length;i++){h=(h*31+s.charCodeAt(i))>>>0;}return h;}
+function lxPickN(list,h,n){
+  const L=list.length; if(L<=n) return list.slice();
+  const gcd=(x,y)=>y?gcd(y,x%y):x; let st=2; while(gcd(st,L)!==1) st++;
+  const start=h%L, out=[]; for(let k=0;k<n;k++) out.push(list[(start+st*k)%L]); return out;
+}
+/* Nom du tissu en arabe avec l'article (من الساتان). */
+function lxArFab(f){
+  const m={lycra_elastane:'الليكرا والإيلاستان',microfibre:'الألياف الدقيقة',polaire:'الصوف القطبي',polyamide:'البولي أميد'};
+  return m[f.id]||('ال'+f.ar);
+}
 function lxSmartContent(collectionId,fabricId,titleFr,titleAr,packPieces){
   const __tf=lxFold((titleFr||'')+' '+(titleAr||''));
   if(!fabricId||fabricId==='none'){const __inf=lxInferFabric(__tf); if(__inf) fabricId=__inf;}
-  const f=lxFabricById(fabricId), fabric=f.id==='none'?'':f.fr.toLowerCase();
+  const f=lxFabricById(fabricId), fabric=f.id!=='none';
   const kind=lxKindFromTitle(__tf)||lxCollectionKind(collectionId);
-  const has=(x)=>!!fabric && fabric===x;
-  let fr='', ar='', benefitsFr=[], benefitsAr=[];
-  const withFabric=(baseFr,baseAr, fabFr, fabAr)=> fabric ? [baseFr.replace('{fabric}',fabFr),baseAr.replace('{fabric}',fabAr)] : [baseFr.replace(' en {fabric}','').replace(' en {fabric}',''),baseAr.replace(' من {fabric}','')];
-  if(kind==='pyjama'){
-    [fr,ar]=withFabric(
-      fabric?`Un pyjama en {fabric}, pensé pour offrir une sensation de douceur et de confort tout en apportant une touche raffinée à vos moments de détente.`:`Un pyjama confortable et élégant, conçu pour accompagner vos moments de détente avec douceur et simplicité.`,
-      fabric?`بيجامة من {fabric}، مصممة لتمنح إحساساً بالنعومة والراحة مع لمسة راقية للحظات الاسترخاء.`:`بيجامة مريحة وأنيقة، مصممة لمرافقة لحظات الاسترخاء بنعومة وبساطة.`,f.fr.toLowerCase(),f.ar);
-    benefitsFr=fabric?[`Toucher doux et agréable`,`Confort pensé pour les moments de détente`,`Style élégant et féminin`,`Une pièce agréable à porter`]:[`Confort agréable au quotidien`,`Style féminin et soigné`,`Agréable à porter pendant les moments de détente`,`Une pièce facile à adopter à la maison`];
-    benefitsAr=fabric?[`ملمس ناعم ومريح`,`راحة مصممة للحظات الاسترخاء`,`ستايل أنثوي وأنيق`,`قطعة مريحة للارتداء`]:[`راحة مريحة للاستخدام اليومي`,`ستايل أنثوي وأنيق`,`مريحة خلال لحظات الاسترخاء`,`قطعة سهلة للاعتماد في المنزل`];
-  }else if(kind==='nuisette'){
-    [fr,ar]=fabric?[`Une nuisette en ${f.fr.toLowerCase()} au style élégant et féminin, idéale pour créer une allure raffinée tout en profitant d’un moment de confort.`,`قميص نوم من ${f.ar} بتصميم أنيق وأنثوي، مثالي لإطلالة راقية مع الحفاظ على الراحة.`]:[`Une nuisette au style élégant et féminin, idéale pour créer une allure raffinée tout en profitant d’un moment de confort.`,`قميص نوم أنيق وأنثوي، مثالي لإطلالة راقية مع الحفاظ على الراحة.`];
-    benefitsFr=[`Finition élégante`,`Toucher agréable`,`Silhouette féminine et raffinée`,`Parfaite pour les moments de détente`];
-    benefitsAr=[`لمسة أنيقة وراقية`,`ملمس مريح`,`إطلالة أنثوية وراقية`,`مثالية للحظات الاسترخاء`];
-  }else if(kind==='lingerie'){
-    [fr,ar]=fabric?[`Un ensemble de lingerie en ${f.fr.toLowerCase()} au style féminin et raffiné, pensé pour sublimer votre silhouette avec élégance.`,`طقم لانجري من ${f.ar} بتصميم أنثوي وراقي، مصمم لإبراز القوام بأناقة.`]:[`Un ensemble de lingerie au style féminin et raffiné, pensé pour sublimer votre silhouette avec élégance.`,`طقم لانجري بتصميم أنثوي وراقي، مصمم لإبراز القوام بأناقة.`];
-    benefitsFr=f.id==='dentelle'?[`Détails en dentelle`,`Style féminin et raffiné`,`Design élégant`,`Pensé pour mettre en valeur la silhouette`]:[`Finition élégante`,`Style féminin et raffiné`,`Design soigné`,`Pensé pour mettre en valeur la silhouette`];
-    benefitsAr=f.id==='dentelle'?[`تفاصيل من الدانتيل`,`ستايل أنثوي وراقي`,`تصميم أنيق`,`مصمم لإبراز القوام`]:[`لمسة نهائية أنيقة`,`ستايل أنثوي وراقي`,`تصميم متناسق`,`مصمم لإبراز القوام`];
-  }else if(kind==='pantoufles'){
-    [fr,ar]=fabric?[`Des pantoufles en ${f.fr.toLowerCase()}, pensées pour apporter confort et douceur à vos moments de détente à la maison.`,`خفاف من ${f.ar} مصممة لتوفير الراحة والنعومة خلال لحظات الاسترخاء في المنزل.`]:[`Des pantoufles pensées pour apporter confort et douceur à vos moments de détente à la maison.`,`خفاف مصممة لتوفير الراحة والنعومة خلال لحظات الاسترخاء في المنزل.`];
-    benefitsFr=[`Confort agréable`,`Douceur au quotidien`,`Idéales pour la maison`,`Style soigné`];
-    benefitsAr=[`راحة مريحة`,`نعومة للاستخدام اليومي`,`مثالية للمنزل`,`ستايل أنيق`];
-  }else if(kind==='robechambre'){
-    [fr,ar]=fabric?[`Un modèle pensé pour les moments de détente, confectionné en ${f.fr.toLowerCase()} pour associer confort et allure soignée.`,`قطعة مخصصة للحظات الاسترخاء، من ${f.ar} لتجمع بين الراحة والإطلالة الأنيقة.`]:[`Un modèle pensé pour les moments de détente, conçu pour associer confort et allure soignée.`,`قطعة مخصصة للحظات الاسترخاء، مصممة للجمع بين الراحة والإطلالة الأنيقة.`];
-    benefitsFr=[`Confort agréable`,`Style soigné`,`Idéal pour les moments de détente`,`Agréable à porter à la maison`];
-    benefitsAr=[`راحة مريحة`,`ستايل أنيق`,`مثالية للحظات الاسترخاء`,`مريحة للارتداء في المنزل`];
-  }else if(kind==='sousvetement'){
-    [fr,ar]=fabric?[`Une pièce pensée pour offrir confort et douceur au quotidien, avec une finition soignée en ${f.fr.toLowerCase()}.`,`قطعة مصممة لتوفير الراحة والنعومة يومياً، مع لمسة نهائية متناسقة من ${f.ar}.`]:[`Une pièce pensée pour offrir confort et douceur au quotidien, avec une finition soignée.`,`قطعة مصممة لتوفير الراحة والنعومة يومياً، مع لمسة نهائية متناسقة.`];
-    benefitsFr=[`Confort agréable au quotidien`,`Toucher agréable`,`Finition soignée`,`Style féminin et élégant`];
-    benefitsAr=[`راحة مريحة يومياً`,`ملمس مريح`,`لمسة نهائية متناسقة`,`ستايل أنثوي وأنيق`];
-  }else{
-    [fr,ar]=fabric?[`Une pièce au style soigné, pensée pour offrir confort et douceur avec une finition en ${f.fr.toLowerCase()}.`,`قطعة بتصميم أنيق، مصممة لتوفير الراحة والنعومة مع لمسة من ${f.ar}.`]:[`Une pièce au style soigné, pensée pour offrir confort et douceur au quotidien.`,`قطعة بتصميم أنيق، مصممة لتوفير الراحة والنعومة في الاستعمال اليومي.`];
-    benefitsFr=[`Confort agréable`,`Toucher agréable`,`Finition soignée`,`Style élégant`];
-    benefitsAr=[`راحة مريحة`,`ملمس مريح`,`لمسة نهائية متناسقة`,`ستايل أنيق`];
+  const B=LX_TEXT_BANK[kind]||LX_TEXT_BANK.generic;
+  const h=lxHash(__tf), v=Math.floor(h/7);
+  const fabFr=fabric?' en '+f.fr.toLowerCase():'', fabAr=fabric?' من '+lxArFab(f):'';
+  let fr=B.df[v%B.df.length].replace('{f}',fabFr), ar=B.da[v%B.da.length].replace('{f}',fabAr);
+  let benefitsFr=lxPickN(B.bf,h,4), benefitsAr=lxPickN(B.ba,h,4);
+  /* Lingerie en dentelle : l'avantage « dentelle » passe en premier. */
+  if(f.id==='dentelle'&&LX_LINGERIE_KINDS.indexOf(kind)>-1){
+    const dF='Détails en dentelle', dA='تفاصيل من الدانتيل';
+    benefitsFr=[dF].concat(benefitsFr.filter(x=>x!==dF)).slice(0,4);
+    benefitsAr=[dA].concat(benefitsAr.filter(x=>x!==dA)).slice(0,4);
   }
   try{
     const __n=Math.floor(Number(packPieces));
     if(__n>=2){
       const N=LX_PACK_NOUNS[kind]||LX_PACK_NOUNS.generic, cnt=__n===2?N.ad:`${__n} ${N.ap}`;
-      const fF=fabric?' en '+fabric:'', fA=fabric?' من '+f.ar:'';
+      const fF=fabFr, fA=fabAr;
       const PK={
         pyjama:[`pensé pour offrir douceur et confort tout en apportant une touche raffinée à vos moments de détente.`,`مصمم لمنح النعومة والراحة مع لمسة راقية للحظات الاسترخاء.`],
-        nuisette:[`au style élégant et féminin, idéal pour créer une allure raffinée tout en profitant d’un moment de confort.`,`بتصميم أنيق وأنثوي، مثالي لإطلالة راقية مع الحفاظ على الراحة.`],
-        lingerie:[`au style féminin et raffiné, pensé pour sublimer votre silhouette avec élégance.`,`بتصميم أنثوي وراقي، مصمم لإبراز القوام بأناقة.`],
+        nuisette:[`au style élégant et féminin, idéal pour créer une allure raffinée tout en profitant d’un moment de confort.`,`بتصميم أنيق وأنثوي، مثالي لمظهر راق مع الحفاظ على الراحة.`],
+        lingerie:[`au style féminin et raffiné, pensé pour sublimer votre silhouette avec élégance.`,`بتصميم أنثوي وراق، مصمم ليبرز جمال الجسم بأناقة.`],
         pantoufles:[`pensé pour apporter confort et douceur à vos moments de détente à la maison.`,`مصمم لتوفير الراحة والنعومة خلال لحظات الاسترخاء في المنزل.`],
-        robechambre:[`pensé pour les moments de détente, alliant confort et allure soignée.`,`مخصص للحظات الاسترخاء، يجمع بين الراحة والإطلالة الأنيقة.`],
-        sousvetement:[`pensé pour offrir confort et douceur au quotidien, avec une finition soignée.`,`مصمم لتوفير الراحة والنعومة يومياً، مع لمسة نهائية متناسقة.`],
-        generic:[`pensé pour offrir confort et douceur, avec une finition soignée.`,`مصمم لتوفير الراحة والنعومة، مع لمسة نهائية متناسقة.`]
+        robechambre:[`pensé pour les moments de détente, alliant confort et allure soignée.`,`مخصص للحظات الاسترخاء، يجمع بين الراحة والمظهر الأنيق.`],
+        sousvetement:[`pensé pour offrir confort et douceur au quotidien, avec une finition soignée.`,`مصمم لتوفير الراحة والنعومة يومياً، بخياطة متقنة.`],
+        generic:[`pensé pour offrir confort et douceur, avec une finition soignée.`,`مصمم لتوفير الراحة والنعومة، بخياطة متقنة.`]
       };
-      const T=PK[kind]||PK.generic;
+      const PKK=LX_LINGERIE_KINDS.indexOf(kind)>-1?'lingerie':kind;
+      const T=PK[PKK]||PK.generic;
       fr=`Un pack de ${__n} ${N.fr}${fF}, ${T[0]}`; ar=`باك يضم ${cnt}${fA}، ${T[1]}`;
       benefitsFr=[`Pack de ${__n} pièces au choix`].concat(benefitsFr).slice(0,5);
       benefitsAr=[__n===2?'باك من قطعتين':`باك من ${__n} قطع`].concat(benefitsAr).slice(0,5);
     }
   }catch(e){ console.warn('pack text',e); }
   try{
-    lxTitleCues(__tf).forEach(c=>{ fr+=' '+c.fr; ar+=' '+c.ar; if(benefitsFr.length<5){benefitsFr=benefitsFr.concat([c.bfr]);benefitsAr=benefitsAr.concat([c.bar]);} });
+    lxTitleCues(__tf,kind,fabricId).forEach(c=>{
+      fr+=' '+c.fr; ar+=' '+c.ar;
+      if(benefitsFr.length<5&&benefitsFr.indexOf(c.bfr)<0){benefitsFr=benefitsFr.concat([c.bfr]);benefitsAr=benefitsAr.concat([c.bar]);}
+    });
   }catch(e){ console.warn('title cues',e); }
   return {fr,ar,benefitsFr,benefitsAr,fabricId:f.id};
 }
@@ -18476,33 +18959,30 @@ function lxSmartContentPreviewHTML(p){
   const v=PRODUCT_VARIANTS[p.id]||{}; const c=v.collectionId||''; const f=v.fabricType||'none'; const g=lxSmartContent(c,f);
   return `<div class="lx-smart-content-preview" id="lx-smart-preview-${escAttr(p.id)}"><div><b>Texte automatique · النص التلقائي</b><span>Basé sur Collection + Type de tissu</span></div><p><strong>Description :</strong> ${escHtml(g.fr)}</p><p><strong>Avantages :</strong> ${g.benefitsFr.map(escHtml).join(' · ')}</p></div>`;
 }
-/* Produits déjà existants (sans generatedContent) : même texte automatique (Collection + Type de tissu),
-   calculé à la lecture avec la collection actuelle. Dès que l'admin enregistre le produit, generatedContent est stocké. */
-function lxLegacyGen(prod){
-  if(!prod) return null;
-  const v=PRODUCT_VARIANTS[prod.id]; if(!v||v.gift) return null;
-  const col=v.unassigned?'':(v.collectionId||(typeof getStoreProductCollection==='function'?getStoreProductCollection(prod):''));
-  const g=lxSmartContent(col,v.fabricType||'none',I18N.fr[prod.nameKey],I18N.ar[prod.nameKey]);
-  return {fr:g.fr,ar:g.ar,benefitsFr:g.benefitsFr,benefitsAr:g.benefitsAr};
-}
 function lxAdminDescriptionValue(p,lang){
   const v=PRODUCT_VARIANTS[p.id]||{}, g=v.generatedContent||{};
+  if(lxTextMode(p.id)!=='auto') return lang==='ar'?(I18N.ar[p.descKey]||''):(I18N.fr[p.descKey]||'');
   const manual=lang==='ar'?g.manualAr:g.manualFr;
-  if(manual){ const ex=lang==='ar'?(I18N.ar[p.descKey]||''):(I18N.fr[p.descKey]||''); if(ex) return ex; }
+  if(manual){ return lang==='ar'?(I18N.ar[p.descKey]||''):(I18N.fr[p.descKey]||''); }
   const a=lxSmartFor(p); return a?(lang==='ar'?a.ar:a.fr):'';
 }
 function lxAdminBenefitsValue(p,lang){
   const v=PRODUCT_VARIANTS[p.id]||{}, g=v.generatedContent||{};
+  if(lxTextMode(p.id)!=='auto'){ const l=lang==='ar'?g.benefitsAr:g.benefitsFr; return Array.isArray(l)?l.join('\n'):''; }
   const manual=lang==='ar'?g.manualBenAr:g.manualBenFr, lst=lang==='ar'?g.benefitsAr:g.benefitsFr;
-  if(manual&&Array.isArray(lst)&&lst.length) return lst.join('\n');
+  if(manual&&Array.isArray(lst)) return lst.join('\n');
   const a=lxSmartFor(p); return a?(lang==='ar'?a.benefitsAr:a.benefitsFr).join('\n'):'';
 }
 function lxSmartBlockHTML(p){
   const v=PRODUCT_VARIANTS[p.id]||{}, g=v.generatedContent||{}, id=p.id;
   const mk=(key,flag,val,label,rows,rtl)=>`<div class="field"><label>${label}</label><textarea id="pf-${key}-${escAttr(id)}" rows="${rows}" spellcheck="false" autocorrect="off" autocapitalize="off" autocomplete="off"${rtl?' dir="rtl" lang="ar"':' lang="fr"'}${flag?' data-lx-manual="1"':''}>${escHtml(val)}</textarea></div>`;
+  const mode=lxTextMode(id);
+  const mb=(m,label)=>`<button type="button" class="btn btn-ghost lx-mode-btn${mode===m?' is-on':''}" data-lx-mode-set="${m}" data-pid="${escAttr(id)}">${label}</button>`;
   return `<div class="lx-smart-block" id="lx-smart-${escAttr(id)}">
-    <div class="lx-smart-head"><b>Texte automatique · النص التلقائي</b><span class="lx-smart-mode" id="lx-mode-${escAttr(id)}"></span><button type="button" class="btn btn-ghost" data-lx-reset="${escAttr(id)}">↺ Tout régénérer (auto)</button></div>
-    <small class="lx-smart-help">Généré à partir de : Titre + Type de tissu + Collection (visible tout de suite, avant l'enregistrement). Vous pouvez modifier à la main : un champ modifié n'est plus écrasé. Champ vidé = retour en automatique.</small>
+    <div class="lx-smart-head"><b>Textes du produit · نصوص المنتج</b><span class="lx-smart-mode" id="lx-mode-${escAttr(id)}"></span><button type="button" class="btn btn-ghost" data-lx-reset="${escAttr(id)}">↺ Tout régénérer (auto)</button></div>
+    <input type="hidden" id="pf-textmode-${escAttr(id)}" value="${escAttr(mode)}">
+    <div class="lx-mode-choice">${mb('manual','✍️ Remplir manuellement · تعبئة يدوية')}${mb('auto','✨ Générer automatiquement · توليد تلقائي')}</div>
+    <small class="lx-smart-help" id="lx-modehelp-${escAttr(id)}"></small>
     <div class="admin-two-col">${mk('desc-fr',g.manualFr,lxAdminDescriptionValue(p,'fr'),t('admin.field.descFr'),5,false)}${mk('desc-ar',g.manualAr,lxAdminDescriptionValue(p,'ar'),t('admin.field.descAr'),5,true)}</div>
     <div class="admin-two-col">${mk('ben-fr',g.manualBenFr,lxAdminBenefitsValue(p,'fr'),'Avantages (un par ligne)',5,false)}${mk('ben-ar',g.manualBenAr,lxAdminBenefitsValue(p,'ar'),'المميزات (واحدة في كل سطر)',5,true)}</div>
   </div>`;
@@ -18521,6 +19001,10 @@ function lxDetailAdminHTML(p){
       <div class="field"><label>التفاصيل (عربية)</label><textarea id="pf-det-ar-${escAttr(id)}" rows="4" spellcheck="false" autocomplete="off" dir="rtl" lang="ar"${d.manualAr&&ar?' data-lx-manual="1"':''}>${escHtml(ar)}</textarea></div>
     </div>
   </div>`;
+}
+function lxDetFrameFieldHTML(p){
+  const id=p.id, f=(PRODUCT_VARIANTS[id]||{}).detFrame==='story';
+  return `<div class="field"><label>Cadre des photos du montage · إطار صور المونتاج</label><select id="pf-detframe-${escAttr(id)}"><option value="square"${f?'':' selected'}>Carré (1:1) — actuel · مربع</option><option value="story"${f?' selected':''}>Vertical 9:16 · عمودي</option></select></div>`;
 }
 async function lxTranslateLines(lines){
   return Promise.all(lines.map(async l=>{
@@ -18619,6 +19103,7 @@ function __renderAdminProductsRaw(){
         <div class="admin-section-grid">
           <section class="admin-section-card"><div class="admin-section-title"><span>01</span><div><h3>${t('admin.productIdentity')}</h3><p>${t('admin.productIdentityHint')}</p></div></div>
             ${renderProductImagesHTML(p)}
+            ${lxDetFrameFieldHTML(p)}
             <div class="admin-two-col"><div class="field"><label>${t('admin.field.nameFr')}</label><input type="text" id="pf-name-fr-${p.id}" value="${escAttr(I18N.fr[p.nameKey]||'')}"></div><div class="field"><label>${t('admin.field.nameAr')}</label><input type="text" id="pf-name-ar-${p.id}" value="${escAttr(I18N.ar[p.nameKey]||'')}"></div></div>
             ${lxSmartFabricHTML(p)}
             <div class="field"><label>${t('admin.catalogTypeLabel')}</label><select id="pf-catalog-type-${p.id}"><option value="" ${!collectionId?'selected':''}>${t('admin.chooseCollection')}</option>${collections.map(c=>`<option value="${escAttr(c.id)}" ${c.id===collectionId?'selected':''}>${escHtml(c[currentLang]||c.fr||c.ar||c.id)}</option>`).join('')}</select></div>
@@ -18647,8 +19132,8 @@ function __renderAdminProductsRaw(){
           <div class="admin-three-col"><div class="field"><label>${t('admin.field.packPieces')}</label><input type="number" min="2" step="1" id="pf-pack-pieces-${p.id}" value="${pack.pieces??''}"></div><div class="field"><label>${t('admin.packPrice')}</label><input type="number" min="0" step="0.01" id="pf-pack-price-${p.id}" value="${pack.price??''}"></div><div class="field"><label>${t('admin.field.packContentsFr')}</label><input type="text" id="pf-pack-contents-fr-${p.id}" ${lxPackAttr(p.id,'contents','fr')}></div></div>
           <div class="field"><label>${t('admin.field.packContentsAr')}</label><input type="text" id="pf-pack-contents-ar-${p.id}" ${lxPackAttr(p.id,'contents','ar')}></div>
           <div class="admin-pack-variants"><div class="admin-block-head"><strong>Bannière offre spéciale · بانر العرض الخاص</strong><small>Affichée dans la fiche produit (pas sur les cartes de l'accueil) et sur les landing pages quand le pack est activé.</small></div>
-            <div class="admin-two-col"><div class="field"><label>Badge (FR) — ex : Offre spéciale</label><input type="text" id="pf-pack-badge-fr-${p.id}" ${lxPackAttr(p.id,'badge','fr')}></div><div class="field"><label>باج البانر (AR) — مثلا: عرض خاص</label><input type="text" id="pf-pack-badge-ar-${p.id}" ${lxPackAttr(p.id,'badge','ar')}></div></div>
-            <div class="admin-two-col"><div class="field"><label>Texte de l’offre (FR) — ex : Achetez 2 pyjamas et profitez d’une remise</label><input type="text" id="pf-pack-label-fr-${p.id}" ${lxPackAttr(p.id,'label','fr')}></div><div class="field"><label>نص العرض (AR) — مثلا: إشتري 2 بيجاما و إستفيدي من تخفيض مميز</label><input type="text" id="pf-pack-label-ar-${p.id}" ${lxPackAttr(p.id,'label','ar')}></div></div>
+            <div class="admin-two-col lx-pair-stack"><div class="field"><label>Badge (FR) — ex : Offre spéciale</label><input type="text" id="pf-pack-badge-fr-${p.id}" ${lxPackAttr(p.id,'badge','fr')}></div><div class="field"><label>باج البانر (AR) — مثلا: عرض خاص</label><input type="text" id="pf-pack-badge-ar-${p.id}" ${lxPackAttr(p.id,'badge','ar')}></div></div>
+            <div class="admin-two-col lx-pair-stack"><div class="field"><label>Texte de l’offre (FR) — ex : Achetez 2 pyjamas et profitez d’une remise</label><input type="text" id="pf-pack-label-fr-${p.id}" ${lxPackAttr(p.id,'label','fr')}></div><div class="field"><label>نص العرض (AR) — مثلا: إشتري 2 بيجاما و إستفيدي من تخفيض مميز</label><input type="text" id="pf-pack-label-ar-${p.id}" ${lxPackAttr(p.id,'label','ar')}></div></div>
             <div class="field"><label>Ancien prix du Pack — automatique (optionnel) · السعر القديم للباك</label><input type="number" min="0" step="0.01" id="pf-pack-oldprice-${p.id}" value="${pack.oldPrice??''}"></div>
           </div>
           <div class="admin-pack-variants"><div class="admin-block-head"><strong>Couleurs & tailles du Pack — الألوان والمقاسات</strong><small>Le Pack reprend automatiquement les couleurs et les tailles du produit principal (section 02), avec le même affichage. Rien à configurer ici.</small></div></div>
@@ -18684,7 +19169,7 @@ function __renderAdminProductsRaw(){
 function lxEnsureSmartCss(){
   if(document.getElementById('lx-smart-css')) return;
   const s=document.createElement('style'); s.id='lx-smart-css';
-  s.textContent='.lx-smart-block{margin:14px 0;padding:14px;border:1px solid rgba(201,168,119,.45);border-radius:14px;background:rgba(201,168,119,.06)}.lx-smart-head{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:6px}.lx-smart-head b{flex:1 1 180px}.lx-smart-mode{font-size:11px;padding:3px 9px;border-radius:99px;background:#efe6d6;color:#6b5a3a}.lx-smart-mode.is-manual{background:#f6dcc8;color:#8a4a1c}.lx-smart-help{display:block;margin:0 0 10px;color:#8a8178;font-size:11px;line-height:1.5}.lx-smart-block textarea{width:100%;min-height:96px}.lx-pack-smart-head{margin:4px 0 10px}';
+  s.textContent='.lx-smart-block{margin:14px 0;padding:14px;border:1px solid rgba(201,168,119,.45);border-radius:14px;background:rgba(201,168,119,.06)}.lx-smart-head{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:6px}.lx-smart-head b{flex:1 1 180px}.lx-smart-mode{font-size:11px;padding:3px 9px;border-radius:99px;background:#efe6d6;color:#6b5a3a}.lx-smart-mode.is-manual{background:#f6dcc8;color:#8a4a1c}.lx-smart-help{display:block;margin:0 0 10px;color:#8a8178;font-size:11px;line-height:1.5}.lx-smart-block textarea{width:100%;min-height:96px}.lx-pack-smart-head{margin:4px 0 10px}.lx-mode-choice{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:6px 0 8px}.lx-mode-btn{white-space:normal;line-height:1.3}.lx-mode-btn.is-on{background:#c9a877!important;color:#2b2318!important;border-color:#c9a877!important;font-weight:700}';
   document.head.appendChild(s);
 }
 function bindAdminSmartContent(){
@@ -18697,11 +19182,21 @@ function bindAdminSmartContent(){
     const TEXT=[['desc-fr',c=>c.fr],['desc-ar',c=>c.ar],['ben-fr',c=>c.benefitsFr.join('\n')],['ben-ar',c=>c.benefitsAr.join('\n')]];
     const PACK=[]; ['name','contents','badge','label'].forEach(k=>['fr','ar'].forEach(l=>PACK.push([`pack-${k}-${l}`,k,l])));
     const modeEls=()=>[document.getElementById('lx-mode-'+id),document.getElementById('lx-pack-mode-'+id)];
+    const getMode=()=>{const e=g('textmode'); return e?e.value:'auto';};
+    const HELP={
+      '':'Choisissez : remplir vous-même (champs vides) ou générer tous les textes automatiquement (titre + tissu + collection). · اختاري: تعبئة النصوص بنفسك (خانات فارغة) أو توليد كل النصوص تلقائيا (حسب العنوان والقماش والكوليكسيون).',
+      manual:'Mode manuel : rien n\'est généré, les champs restent exactement comme vous les écrivez. · الوضع اليدوي: لا يتولد أي نص، وتبقى الخانات كما كتبتيها.',
+      auto:'Mode automatique : textes générés en arabe et en français à partir du titre + tissu + collection (+ nombre de pièces pour un pack), avant l\'enregistrement. Vous pouvez modifier n\'importe quel texte : un champ modifié n\'est plus écrasé. Champ vidé = il reste vide (↺ Tout régénérer pour le remplir à nouveau). · الوضع التلقائي: تتولد النصوص بالعربية والفرنسية قبل التسجيل. يمكنك تعديل أي نص، والنص المعدل لا يُستبدل، وإذا أفرغتِ خانة فتبقى فارغة (زر «Tout régénérer» يملؤها من جديد).'
+    };
     const setModes=()=>{
+      const m=getMode();
+      document.querySelectorAll(`[data-lx-mode-set][data-pid="${CSS.escape(id)}"]`).forEach(b=>b.classList.toggle('is-on',b.dataset.lxModeSet===m));
+      const h=document.getElementById('lx-modehelp-'+id); if(h) h.textContent=HELP[m]!==undefined?HELP[m]:HELP.auto;
       const nT=TEXT.filter(([k])=>g(k)?.dataset.lxManual).length, nP=PACK.filter(([k])=>g(k)?.dataset.lxManual).length;
       const [a,b]=modeEls();
-      if(a){a.textContent=nT?`✎ ${nT}/4 modifié(s) à la main`:'✨ Auto';a.classList.toggle('is-manual',!!nT);}
-      if(b){b.textContent=nP?`✎ ${nP}/8 modifié(s) à la main`:'✨ Auto';b.classList.toggle('is-manual',!!nP);}
+      const lbl=m==='manual'?'✍️ Manuel · يدوي':'⏳ Choisir un mode · اختاري الوضع';
+      if(a){ if(m==='auto'){a.textContent=nT?`✎ ${nT}/4 modifié(s) à la main`:'✨ Auto';a.classList.toggle('is-manual',!!nT);} else {a.textContent=lbl;a.classList.toggle('is-manual',m==='manual');} }
+      if(b){ if(m==='auto'){b.textContent=nP?`✎ ${nP}/8 modifié(s) à la main`:'✨ Auto';b.classList.toggle('is-manual',!!nP);} else {b.textContent=lbl;b.classList.toggle('is-manual',m==='manual');} }
     };
     const fillText=force=>{
       let c=null; try{const x=ctx(); c=lxSmartContent(x.col,x.fab,x.tfr,x.tar,(PRODUCT_VARIANTS[id]&&PRODUCT_VARIANTS[id].kind==='pack')?g('pack-pieces')?.value:0);}catch(e){console.warn(e);}
@@ -18712,16 +19207,26 @@ function bindAdminSmartContent(){
       let a=null; try{const x=ctx(); a=lxSmartPack(x.tfr,x.tar,x.col,x.fab,g('pack-pieces')?.value);}catch(e){console.warn(e);}
       PACK.forEach(([k,grp,l])=>{const el=g(k); if(!el) return; if(force) delete el.dataset.lxManual; if(!el.dataset.lxManual&&a) el.value=a[grp][l];});
     };
-    const refresh=()=>{fillText(false);fillPack(false);setModes();};
+    /* Les champs ne se remplissent tout seuls QU'en mode automatique. */
+    const refresh=()=>{ if(getMode()==='auto'){fillText(false);fillPack(false);} setModes(); };
+    const hasManualContent=()=>TEXT.concat(PACK).some(([k])=>{const el=g(k); return el&&el.dataset.lxManual&&el.value.trim()!=='';});
+    const chooseMode=m=>{
+      const e=g('textmode'); if(!e) return;
+      if(m==='auto'){
+        if(hasManualContent() && !confirm('Remplacer les textes modifiés à la main par les textes automatiques ?\nاستبدال النصوص المعدلة يدويا بالنصوص التلقائية؟')) return;
+        e.value='auto'; fillText(true); fillPack(true);
+      } else { e.value='manual'; }
+      setModes();
+    };
     ['fabric','catalog-type','custom-collection'].forEach(s=>g(s)?.addEventListener('change',refresh));
     ['name-fr','name-ar'].forEach(s=>{const el=g(s); if(el){el.addEventListener('input',refresh);el.addEventListener('change',refresh);}});
-    const pcs=g('pack-pieces'); if(pcs){pcs.addEventListener('input',()=>{fillText(false);fillPack(false);setModes();});pcs.addEventListener('change',()=>{fillText(false);fillPack(false);setModes();});}
+    const pcs=g('pack-pieces'); if(pcs){pcs.addEventListener('input',refresh);pcs.addEventListener('change',refresh);}
     TEXT.concat(PACK).forEach(([k])=>{
       const el=g(k); if(!el) return;
-      el.addEventListener('input',()=>{ if(el.value.trim()!=='') el.dataset.lxManual='1'; setModes(); });
-      el.addEventListener('change',()=>{ if(el.value.trim()===''){ delete el.dataset.lxManual; fillText(false); fillPack(false);} setModes(); });
+      el.addEventListener('input',()=>{ el.dataset.lxManual='1'; setModes(); });
     });
-    document.querySelector(`[data-lx-reset="${CSS.escape(id)}"]`)?.addEventListener('click',()=>{fillText(true);setModes();});
+    document.querySelectorAll(`[data-lx-mode-set][data-pid="${CSS.escape(id)}"]`).forEach(b=>b.addEventListener('click',()=>chooseMode(b.dataset.lxModeSet)));
+    document.querySelector(`[data-lx-reset="${CSS.escape(id)}"]`)?.addEventListener('click',()=>{ if(getMode()==='auto'){fillText(true);setModes();} else chooseMode('auto'); });
     document.querySelector(`[data-lx-pack-reset="${CSS.escape(id)}"]`)?.addEventListener('click',()=>{fillPack(true);setModes();});
     setModes();
   });
@@ -18740,7 +19245,7 @@ function bindAdminCatalogTypeEvents(){
 function bindAdminPackEvents(){
   document.querySelectorAll('[data-addpackcolor]').forEach(btn=>btn.addEventListener('click',()=>{
     const id=btn.dataset.addpackcolor,v=PRODUCT_VARIANTS[id]||(PRODUCT_VARIANTS[id]={colors:[],sizes:[],stock:null,pack:null});
-    const fr=document.getElementById('newpackcolor-fr-'+id)?.value.trim(),ar=document.getElementById('newpackcolor-ar-'+id)?.value.trim(),hex=document.getElementById('newpackcolor-hex-'+id)?.value||'#c9a877';
+    const fr=document.getElementById('newpackcolor-fr-'+id)?.value.trim(),ar=document.getElementById('newpackcolor-ar-'+id)?.value.trim(),hex=lxColorHexFor(document.getElementById('newpackcolor-fr-'+id)?.value.trim(),document.getElementById('newpackcolor-ar-'+id)?.value.trim(),document.getElementById('newpackcolor-hex-'+id)?.value);
     if(!fr&&!ar)return; if(!v.pack)v.pack={enabled:false,pieces:2,price:0,name:{fr:'',ar:''},contents:{fr:'',ar:''},colors:[],sizes:[]};
     if(!Array.isArray(v.pack.colors))v.pack.colors=[]; v.pack.colors.push({id:'pc'+Date.now().toString(36)+Math.random().toString(36).slice(2,5),fr:fr||ar,ar:ar||fr,hex}); openProductId=id; renderAdminProducts();
   }));
@@ -18758,16 +19263,7 @@ function bindAdminPackEvents(){
 const LX_SIZES_LETTERS=["XS","S","M","L","XL","XXL","3XL","4XL"];
 const LX_SIZES_SHOES=["35","36","37","38","39","40","41","42","43","44","45","46"];
 const LX_SIZE_ORDER=LX_SIZES_LETTERS.concat(LX_SIZES_SHOES);
-const LX_COLOR_PRESETS=[
-  {id:"noir",fr:"Noir",ar:"أسود",hex:"#1a1a1a"},{id:"blanc",fr:"Blanc",ar:"أبيض",hex:"#f4ede4"},
-  {id:"beige",fr:"Beige",ar:"بيج",hex:"#c9a877"},{id:"creme",fr:"Crème",ar:"كريمي",hex:"#f3e6c8"},
-  {id:"gris",fr:"Gris",ar:"رمادي",hex:"#8c8c8c"},{id:"marron",fr:"Marron",ar:"بني",hex:"#6b4423"},
-  {id:"rouge",fr:"Rouge",ar:"أحمر",hex:"#c8102e"},{id:"rose",fr:"Rose",ar:"وردي",hex:"#e8a0b4"},
-  {id:"bordeaux",fr:"Bordeaux",ar:"عنابي",hex:"#6d1a2c"},{id:"marine",fr:"Bleu marine",ar:"كحلي",hex:"#1b2a49"},
-  {id:"ciel",fr:"Bleu ciel",ar:"أزرق سماوي",hex:"#8ec5e8"},{id:"vert",fr:"Vert",ar:"أخضر",hex:"#2e7d4f"},
-  {id:"kaki",fr:"Kaki",ar:"كاكي",hex:"#78794a"},{id:"jaune",fr:"Jaune",ar:"أصفر",hex:"#f2c230"},
-  {id:"orange",fr:"Orange",ar:"برتقالي",hex:"#e87722"},{id:"violet",fr:"Violet",ar:"بنفسجي",hex:"#6f3d8f"}
-];
+const LX_COLOR_PRESETS=LX_COLOR_PALETTE; /* même palette que le reste du site */
 function lxN(s){return String(s==null?'':s).trim().toLowerCase();}
 function lxFindColor(v,p){return (v.colors||[]).find(c=>c.id===p.id||lxN(c.fr)===lxN(p.fr)||lxN(c.ar)===lxN(p.ar));}
 function lxHasSize(v,s){return (v.sizes||[]).some(x=>lxN(x)===lxN(s));}
@@ -18824,7 +19320,7 @@ async function bindProductVariantEvents(){
       if(!fr && !ar) return;
       const oldColors = PRODUCT_VARIANTS[id].colors.slice();
       const cid = "c" + Date.now().toString(36) + Math.random().toString(36).slice(2,5);
-      PRODUCT_VARIANTS[id].colors.push({ id:cid, fr: fr||ar, ar: ar||fr, hex: hexInput.value || "#c9a877" });
+      PRODUCT_VARIANTS[id].colors.push({ id:cid, fr: fr||ar, ar: ar||fr, hex: lxColorHexFor(fr,ar,hexInput.value) });
       try{
         persistVariantsOrShowError(id);
         frInput.value = ""; arInput.value = ""; hexInput.value = "#c9a877";
@@ -18972,10 +19468,17 @@ async function __saveProductEditsInner(id){
   const __flag=s=>!!document.getElementById(`pf-${s}-${id}`)?.dataset.lxManual;
   const __lines=s=>String(document.getElementById(`pf-${s}-${id}`)?.value||'').split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
   const __smart=lxSmartContent(collectionId,v.fabricType,nameFr||I18N.fr[p.nameKey],nameAr||I18N.ar[p.nameKey],v.kind==='pack'?parseInt(val('pack-pieces'),10):0);
-  const __mFr=__flag('desc-fr')&&descFr!=='', __mAr=__flag('desc-ar')&&descAr!=='';
-  const __mbFr=__flag('ben-fr')&&__lines('ben-fr').length>0, __mbAr=__flag('ben-ar')&&__lines('ben-ar').length>0;
-  if(!__mFr) I18N.fr[p.descKey]=__smart.fr; if(!__mAr) I18N.ar[p.descKey]=__smart.ar;
-  v.generatedContent={fr:__smart.fr,ar:__smart.ar,benefitsFr:__mbFr?__lines('ben-fr'):__smart.benefitsFr,benefitsAr:__mbAr?__lines('ben-ar'):__smart.benefitsAr,fabricType:v.fabricType,manualFr:__mFr,manualAr:__mAr,manualBenFr:__mbFr,manualBenAr:__mbAr};
+  const __modeEl=el('textmode'), __mode=__modeEl?__modeEl.value:lxTextMode(id);
+  if(__mode==='auto'){
+    const __mFr=__flag('desc-fr'), __mAr=__flag('desc-ar');
+    const __mbFr=__flag('ben-fr'), __mbAr=__flag('ben-ar');
+    if(!__mFr) I18N.fr[p.descKey]=__smart.fr; if(!__mAr) I18N.ar[p.descKey]=__smart.ar;
+    v.generatedContent={mode:'auto',fr:__smart.fr,ar:__smart.ar,benefitsFr:__mbFr?__lines('ben-fr'):__smart.benefitsFr,benefitsAr:__mbAr?__lines('ben-ar'):__smart.benefitsAr,fabricType:v.fabricType,manualFr:__mFr,manualAr:__mAr,manualBenFr:__mbFr,manualBenAr:__mbAr};
+  } else {
+    /* Mode manuel (ou choix pas encore fait) : on enregistre exactement ce qui est écrit, rien n'est généré. */
+    const __bFr=__lines('ben-fr'), __bAr=__lines('ben-ar');
+    v.generatedContent={mode:__mode,fr:descFr,ar:descAr,benefitsFr:__bFr,benefitsAr:__bAr,fabricType:v.fabricType,manualFr:descFr!=='',manualAr:descAr!=='',manualBenFr:__bFr.length>0,manualBenAr:__bAr.length>0};
+  }
   v.oldPrice=(__oldRaw!==''&&Number.isFinite(__oldParsed))?__oldParsed:null;
   if(document.getElementById(`pf-det-fr-${id}`)){
     const __dFr=__lines('det-fr'); let __dAr=__lines('det-ar');
@@ -18983,6 +19486,7 @@ async function __saveProductEditsInner(id){
     if(__dFr.length&&!__dAr.length){ try{ __dAr=await lxTranslateLines(__dFr); }catch(e){ __dAr=[]; } }
     if(__dFr.length||__dAr.length) v.detailStrip={fr:__dFr,ar:__dAr,manualAr:__dMan}; else delete v.detailStrip;
   }
+  { const __fe=document.getElementById(`pf-detframe-${id}`); if(__fe){ if(__fe.value==='story') v.detFrame='story'; else delete v.detFrame; } }
   const packEnabled=!!document.getElementById(`pf-pack-enabled-${id}`)?.checked||v.kind==='pack';
   const packPiecesRaw=val('pack-pieces'),packPieces=packPiecesRaw===''?null:Math.max(2,parseInt(packPiecesRaw,10));
   const packPriceRaw=v.kind==='pack'?String(p.price):val('pack-price'),packPrice=packPriceRaw===''?null:parseFloat(packPriceRaw);
@@ -19003,7 +19507,7 @@ async function __saveProductEditsInner(id){
   }else{
     v.pack={...oldPack,enabled:false,pieces:packPieces,price:packPrice,name:{fr:packNameFr,ar:packNameAr},contents:{fr:packContentsFr,ar:packContentsAr},colors:packColors,sizes:packSizes,...packExtra};
   }
-  { const __pm={}; ['name','contents','badge','label'].forEach(g=>['fr','ar'].forEach(l=>{const el=document.getElementById(`pf-pack-${g}-${l}-${id}`); __pm[g+'_'+l]=!!(el&&el.dataset.lxManual&&String(el.value).trim()!=='');})); v.pack.manual=__pm; }
+  { const __pm={}; ['name','contents','badge','label'].forEach(g=>['fr','ar'].forEach(l=>{const el=document.getElementById(`pf-pack-${g}-${l}-${id}`); __pm[g+'_'+l]=!!(el&&el.dataset.lxManual);})); v.pack.manual=__pm; }
   /* An incomplete Pack is allowed and saved as entered. */
   saveProductVariants(PRODUCT_VARIANTS);
   const overrides=loadProductOverrides();overrides[id]={price:p.price,enabled:p.enabled,video:p.video,name:{fr:I18N.fr[p.nameKey],ar:I18N.ar[p.nameKey]},desc:{fr:I18N.fr[p.descKey],ar:I18N.ar[p.descKey]},badge:{fr:I18N.fr[p.badgeKey],ar:I18N.ar[p.badgeKey]}};saveProductOverrides(overrides);
@@ -19041,7 +19545,7 @@ async function addNewProductAdmin(){
   const p = { id, nameKey, descKey, badgeKey, price:0, enabled:true, video:"" };
   const giftNew=!!window.__luxiaNewGift; window.__luxiaNewGift=false;
   if(giftNew){ I18N.fr[nameKey]="Pack Cadeau"; I18N.ar[nameKey]="باك كادو"; }
-  PRODUCT_VARIANTS[id] = { colors: [], sizes: [], stock:null, pack:null, collectionId:null, fabricType:'none', generatedContent:lxSmartContent(null,'none'), unassigned:true };
+  PRODUCT_VARIANTS[id] = { colors: [], sizes: [], stock:null, pack:null, collectionId:null, fabricType:'none', generatedContent:giftNew?Object.assign(lxSmartContent(null,'none'),{mode:'auto'}):{mode:'',fr:'',ar:'',benefitsFr:[],benefitsAr:[],fabricType:'none',manualFr:false,manualAr:false,manualBenFr:false,manualBenAr:false}, unassigned:true };
   const packNew=!giftNew&&window.__lxNewKind==='pack'; window.__lxNewKind=null;
   if(packNew){ I18N.fr[nameKey]="Nouveau pack"; I18N.ar[nameKey]="باك جديد"; PRODUCT_VARIANTS[id].kind='pack'; PRODUCT_VARIANTS[id].pack={enabled:true,pieces:2,price:0,name:{fr:'',ar:''},contents:{fr:'',ar:''},badge:{fr:'',ar:''},label:{fr:'',ar:''},colors:[],sizes:[],oldPrice:null}; }
   if(giftNew) PRODUCT_VARIANTS[id].gift={items:[{name:"",type:"cloth"}],msg:true,hide:true,wrap:true,wrapPrice:15};
@@ -25071,12 +25575,14 @@ ov.addEventListener('pointermove',function(e){var p=P[e.pointerId];if(!p)return;
 if(Object.keys(P).length===2){s=Math.min(5,Math.max(1,s0*dist()/d0));ap();}else if(s>1){tx+=dx;ty+=dy;ap();}});
 function up(e){if(!P[e.pointerId])return;var single=Object.keys(P).length===1;delete P[e.pointerId];
 if(single){var dx=e.clientX-sx;if(s<=1.02&&L.length>1&&Math.abs(dx)>60){show(i+(dx<0?1:-1));return;}
+if(mv<12&&s<=1.02&&e.target===ov){close();return;}
 if(mv<12){var n=Date.now();if(n-lt<320){s=s>1?1:2.5;tx=ty=0;ap();lt=0;}else lt=n;}}
 if(s<1.02){s=1;tx=ty=0;ap();}}
 ov.addEventListener('pointerup',up);ov.addEventListener('pointercancel',up);
 ov.addEventListener('wheel',function(e){e.preventDefault();s=Math.min(5,Math.max(1,s*(e.deltaY<0?1.15:.87)));if(s===1){tx=ty=0;}ap();},{passive:false});
 document.addEventListener('keydown',function(e){if(!ov.classList.contains('on'))return;if(e.key==='Escape')close();if(e.key==='ArrowRight')show(i+1);if(e.key==='ArrowLeft')show(i-1);});}
 document.addEventListener('click',function(e){var m=e.target.closest&&e.target.closest('#productDetailMainImage,.product-detail-main-image img,.lx-det-slide img');if(!m)return;
+if(window.__lxDetDragged){e.preventDefault();e.stopPropagation();return;}
 var pd=document.getElementById('productDetailOverlay'),G=(pd&&pd._lxGallery)||[],a=0,sl=m.closest('.lx-det-slide');
 if(sl){L=[].map.call(sl.parentNode.querySelectorAll('.lx-det-slide img'),function(x){return x.src;});a=+sl.dataset.i||0;}else{L=G.slice();var u=function(x){var q=document.createElement('a');q.href=x;return q.href;};a=G.map(u).indexOf(m.src);if(a<0){L=[m.src];a=0;}}
 if(!L.length)L=[m.src];
@@ -25506,6 +26012,8 @@ html[data-lx-theme="dark"] .lx-det-kicker{color:#c9a24f !important}
 html[data-lx-theme="dark"] .lx-det-title{color:#f6eee1 !important}
 html[data-lx-theme="dark"] .lx-det-orn i,html[data-lx-theme="dark"] .lx-det-dots i.on{background:#c9a24f !important}
 html[data-lx-theme="dark"] .lx-det-dots i,html[data-lx-theme="dark"] .lx-det-slide{border-color:#c9a24f !important}
+html[data-lx-theme="dark"] .lx-det-nav{background:rgba(10,8,7,.8) !important;border-color:rgba(201,162,79,.55) !important;color:#e3c785 !important}
+html[data-lx-theme="dark"] .lx-det-nav:hover,html[data-lx-theme="dark"] .lx-det-nav:focus-visible{background:#c9a24f !important;color:#0a0807 !important}
 
 /* ===== Landing pages — thème dark : formule (À la pièce / Pack) + champs pack cadeau =====
    Même rendu que la fiche produit du site dark. Bloc unique, placé en dernier. */
@@ -25786,7 +26294,7 @@ html:is([data-lx-theme="dark"],[data-lx-lp-theme="dark"]) body .lp-preview.lp-pr
     var lay=layout(id,packsOf(id));
     return rawPacks(id).map(function(pk,i){
       var base='class="lx-mp-in" data-mp-id="'+escAttr(id)+'" data-mp-i="'+i+'"';
-      return '<div class="lx-mp-row"><div class="admin-two-col"><div class="field"><label>Titre du pack (FR)</label><input type="text" '+base+' data-mp-f="title-fr" value="'+escAttr((pk.title&&pk.title.fr)||'')+'" placeholder="ex : Pack Duo"></div>'
+      return '<div class="lx-mp-row"><div class="admin-two-col lx-pair-stack"><div class="field"><label>Titre du pack (FR)</label><input type="text" '+base+' data-mp-f="title-fr" value="'+escAttr((pk.title&&pk.title.fr)||'')+'" placeholder="ex : Pack Duo"></div>'
         +'<div class="field"><label>عنوان الباك (AR)</label><input type="text" dir="rtl" '+base+' data-mp-f="title-ar" value="'+escAttr((pk.title&&pk.title.ar)||'')+'" placeholder="مثلا: باك ثنائي"></div></div>'
         +'<div class="admin-two-col"><div class="field"><label>Nombre de pièces · عدد القطع</label><input type="number" min="2" step="1" '+base+' data-mp-f="pieces" value="'+escAttr(pk.pieces!=null?pk.pieces:'')+'"></div>'
         +'<div class="field"><label>Prix du pack (DH) · ثمن الباك</label><input type="number" min="0" step="0.01" '+base+' data-mp-f="price" value="'+escAttr(pk.price!=null?pk.price:'')+'"></div></div>'
