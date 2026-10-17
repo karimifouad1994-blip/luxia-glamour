@@ -14069,7 +14069,7 @@ function lxDetailBlockHTML(id,lang,gallery){
   const head=`<div class="lx-det-head"><div class="lx-det-kicker">${ar?'التفاصيل':'Le détail'}</div><div class="lx-det-title">${ar?'كل تفصيل، بصمة':'Chaque détail, une signature'}</div><div class="lx-det-orn"><i></i></div></div>`;
   const multi=extra.length>1;
   const slider=extra.length?`<div class="lx-det-slider"${((PRODUCT_VARIANTS[id]||{}).detFrame==='story')?' data-frame="story"':''}><div class="lx-det-slides">${extra.map((src,i)=>`<div class="lx-det-slide" data-i="${i}" role="button" tabindex="0"><img src="${escAttr(src)}" alt="${i+1}" loading="lazy" draggable="false"></div>`).join('')}</div>${multi?`<button type="button" class="lx-det-nav lx-det-prev" aria-label="${ar?'الصورة السابقة':'Photo précédente'}">&#171;</button><button type="button" class="lx-det-nav lx-det-next" aria-label="${ar?'الصورة التالية':'Photo suivante'}">&#187;</button>`:''}</div><div class="lx-det-dots">${extra.map((_,i)=>`<i class="${i===0?'on':''}"${multi?` data-k="${i}" role="button" tabindex="0" aria-label="${i+1}/${extra.length}"`:''}></i>`).join('')}</div>`:'';
-  return `<div class="lx-det${ar?' is-ar':''}">${strip}${extra.length?head+slider:''}</div>`;
+  return `<div class="lx-det${ar?' is-ar':''}">${extra.length?head:''}${strip}${extra.length?slider:''}</div>`;
 }
 /* Bloc « Le détail » partagé : site (fenêtre produit) + landing pages. Défilement auto toutes les 4 s. */
 function lpDetailBlock(prod,imgs,lang,gal){ return lxDetailBlockHTML(prod?prod.id:'',lang,gal?imgs:imgs.slice(0,1)); }
@@ -26090,6 +26090,7 @@ html:is([data-lx-theme="dark"],[data-lx-lp-theme="dark"]) body .lp-preview.lp-pr
 html:is([data-lx-theme="dark"],[data-lx-lp-theme="dark"]) body .lp-preview.lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack .lp-gift-picker select.is-required-missing,html:is([data-lx-theme="dark"],[data-lx-lp-theme="dark"]) body .lp-preview.lp-preview .lp-gift-pack select.is-required-missing + .lx-dd .lx-dd-btn{border-color:#c0392b !important;box-shadow:0 0 0 3px rgba(192,57,43,.22) !important}
 </style>
 <style id="lx-det-patch">
+.lx-det-strip{margin-bottom:16px}
 /* Flèches « » : sans cadre rond, aux bords de la fenêtre, tous thèmes */
 html:root body .lx-det-slider{overflow:visible;clip-path:inset(0 calc(-1*var(--lx-b,0px)) 0 calc(-1*var(--lx-b,0px)))}
 html:root body .lx-det-slider .lx-det-nav,html[data-lx-theme="dark"] body .lx-det-slider .lx-det-nav{width:44px !important;height:72px !important;margin-top:-36px !important;padding:0 0 10px !important;border:0 !important;border-radius:0;background:transparent !important;box-shadow:none;color:#d8b45a !important;font:400 68px/1 Georgia,'Times New Roman',serif !important;letter-spacing:-.08em;text-shadow:0 1px 2px rgba(0,0,0,.7),0 0 8px rgba(0,0,0,.45);opacity:1;transition:color .25s,transform .25s}
