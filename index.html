@@ -12266,6 +12266,43 @@ setInterval(lxPromoMarqueeSync,700);
 document.addEventListener('DOMContentLoaded',lxPromoMarqueeSync);
 window.addEventListener('resize',function(){ document.querySelectorAll('.lx-mq').forEach(function(b){ b.removeAttribute('data-sig'); }); lxPromoMarqueeSync(); });
 </script>
+<style id="lx-formula-opts-css">
+/* ===== Fiche produit : formule (À la pièce / Pack) = cartes à choix, thème clair + thème sombre ===== */
+html:root body .lx-mode-step{margin:16px 0 6px}
+html:root body .lx-mode-btns{display:grid;gap:16px;padding-top:8px}
+html:root body .lx-mode-btns .lx-mode-opt{all:unset;box-sizing:border-box;position:relative;display:flex;align-items:center;gap:14px;width:100%;min-height:66px;padding:14px 18px;border-radius:18px;border:1.5px solid #cdb07a;background:#fffdf9;color:#3b2a1c;font-family:var(--font-body,Jost,Arial,sans-serif);box-shadow:0 6px 16px rgba(80,55,25,.10);cursor:pointer;-webkit-tap-highlight-color:transparent;transition:border-color .18s ease,background .18s ease,box-shadow .18s ease,transform .18s ease}
+html:root body .lx-mode-btns .lx-mode-opt:hover{border-color:#b08a45;transform:translateY(-1px)}
+html:root body .lx-mode-btns .lx-mode-opt:active{transform:scale(.99)}
+html:root body .lx-mode-btns .lx-mode-opt:focus-visible{outline:2px solid #c9a24f;outline-offset:3px}
+html:root body .lx-mode-btns .lx-mode-dot{flex:0 0 auto;box-sizing:border-box;width:24px;height:24px;border-radius:50%;border:2px solid #b99a62;background:#fff;display:grid;place-items:center;transition:background .18s ease,border-color .18s ease}
+html:root body .lx-mode-btns .lx-mode-opt.is-on .lx-mode-dot{background:#c9a24f;border-color:#c9a24f}
+html:root body .lx-mode-btns .lx-mode-opt.is-on .lx-mode-dot::after{content:"\2713";font:900 13px/1 var(--font-body,Arial,sans-serif);color:#2b1620}
+html:root body .lx-mode-btns .lx-mode-txt{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:3px}
+html:root body .lx-mode-btns .lx-mode-name{font-size:17px;font-weight:600;letter-spacing:.03em;line-height:1.2}
+html:root body .lx-mode-btns .lx-mode-save{font-size:12.5px;font-weight:500;letter-spacing:.02em;color:#8a2944}
+html:root body .lx-mode-btns .lx-mode-price{flex:0 0 auto;font-size:19px;font-weight:700;white-space:nowrap;color:#7a5a2e;font-variant-numeric:lining-nums tabular-nums}
+html:root body .lx-mode-btns .lx-mode-badge{position:absolute;top:-11px;inset-inline-end:16px;font-style:normal;font-size:11.5px;font-weight:700;letter-spacing:.04em;padding:3px 11px;border-radius:99px;background:linear-gradient(135deg,#ecd49b,#c9a24f);color:#3a0b18;box-shadow:0 2px 6px rgba(0,0,0,.18)}
+html:root body .lx-mode-btns .lx-mode-opt.is-on{background:linear-gradient(145deg,#3a1b27,#2b1620);border-color:#c9a24f;color:#f3dfa8;box-shadow:0 0 0 2px rgba(201,162,79,.22),0 10px 22px rgba(43,22,32,.28)}
+html:root body .lx-mode-btns .lx-mode-opt.is-on .lx-mode-price{color:#f0d69a}
+html:root body .lx-mode-btns .lx-mode-opt.is-on .lx-mode-save{color:#f0c8a8}
+html[data-lx-theme="dark"]:root body .lx-mode-btns .lx-mode-opt{background:#090705;color:#f6eee1;border-color:rgba(201,162,79,.4);box-shadow:none}
+html[data-lx-theme="dark"]:root body .lx-mode-btns .lx-mode-opt:hover{border-color:#c9a24f}
+html[data-lx-theme="dark"]:root body .lx-mode-btns .lx-mode-dot{background:#090705;border-color:rgba(201,162,79,.7)}
+html[data-lx-theme="dark"]:root body .lx-mode-btns .lx-mode-price{color:#cfb176}
+html[data-lx-theme="dark"]:root body .lx-mode-btns .lx-mode-save{color:#e3b3a0}
+html[data-lx-theme="dark"]:root body .lx-mode-btns .lx-mode-opt.is-on{background:#150e08;border-color:#c9a24f;color:#e7c677;box-shadow:0 0 0 2px rgba(201,162,79,.18)}
+html[data-lx-theme="dark"]:root body .lx-mode-btns .lx-mode-opt.is-on .lx-mode-dot{background:#c9a24f;border-color:#c9a24f}
+html[data-lx-theme="dark"]:root body .lx-mode-btns .lx-mode-opt.is-on .lx-mode-price{color:#e7c677}
+html[data-lx-theme="dark"]:root body .lx-mode-btns .lx-mode-opt.is-on .lx-mode-save{color:#e3b3a0}
+/* quantité et résumé : chiffres lisibles, prix jamais coupé sur deux lignes */
+html:root body #lxDetailQty{font-family:var(--font-body,Jost,Arial,sans-serif);font-variant-numeric:lining-nums tabular-nums;font-size:20px;font-weight:600;min-width:2ch;text-align:center}
+html:root body #checkoutSummary .row>span:last-child{white-space:nowrap;flex:0 0 auto;font-variant-numeric:lining-nums tabular-nums}
+html:root body #checkoutSummary .row>span:first-child{min-width:0}
+/* photos du montage : cadre 9:16 plus compact (la photo ne couvre plus tout l'écran) + flèches plus discrètes */
+html:root body .lx-det-slider[data-frame="story"]{--lxw:min(90%,calc(62vh * 9 / 16))}
+html:root body .lx-det-slider[data-frame="story"]{--lxw:min(90%,calc(62svh * 9 / 16))}
+html:root body .lx-det-slider .lx-det-nav{width:30px;height:30px;margin-top:-15px;padding:0 0 2px;font-size:20px;opacity:.92}
+</style>
 </head>
 <body class="luxia-store-home">
 
@@ -12456,7 +12493,7 @@ window.addEventListener('resize',function(){ document.querySelectorAll('.lx-mq')
         <div class="field">
           <label>Ville</label>
           <select id="fCityType" autocomplete="off">
-            <option value="">Choisissez votre ville</option>
+            <option value="">Votre ville</option>
             <option value="casa">Casablanca / الدار البيضاء</option>
             <option value="other">Autre ville</option>
           </select>
@@ -12464,7 +12501,7 @@ window.addEventListener('resize',function(){ document.querySelectorAll('.lx-mq')
           <input type="text" id="fCityOther" placeholder="Écrivez votre ville" style="display:none;margin-top:8px;">
           <div class="field-error" id="fCityError">Veuillez choisir votre ville.</div>
         </div>
-        <div class="field"><label data-i18n="modal.field.address">Adresse</label><input type="text" id="fAddress" data-i18n-placeholder="modal.ph.address" placeholder="Quartier, rue, n°"><div class="field-error" data-i18n="modal.error.address">Veuillez saisir votre adresse.</div></div>
+        <div class="field"><label data-i18n="modal.field.address">Adresse</label><input type="text" id="fAddress" data-i18n-placeholder="modal.ph.address" placeholder="Quartier, rue"><div class="field-error" data-i18n="modal.error.address">Veuillez saisir votre adresse.</div></div>
       </div>
       <div class="order-summary" id="checkoutSummary"></div>
       <div class="modal-actions"><button class="btn btn-primary btn-block" id="submitOrder" data-i18n="modal.submit">Valider ma commande</button></div>
@@ -12980,7 +13017,7 @@ const I18N = {
     "variant.title":"Ajouter au panier","variant.subtitle":"Choisissez la couleur, la taille et la quantité.",
     "modal.field.color":"Couleur","modal.field.size":"Taille","modal.field.qty":"Quantité",
     "modal.field.name":"Nom complet","modal.field.phone":"Téléphone","modal.field.city":"Ville","modal.field.address":"Adresse","modal.field.remark":"Remarque (facultatif)",
-    "modal.ph.name":"Votre nom et prénom","modal.ph.phone":"06 XX XX XX XX","modal.ph.city":"Casablanca","modal.ph.address":"Quartier, rue, n°","modal.ph.remark":"Un détail à préciser ?",
+    "modal.ph.name":"Votre nom et prénom","modal.ph.phone":"06 XX XX XX XX","modal.ph.city":"Casablanca","modal.ph.address":"Quartier, rue","modal.ph.remark":"Un détail à préciser ?",
     "modal.error.name":"Veuillez saisir votre nom complet.","modal.error.phone":"Veuillez saisir un numéro de téléphone valide.",
     "modal.error.city":"Veuillez choisir votre ville.","modal.error.cityOther":"Veuillez écrire le nom de votre ville.","modal.error.address":"Veuillez saisir votre adresse.",
     "modal.error.color":"Merci de choisir une couleur.","modal.error.size":"Merci de choisir une taille.",
@@ -14031,7 +14068,7 @@ function lxDetailBlockHTML(id,lang,gallery){
   const strip=items.length?`<div class="lx-det-strip"><div class="lx-det-track" style="--lx-det-dur:${items.length*reps*4}s"><div class="lx-det-group">${group}</div><div class="lx-det-group" aria-hidden="true">${group}</div></div></div>`:'';
   const head=`<div class="lx-det-head"><div class="lx-det-kicker">${ar?'التفاصيل':'Le détail'}</div><div class="lx-det-title">${ar?'كل تفصيل، بصمة':'Chaque détail, une signature'}</div><div class="lx-det-orn"><i></i></div></div>`;
   const multi=extra.length>1;
-  const slider=extra.length?`<div class="lx-det-slider"${((PRODUCT_VARIANTS[id]||{}).detFrame==='story')?' data-frame="story"':''}><div class="lx-det-slides">${extra.map((src,i)=>`<div class="lx-det-slide" data-i="${i}" role="button" tabindex="0"><img src="${escAttr(src)}" alt="${i+1}" loading="lazy" draggable="false"></div>`).join('')}</div>${multi?`<button type="button" class="lx-det-nav lx-det-prev" aria-label="${ar?'الصورة السابقة':'Photo précédente'}">&#8249;</button><button type="button" class="lx-det-nav lx-det-next" aria-label="${ar?'الصورة التالية':'Photo suivante'}">&#8250;</button>`:''}</div><div class="lx-det-dots">${extra.map((_,i)=>`<i class="${i===0?'on':''}"${multi?` data-k="${i}" role="button" tabindex="0" aria-label="${i+1}/${extra.length}"`:''}></i>`).join('')}</div>`:'';
+  const slider=extra.length?`<div class="lx-det-slider"${((PRODUCT_VARIANTS[id]||{}).detFrame==='story')?' data-frame="story"':''}><div class="lx-det-slides">${extra.map((src,i)=>`<div class="lx-det-slide" data-i="${i}" role="button" tabindex="0"><img src="${escAttr(src)}" alt="${i+1}" loading="lazy" draggable="false"></div>`).join('')}</div>${multi?`<button type="button" class="lx-det-nav lx-det-prev" aria-label="${ar?'الصورة السابقة':'Photo précédente'}">&#171;</button><button type="button" class="lx-det-nav lx-det-next" aria-label="${ar?'الصورة التالية':'Photo suivante'}">&#187;</button>`:''}</div><div class="lx-det-dots">${extra.map((_,i)=>`<i class="${i===0?'on':''}"${multi?` data-k="${i}" role="button" tabindex="0" aria-label="${i+1}/${extra.length}"`:''}></i>`).join('')}</div>`:'';
   return `<div class="lx-det${ar?' is-ar':''}">${strip}${extra.length?head+slider:''}</div>`;
 }
 /* Bloc « Le détail » partagé : site (fenêtre produit) + landing pages. Défilement auto toutes les 4 s. */
@@ -14116,6 +14153,7 @@ function openProductDetailModal(id){
       <div class="product-detail-main-image"><img id="productDetailMainImage" src="${escAttr(gallery[0])}" alt="${escAttr(title)}"></div>
     </div>
     <div class="product-detail-content">
+      <div class="product-detail-price lx-price-top">${Number(p.price||0)} ${t('unit.dh')}${oldPriceHTML(id)}</div>
       ${(desc||benefits.length)?`<section class="product-detail-section"><h4>${lang==='ar'?'الوصف':'Description'}</h4>${desc?(lxGiftRich(desc)||`<p>${escHtml(desc)}</p>`):''}${benefits.length?`<ul style="margin-top:${desc?'10px':'0'}!important">${benefits.map(x=>`<li>${escHtml(String(x))}</li>`).join('')}</ul>`:''}</section>`:''}
       ${lxDetailBlockHTML(id,lang,gallery)}
       ${(!hasPack&&(colors.length||sizes.length))?`<div class="product-detail-variant-picker">
@@ -14959,11 +14997,22 @@ function lxApplyGiftLine(ln,gcfg,p,gSel,gMsg,gHide,gWrap,wrapPrice){
   ln.giftSel={sel:{...gSel},msg:gMsg,hide:gHide,wrap:gWrap};
   ln.size=parts.join(" · ")+(gMsg?` · Message : "${gMsg}"`:"")+(gHide?" · Sans prix":"")+(gWrap?" · Emballage premium":"");
 }
+/* Pack : prix barré = prix réel du produit (sans promo) × nombre de pièces ; économie = ce prix barré − prix du Pack. Le prix barré "offre limitée" d'un produit seul, lui, suit la promo du site. */
+function lxPackOldFromUnit(unitPrice,pieces){
+  return Math.round((Number(unitPrice)||0)*(Math.floor(Number(pieces))||1));
+}
+function lxPackSaving(cfg,unitPrice,packPrice){
+  return Math.max(0,lxPackOldFromUnit(unitPrice,cfg&&cfg.pieces)-Math.round(Number(packPrice)));
+}
 function lxModeStepHTML(id){
   const cfg=getPackConfig(id); if(!cfg) return '';
   if(window.lxIsPackOnly && window.lxIsPackOnly(id)) return '';
   const p=PRODUCTS.find(x=>x.id===id)||{}; const ar=document.documentElement.lang==='ar';
-  return `<div class="field lx-mode-step"><label>${ar?'اختاري طريقة الشراء':'Choisissez votre formule'}</label><div class="lx-mode-btns"><button type="button" class="btn btn-ghost" data-lx-mode="piece">${ar?'قطعة واحدة':'À la pièce'} · ${Number(p.price||0)} ${t('unit.dh')}</button><button type="button" class="btn btn-ghost" data-lx-mode="pack">Pack ×${Math.floor(Number(cfg.pieces))} · ${Number(cfg.price)} ${t('unit.dh')}</button></div></div>`;
+  const pc=Math.floor(Number(cfg.pieces)), pr=Number(p.price||0), pk=Number(cfg.price), sv=lxPackSaving(cfg,pr,pk), dh=t('unit.dh');
+  const opt=(mode,name,price,extra,badge)=>`<button type="button" class="lx-mode-opt" role="radio" aria-checked="false" data-lx-mode="${mode}"><i class="lx-mode-dot" aria-hidden="true"></i><span class="lx-mode-txt"><span class="lx-mode-name">${name}</span>${extra||''}</span><b class="lx-mode-price">${price} ${dh}</b>${badge||''}</button>`;
+  const save=sv>0?`<small class="lx-mode-save">${ar?'وفّري '+sv+' '+dh:'Économisez '+sv+' '+dh}</small>`:'';
+  const badge=`<em class="lx-mode-badge">${ar?'عرض خاص':'Offre spéciale'}</em>`;
+  return `<div class="field lx-mode-step"><label>${ar?'اختاري طريقة الشراء':'Choisissez votre formule'}</label><div class="lx-mode-btns" role="radiogroup">${opt('piece',ar?'قطعة واحدة':'À la pièce',pr)}${opt('pack','Pack ×'+pc,pk,save,badge)}</div></div>`;
 }
 function lxSetupDetailOrder(m,p,getSel,hasPack){
   const id=p.id, host=m.querySelector("#lxDetailOrder"), qv=m.querySelector("#lxDetailQty");
@@ -15006,7 +15055,7 @@ function lxSetupDetailOrder(m,p,getSel,hasPack){
   const applyMode=(nm)=>{
     mode=nm; packColors=Array(nPieces).fill(""); selColor=""; selSize="";
     const ar=document.documentElement.lang==="ar";
-    m.querySelectorAll("[data-lx-mode]").forEach(b=>{ const on=b.dataset.lxMode===nm; b.classList.toggle("btn-primary",on); b.classList.toggle("btn-ghost",!on); });
+    m.querySelectorAll("[data-lx-mode]").forEach(b=>{ const on=b.dataset.lxMode===nm; b.classList.toggle("is-on",on); b.setAttribute("aria-checked",on?"true":"false"); });
     const st2=m.querySelector("#lxStage2"); if(st2) st2.style.display="";
     const box=m.querySelector("#lxPackColors"); if(!box) return; box.innerHTML="";
     const addGroup=(gid,label,kind,items,onPick)=>{
@@ -17041,7 +17090,7 @@ function renderLandingPublic(p, isPreview){
     const c=M.cheapest(packs), ar=lang==='ar', dh=t('unit.dh'), lay=M.layout(id,packs), gal=M.galOf(id);
     let h=`<div class="lp-mp-wrap" id="lp-${ns}-picker"><div class="lp-mp-from"><small>${ar?'ابتداءً من':'À partir de'}</small> <b>${M.fmt(c.price)} ${dh}</b>${M.oldHtml(id,c.price,true)} <span>· ${escHtml(M.pcsLabel(c.pieces))}</span></div><div class="lp-mp-title">${ar?'اختاري الباك المفضل ديالك':'Choisissez votre pack préféré'}</div>`;
     lay.items.forEach((o,k)=>{
-      const pk=o.pk, sv=M.savingOf(pk,c), extra=pk.pieces-(c?c.pieces:0);
+      const pk=o.pk, sv=M.savingOf(pk,c,id), extra=pk.pieces-(c?c.pieces:0);
       const im=o.gi>0?`<div class="lx-mp-card3d-img"><img src="${escAttr(gal[o.gi])}" alt="" loading="lazy"></div>`:'';
       const save=sv>0?`<span class="lx-mp-save">${ar?('وفري <bdi>'+M.fmt(sv)+'</bdi> '+dh):('Économisez '+M.fmt(sv)+' '+dh)}${(extra>0&&!ar)?(' · +'+extra+' pièce'+(extra>1?'s':'')):''}</span>`:'<span></span>';
       h+=`<div class="lx-mp-card3d"><div class="lx-mp-card3d-in"><span class="lx-mp-card3d-n">${k+1}</span>${im}<div class="lx-mp-packsec"><button type="button" class="lx-mp-pack" data-lp-mp="${ns}:${o.pi}"><span class="lx-mp-pack-title">${escHtml(M.titleOf(pk,ar?'ar':'fr'))}</span><strong class="lx-mp-pack-price">${M.fmt(pk.price)} ${dh}${M.oldHtml(id,pk.price,pk===c)}</strong><span class="lx-mp-pack-pcs">${escHtml(M.pcsLabel(pk.pieces))}</span>${save}<span class="lx-mp-cta">${ar?'اختاري هذا الباك':'Choisir ce pack'}<i class="lx-mp-cta-arr" aria-hidden="true">→</i></span></button></div></div></div>`;
@@ -17195,7 +17244,8 @@ function renderLandingPublic(p, isPreview){
     const lpSingleForBanner = Number(String(p.price||'0').replace(/[^0-9.]/g,''))||0;
     const lpBadgeTxt = p.packBadge || (mainPackCfg&&mainPackCfg.badge&&mainPackCfg.badge[lang]) || (lang==='ar'?'عرض خاص':'Offre spéciale');
     const lpLabelTxt = p.packLabel || (mainPackCfg&&mainPackCfg.label&&mainPackCfg.label[lang]) || (mainPackCfg&&mainPackCfg.name&&mainPackCfg.name[lang]) || (lang==='ar'?('اشتري '+mainPack+' قطع واستفيدي من تخفيض مميز'):('Achetez '+mainPack+' pièces et profitez d’une remise spéciale'));
-    const lpOldTxt = p.packOldPrice || ((mainPackCfg&&Number(mainPackCfg.oldPrice)>Number(lpPackPriceRaw))?(String(mainPackCfg.oldPrice)+'dh'):(autoOldPrice(Number(lpPackPriceRaw))?(String(autoOldPrice(Number(lpPackPriceRaw)))+'dh'):''));
+    const __lpPackOldN = lxPackOldFromUnit(lpSingleForBanner, mainPack);
+    const lpOldTxt = (__lpPackOldN>Number(lpPackPriceRaw)) ? (String(__lpPackOldN)+'dh') : '';
     const packBannerHTML = (mainPackEnabled&&!(window.lxIsPackOnly&&window.lxIsPackOnly(p.sourceProductId))) ? `<section class="lp-section lp-pack-banner-section"><a href="#lp-main-product" data-lp-pack-cta class="lp-pack-banner">
       ${mainImageURL?`<img class="lp-pack-banner-img" src="${escAttr(mainImageURL)}" alt="">`:''}
       ${lpBadgeTxt?`<span class="lp-pack-badge">${escHtml(lpBadgeTxt)}</span>`:''}
@@ -17392,7 +17442,7 @@ function renderLandingPublic(p, isPreview){
     const drawerFormHTML = `<form class="lp-order${(isLandingGiftProduct(mainSourceProduct)||isLandingGiftProduct(product2SourceProduct)||xSlots.some(s=>s.isGift))?' lp-gift-landing':''}" id="lp-order-form" style="margin-top:16px" novalidate><div class="lp-field"><label>${lang==='ar'?'الاسم':'Nom'}</label><input name="name" required></div><div class="lp-field"><label>${lang==='ar'?'الهاتف':'Téléphone'}</label><input name="phone" required></div><div class="lp-field">
   <label>${lang==='ar'?'المدينة':'Ville'}</label>
   <select name="cityType" id="lp-city-type" autocomplete="off" required>
-    <option value="">${lang==='ar'?'اختاري المدينة':'Choisissez votre ville'}</option>
+    <option value="">${lang==='ar'?'اختاري المدينة':'Votre ville'}</option>
     <option value="casa" ${lpDeliveryType==='casa'?'selected':''}>Casablanca / الدار البيضاء</option>
     <option value="other" ${lpDeliveryType==='other'?'selected':''}>${lang==='ar'?'مدينة أخرى':'Autre ville'}</option>
   </select>
@@ -26039,6 +26089,28 @@ html:is([data-lx-theme="dark"],[data-lx-lp-theme="dark"]) body .lp-preview.lp-pr
 html:is([data-lx-theme="dark"],[data-lx-lp-theme="dark"]) body .lp-preview.lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack .lp-gift-picker .lp-gift-after-choices textarea::placeholder{color:rgba(216,189,123,.6) !important}
 html:is([data-lx-theme="dark"],[data-lx-lp-theme="dark"]) body .lp-preview.lp-preview .lp-card.lp-product-card.lp-gift-pack.lp-gift-pack .lp-gift-picker select.is-required-missing,html:is([data-lx-theme="dark"],[data-lx-lp-theme="dark"]) body .lp-preview.lp-preview .lp-gift-pack select.is-required-missing + .lx-dd .lx-dd-btn{border-color:#c0392b !important;box-shadow:0 0 0 3px rgba(192,57,43,.22) !important}
 </style>
+<style id="lx-det-patch">
+/* Flèches « » : sans cadre rond, aux bords de la fenêtre, tous thèmes */
+html:root body .lx-det-slider{overflow:visible;clip-path:inset(0 calc(-1*var(--lx-b,0px)) 0 calc(-1*var(--lx-b,0px)))}
+html:root body .lx-det-slider .lx-det-nav,html[data-lx-theme="dark"] body .lx-det-slider .lx-det-nav{width:44px !important;height:72px !important;margin-top:-36px !important;padding:0 0 10px !important;border:0 !important;border-radius:0;background:transparent !important;box-shadow:none;color:#d8b45a !important;font:400 68px/1 Georgia,'Times New Roman',serif !important;letter-spacing:-.08em;text-shadow:0 1px 2px rgba(0,0,0,.7),0 0 8px rgba(0,0,0,.45);opacity:1;transition:color .25s,transform .25s}
+html:root body .lx-det-slider .lx-det-nav:hover,html:root body .lx-det-slider .lx-det-nav:focus-visible,html[data-lx-theme="dark"] body .lx-det-slider .lx-det-nav:hover{background:transparent !important;color:#f3d98a !important;transform:scale(1.1)}
+html:root body .lx-det-slider .lx-det-prev{left:calc(-1*var(--lx-b,0px))}
+html:root body .lx-det-slider .lx-det-next{left:auto;right:calc(-1*var(--lx-b,0px))}
+/* Charte dorée « détails » : pleine largeur, sans début ni fin, or plus doux (thème original uniquement) */
+html:not([data-lx-theme="dark"]) .lx-det-strip{border-radius:0;border-left:0;border-right:0;margin-left:calc(-1*var(--lx-b,0px));margin-right:calc(-1*var(--lx-b,0px));background:linear-gradient(100deg,rgba(181,141,60,.55) 0%,rgba(232,207,142,.5) 28%,rgba(247,232,184,.45) 50%,rgba(224,194,122,.5) 72%,rgba(181,141,60,.55) 100%);box-shadow:none;border-top-color:rgba(143,111,44,.35);border-bottom-color:rgba(143,111,44,.35)}
+</style>
+<script id="lx-det-bleed">(function(){
+function run(){
+  document.querySelectorAll('.lx-det').forEach(function(d){
+    var c=d.closest('.product-detail-modal,.lp-preview')||document.body, cr=c.getBoundingClientRect(), r=d.getBoundingClientRect();
+    var l=Math.max(0,Math.round(r.left-cr.left)), rr=Math.max(0,Math.round(cr.right-r.right)), b=Math.min(l,rr);
+    if(d.style.getPropertyValue('--lx-b')!==b+'px') d.style.setProperty('--lx-b',b+'px');
+  });
+}
+var t=null,q=function(){ if(t) return; t=setTimeout(function(){t=null;run();},60); };
+new MutationObserver(q).observe(document.body,{childList:true,subtree:true});
+addEventListener('resize',q); addEventListener('load',q); q();
+})();</script>
 </body>
 
 
@@ -26064,7 +26136,7 @@ html:is([data-lx-theme="dark"],[data-lx-lp-theme="dark"]) body .lp-preview.lp-pr
     var c=null; packs.forEach(function(pk){ if(!c||pk.price<c.price||(pk.price===c.price&&pk.pieces>c.pieces)) c=pk; }); return c;
   }
   /* économie d'un pack par rapport au tarif du pack le moins cher */
-  function savingOf(pk,c){
+  function savingOf(pk,c,id){
     if(!c||pk===c) return 0;
     var s=Math.round((c.price/c.pieces)*pk.pieces-pk.price);
     return s>0?s:0;
@@ -26157,7 +26229,7 @@ html:is([data-lx-theme="dark"],[data-lx-lp-theme="dark"]) body .lp-preview.lp-pr
     var gal=((PRODUCT_IMAGE_GALLERY[id]&&PRODUCT_IMAGE_GALLERY[id].length)?PRODUCT_IMAGE_GALLERY[id]:[PRODUCT_IMAGES[id]]).filter(Boolean);
     var img=function(src,i){ return '<div class="product-detail-main-image'+(i?' lx-mp-extra':'')+'"><img src="'+escAttr(src)+'" alt="'+escAttr(title)+(i?' — '+(i+1):'')+'"'+(i?' loading="lazy"':'')+'></div>'; };
     var packBtn=function(pk,i){
-      var sv=savingOf(pk,c), extra=pk.pieces-(c?c.pieces:0);
+      var sv=savingOf(pk,c,id), extra=pk.pieces-(c?c.pieces:0);
       var save=sv>0?'<span class="lx-mp-save">'+(lang==='ar'?('وفري <bdi>'+fmt(sv)+'</bdi> '+dh):('Économisez '+fmt(sv)+' '+dh))+((extra>0&&lang!=='ar')?(' · +'+extra+' pièce'+(extra>1?'s':'')):'')+'</span>':'<span></span>';
       return '<div class="product-detail-content lx-mp-packsec"><button type="button" class="lx-mp-pack" data-lx-mp-i="'+i+'"><span class="lx-mp-pack-title">'+escHtml(titleOf(pk,lang))+'</span><strong class="lx-mp-pack-price">'+fmt(pk.price)+' '+dh+oldHtml(id,pk.price,pk===c)+'</strong><span class="lx-mp-pack-pcs">'+escHtml(pcsLabel(pk.pieces))+'</span>'+save+'<span class="lx-mp-cta">'+(lang==='ar'?'اختاري هذا الباك':'Choisir ce pack')+'<i class="lx-mp-cta-arr" aria-hidden="true">\u203a</i></span></button></div>';
     };
