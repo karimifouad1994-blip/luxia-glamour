@@ -3,7 +3,33 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<script id="luxia-theme-early">(function(){try{if(localStorage.getItem("luxia_site_theme")==="dark")document.documentElement.setAttribute("data-lx-theme","dark");}catch(e){}})();</script>
+<script id="luxia-theme-early">(function(){
+var d=document.documentElement;
+try{if(localStorage.getItem("luxia_site_theme")==="dark")d.setAttribute("data-lx-theme","dark");}catch(e){}
+/* Couleurs / taille de police du dernier thème connu : appliquées AVANT le 1er affichage (plus de flash de l'ancien thème) */
+try{var t=JSON.parse(localStorage.getItem("luxia_theme_vars_v1")||"null");if(t)for(var k in t){if(t[k])d.style.setProperty(k,t[k]);}}catch(e){}
+/* Porte de démarrage : la page reste cachée jusqu'à ce que les réglages (thème, langue, textes) soient appliqués. Sécurité : 3 s max. */
+try{
+var path=location.pathname.replace(/\/+$/,''),q=new URLSearchParams(location.search);
+var isLanding=!!q.get('landing')||path.indexOf('/p/')===0;
+if(!isLanding){
+d.classList.add("lx-boot");
+setTimeout(function(){window.lxReleaseBoot&&window.lxReleaseBoot(true);},3000);
+}
+}catch(e){}
+window.lxReleaseBoot=function(now){
+var go=function(){d.classList.remove("lx-boot");};
+if(now===true||!window.requestAnimationFrame) go(); else requestAnimationFrame(function(){requestAnimationFrame(go);});
+};
+})();</script>
+<style id="lx-boot-css">
+html.lx-boot{background:var(--lx-boot-bg,var(--bg-deep,#1c0f16)) !important}
+html[data-lx-theme="dark"].lx-boot{--lx-boot-bg:#0a0807}
+html.lx-boot body{visibility:hidden !important}
+html.lx-boot::before{content:"LUXIA";position:fixed;inset:0;z-index:99999;display:grid;place-items:center;background:var(--lx-boot-bg,var(--bg-deep,#1c0f16));color:var(--gold,#c7a15c);font-family:Georgia,serif;font-size:26px;letter-spacing:.18em;animation:lpBootFade .8s ease-in-out infinite alternate}
+html.lx-boot *,html.lx-boot *::before,html.lx-boot *::after{transition:none !important;animation-delay:0s !important}
+html.lx-boot::before{transition:none !important}
+</style>
 <title>LUXIA — Luxury Collection</title>
 <!-- META PIXEL — LUXIA SHOP | PIXEL / Dataset 1082074067935216 -->
 <script>
@@ -8156,7 +8182,6 @@ body .lp-preview .lp-product-card.lp-gift-pack #lp-p2-add{
   opacity:1 !important;
   box-shadow:0 10px 22px -8px rgba(216,189,123,.55),inset 0 1px 0 rgba(255,255,255,.45) !important;
 }
-.wa-round,
 .lp-wa-float{
   display:inline-flex !important;
   align-items:center;
@@ -12303,6 +12328,11 @@ html:root body .lx-det-slider[data-frame="story"]{--lxw:min(90%,calc(62vh * 9 / 
 html:root body .lx-det-slider[data-frame="story"]{--lxw:min(90%,calc(62svh * 9 / 16))}
 html:root body .lx-det-slider .lx-det-nav{width:30px;height:30px;margin-top:-15px;padding:0 0 2px;font-size:20px;opacity:.92}
 </style>
+<style id="lx-pd-video-css">
+.lx-pd-video{margin:16px 0 14px;border-radius:14px;overflow:hidden;background:#000}
+.lx-pd-video .lunea-video-wrap{width:100%}
+.lx-pd-video video{display:block;width:100%;max-height:min(70vh,520px);object-fit:contain;background:#000}
+</style>
 </head>
 <body class="luxia-store-home">
 
@@ -12425,7 +12455,7 @@ html:root body .lx-det-slider .lx-det-nav{width:30px;height:30px;margin-top:-15p
       <span class="mark" data-brand-mark>LUXIA</span>
       <span class="footer-tagline" data-i18n="brand.tagline">Luxury Collection</span>
       <div class="footer-badges">
-        <a class="wa-round" id="footerWhatsappLink" href="https://wa.me/212648701722" target="_blank" rel="noopener" aria-label="WhatsApp"><svg class="wa-logo" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="#fff" d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.14-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.62-.92-2.22-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.8.37-.27.3-1.04 1.02-1.04 2.48 0 1.46 1.07 2.88 1.22 3.08.15.2 2.1 3.2 5.08 4.49.71.31 1.26.49 1.69.63.71.23 1.36.2 1.87.12.57-.08 1.76-.72 2.01-1.41.25-.69.25-1.29.17-1.41-.07-.12-.27-.2-.57-.35z"/><path fill="#fff" d="M12.04 2C6.5 2 2 6.5 2 12.04c0 1.77.46 3.5 1.34 5.03L2 22l5.07-1.33a10 10 0 0 0 4.97 1.27h.01c5.54 0 10.04-4.5 10.04-10.04C22.09 6.5 17.58 2 12.04 2zm0 18.2h-.01a8.2 8.2 0 0 1-4.18-1.14l-.3-.18-3.01.79.8-2.93-.2-.31a8.17 8.17 0 0 1-1.26-4.4c0-4.53 3.69-8.22 8.23-8.22 2.2 0 4.26.86 5.81 2.41a8.15 8.15 0 0 1 2.4 5.82c0 4.54-3.69 8.23-8.28 8.16z"/></svg></a>
+        <a class="wa-round footer-badge" id="footerWhatsappLink" href="https://wa.me/212648701722" target="_blank" rel="noopener" aria-label="WhatsApp"><svg class="wa-logo" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="#fff" d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.14-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.62-.92-2.22-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.8.37-.27.3-1.04 1.02-1.04 2.48 0 1.46 1.07 2.88 1.22 3.08.15.2 2.1 3.2 5.08 4.49.71.31 1.26.49 1.69.63.71.23 1.36.2 1.87.12.57-.08 1.76-.72 2.01-1.41.25-.69.25-1.29.17-1.41-.07-.12-.27-.2-.57-.35z"/><path fill="#fff" d="M12.04 2C6.5 2 2 6.5 2 12.04c0 1.77.46 3.5 1.34 5.03L2 22l5.07-1.33a10 10 0 0 0 4.97 1.27h.01c5.54 0 10.04-4.5 10.04-10.04C22.09 6.5 17.58 2 12.04 2zm0 18.2h-.01a8.2 8.2 0 0 1-4.18-1.14l-.3-.18-3.01.79.8-2.93-.2-.31a8.17 8.17 0 0 1-1.26-4.4c0-4.53 3.69-8.22 8.23-8.22 2.2 0 4.26.86 5.81 2.41a8.15 8.15 0 0 1 2.4 5.82c0 4.54-3.69 8.23-8.28 8.16z"/></svg></a>
         <a class="footer-badge" href="https://www.instagram.com/luxia__shop?stkn=Y2U4Z2Z5ZnhyMTho" target="_blank" rel="noopener" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>Instagram</a>
         <span class="footer-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M3 16V8a1 1 0 0 1 1-1h9v9H3Zm11-6h4l3 3v3h-7v-6Z"/></svg><span data-i18n="footer.delivery">Livraison partout au Maroc</span></span>
         <span class="footer-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3" y="6" width="18" height="13" rx="2"/></svg><span data-i18n="footer.cod">Paiement à la livraison</span></span>
@@ -13326,6 +13356,12 @@ function applySiteTheme(){
     if(val) document.documentElement.style.setProperty(cssVar, val);
     else document.documentElement.style.removeProperty(cssVar);
   });
+  /* mémorise le thème pour l'appliquer dès le 1er rendu à la prochaine visite */
+  try{
+    const cache={};
+    Object.keys(SITE_THEME_VARS).forEach(k=>{ if(SITE_THEME[k]) cache[SITE_THEME_VARS[k]]=SITE_THEME[k]; });
+    localStorage.setItem("luxia_theme_vars_v1",JSON.stringify(cache));
+  }catch(e){}
 }
 const SITE_THEME_MODE_KEY="luxia_site_theme";
 function getSiteThemeMode(){
@@ -13351,6 +13387,7 @@ function applyBrandName(){
   document.title=`${name} — Luxury Collection`;
 }
 function applySiteWhatsapp(){
+  try{ window.lxApplySiteExtras&&window.lxApplySiteExtras(); }catch(e){}
   try{const r=(SITE_CONTENT.fr&&SITE_CONTENT.fr.__show_whatsapp!==undefined?SITE_CONTENT.fr.__show_whatsapp:(SITE_CONTENT.ar?SITE_CONTENT.ar.__show_whatsapp:undefined));document.documentElement.classList.toggle("lx-wa-off",r==="0"||r===0||r===false);}catch(e){}
   const el=document.getElementById("footerWhatsappLink");
   if(el) el.href=`https://wa.me/${SITE_WHATSAPP_NUMBER}`;
@@ -13483,6 +13520,7 @@ async function saveSiteDefaultLanguage(lang, onDiag){
 }
 
 function getSavedVisitorLanguage(){
+  if(window.lxLangLocked&&window.lxLangLocked()) return null;
   try{
     const lang=localStorage.getItem(LANGUAGE_STORAGE_KEY);
     if(lang!=='ar' && lang!=='fr') return null;
@@ -14023,6 +14061,7 @@ function renderProducts(){
 let productDetailGalleryTimer = null;
 
 function clearProductDetailGalleryTimer(){
+  try{ document.querySelectorAll('#productDetailBody video').forEach(v=>{ try{v.pause();}catch(e){} }); }catch(e){}
   if(productDetailGalleryTimer){
     clearInterval(productDetailGalleryTimer);
     productDetailGalleryTimer = null;
@@ -14131,6 +14170,14 @@ function lxDetSlide(box){
   box._lxDetT=t;
   return t;
 }
+/* Vidéo produit : affichée dans la fenêtre produit, juste avant « Commander ce produit ». */
+function lxProductVideoHTML(p){
+  const src=(p&&typeof p.video==='string')?p.video.trim():'';
+  if(!src) return '';
+  const silent=!!(PRODUCT_VARIANTS[p.id]&&PRODUCT_VARIANTS[p.id].videoMuted);
+  const lbl=document.documentElement.lang==='ar'?'\u062a\u0634\u063a\u064a\u0644/\u0625\u064a\u0642\u0627\u0641 \u0627\u0644\u0635\u0648\u062a':'Activer/couper le son';
+  return `<div class="lx-pd-video"><div class="lunea-video-wrap"${silent?' data-start-muted="1"':''}><video src="${escAttr(src)}"${silent?' muted':''} autoplay loop preload="auto" playsinline disablepictureinpicture disableremoteplayback controlslist="nodownload noplaybackrate noremoteplayback"></video>${silent?'':`<button type="button" class="lunea-sound-btn" aria-label="${lbl}" title="${lbl}">\uD83D\uDD0A</button>`}</div></div>`;
+}
 function openProductDetailModal(id){
   clearProductDetailGalleryTimer();
   const p=PRODUCTS.find(x=>x.id===id); if(!p) return;
@@ -14161,6 +14208,7 @@ function openProductDetailModal(id){
         ${sizes.length?`<section class="product-detail-variant-group" id="detailSizeGroup"><h4>${lang==='ar'?'المقاس':'Taille'}</h4><div class="product-detail-size-options">${sizes.map(sz=>`<button type="button" class="product-detail-size-option" data-detail-size="${escAttr(sz)}" disabled aria-disabled="true">${escHtml(sz)}</button>`).join('')}</div></section>`:''}
       </div>`:''}
       ${hasPack?packBannerHTML(id,'detail'):''}
+      ${lxProductVideoHTML(p)}
       <div class="product-detail-price">${Number(p.price||0)} ${t('unit.dh')}${oldPriceHTML(id)}</div>
       ${(()=>{const __sv=PRODUCT_VARIANTS[id];return !!__sv&&typeof __sv.stock==='number'&&__sv.stock<=0;})()?`<button type="button" class="btn btn-primary btn-block product-detail-add is-soldout" disabled aria-disabled="true">${t('variant.outOfStock')}</button>`:(`<div class="lx-order-card" id="lxOrderCard"><div class="lx-card-title">${document.documentElement.lang==='ar'?'اطلبي هذا المنتوج':'Commander ce produit'}</div>${hasPack?lxModeStepHTML(id):''}<div id="lxStage2"${(hasPack&&lxModeStepHTML(id))?' style="display:none"':''}><div id="lxPackColors"></div><div class="field lx-detail-qty"><label>${t('modal.field.qty')}</label><div class="qty-control"><button type="button" class="qty-btn" id="lxQtyMinus">−</button><span class="qty-value" id="lxDetailQty">1</span><button type="button" class="qty-btn" id="lxQtyPlus">+</button></div></div><div id="lxDetailOrder"></div></div></div>`)}
     </div>`;
@@ -14276,7 +14324,7 @@ function setLanguage(lang, persist=true){
 }
 document.addEventListener("click", (e)=>{
   const btn = e.target.closest(".lang-btn");
-  if(btn) setLanguage(btn.dataset.lang);
+  if(btn){ if(!btn.closest('.admin-lang-switch')&&window.lxLangLocked&&window.lxLangLocked()) return; setLanguage(btn.dataset.lang); }
 });
 
 /* ============================================================
@@ -15577,7 +15625,7 @@ async function renderAdminSettings(){
   if(!isAdminAuthenticated()){ renderAdminLogin(); return; }
   let current=SITE_DEFAULT_LANGUAGE;
   try{ current=await loadSiteSettings(); }catch(e){}
-  const keys=Object.keys(I18N.fr).filter(k=>(!k.startsWith("admin.") || k==="admin.link") && !k.startsWith("status.") && k!=="__background_url" && k!=="__background_history" && k!=="__whatsapp_number" && k!=="__offer").map(k=>[k,k]);
+  const keys=Object.keys(I18N.fr).filter(k=>(!k.startsWith("admin.") || k==="admin.link") && !k.startsWith("status.") && k!=="__background_url" && k!=="__background_history" && k!=="__whatsapp_number" && k!=="__offer" && k!=="__wa_float" && k!=="__lang_lock").map(k=>[k,k]);
   let html=adminLanguageSwitcherHTML();
   html+=adminTabsHTML("settings");
   html+=`<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; gap:16px; flex-wrap:wrap;">
@@ -15649,6 +15697,20 @@ async function renderAdminSettings(){
         <span>إظهار زر WhatsApp / Afficher le bouton WhatsApp</span>
       </label>
       <button class="btn btn-primary" id="saveSiteShowWhatsappBtn" style="margin-top:12px;">حفظ / Enregistrer</button>
+    </div>
+    <div style="height:1px; background:var(--line); margin:30px 0;"></div>
+    <h3 style="font-family:var(--font-display); font-size:calc(24px * var(--font-scale)); margin-bottom:10px;">زر واتساب عائم / Bouton WhatsApp flottant</h3>
+    <p style="color:var(--ivory-dim); font-size:calc(12px * var(--font-scale)); margin-bottom:14px;">زر صغير شبه شفاف أسفل يمين الشاشة في الموقع وصفحات اللاندينغ. أزرار واتساب الحالية تبقى كما هي. / Petit bouton semi-transparent en bas à droite (site + landing pages). Les boutons actuels ne changent pas.</p>
+    <div class="field" style="max-width:700px;">
+      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;"><input type="checkbox" id="siteWaFloat" ${(SITE_CONTENT.fr&&SITE_CONTENT.fr.__wa_float==='1')||(SITE_CONTENT.ar&&SITE_CONTENT.ar.__wa_float==='1')?'checked':''} style="width:auto;"><span>تفعيل الزر العائم / Activer le bouton flottant</span></label>
+      <button class="btn btn-primary" id="saveSiteWaFloatBtn" style="margin-top:12px;">حفظ / Enregistrer</button>
+    </div>
+    <div style="height:1px; background:var(--line); margin:30px 0;"></div>
+    <h3 style="font-family:var(--font-display); font-size:calc(24px * var(--font-scale)); margin-bottom:10px;">لغة واحدة بدون اختيار / Langue unique</h3>
+    <p style="color:var(--ivory-dim); font-size:calc(12px * var(--font-scale)); margin-bottom:14px;">يخفي أزرار تغيير اللغة ويفرض لغة الافتتاح المختارة أعلاه، في الموقع وصفحات اللاندينغ. / Masque le sélecteur FR/AR et impose la langue d'ouverture choisie ci-dessus (site + landing pages).</p>
+    <div class="field" style="max-width:700px;">
+      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;"><input type="checkbox" id="siteLangLock" ${(SITE_CONTENT.fr&&SITE_CONTENT.fr.__lang_lock==='1')||(SITE_CONTENT.ar&&SITE_CONTENT.ar.__lang_lock==='1')?'checked':''} style="width:auto;"><span>لغة واحدة فقط بدون اختيار / Une seule langue, sans choix</span></label>
+      <button class="btn btn-primary" id="saveSiteLangLockBtn" style="margin-top:12px;">حفظ / Enregistrer</button>
     </div>
     <div style="height:1px; background:var(--line); margin:30px 0;"></div>
     <h3 style="font-family:var(--font-display); font-size:calc(24px * var(--font-scale)); margin-bottom:10px;">مصاريف التوصيل</h3>
@@ -15848,6 +15910,19 @@ async function renderAdminSettings(){
       adminSaveResult(showWaBtn,true,t("admin.settingsSaved"));
     }catch(err){ console.error(err); adminSaveResult(showWaBtn,false,err?.message || t("admin.backendWriteError"),err); }
     finally{ showWaBtn.disabled=false; }
+  });
+  [["saveSiteWaFloatBtn","siteWaFloat","__wa_float"],["saveSiteLangLockBtn","siteLangLock","__lang_lock"]].forEach(([bid,iid,key])=>{
+    const b=document.getElementById(bid); if(!b) return;
+    b.addEventListener("click",async()=>{
+      const on=document.getElementById(iid).checked; b.disabled=true;
+      try{
+        const content={fr:{...(SITE_CONTENT.fr||{})},ar:{...(SITE_CONTENT.ar||{})}};
+        content.fr[key]=on?"1":"0"; content.ar[key]=on?"1":"0";
+        await saveSiteContent(content); try{ window.lxApplySiteExtras&&window.lxApplySiteExtras(); }catch(e){}
+        adminSaveResult(b,true,t("admin.settingsSaved"));
+      }catch(err){ console.error(err); adminSaveResult(b,false,err?.message || t("admin.backendWriteError"),err); }
+      finally{ b.disabled=false; }
+    });
   });
   const shippingBtn=document.getElementById("saveShippingSettingsBtn");
   if(shippingBtn) shippingBtn.addEventListener("click",async()=>{
@@ -16288,6 +16363,7 @@ function landingEditorHTML(p){
       <div class="full"><label>${t("lp.videoUploadLabel")}</label><input type="file" accept="video/*" id="lp-video-file"> <span id="lp-video-status" style="font-size:calc(12px * var(--font-scale));color:var(--gold-soft);"></span></div>
       <div class="full" style="margin-top:8px;padding-top:16px;border-top:1px solid var(--line);"><label>${t("lp.video2Label")}</label><input type="file" accept="video/*" id="lp-video2-file"><span id="lp-video2-status" style="display:block;margin-top:6px;font-size:calc(12px * var(--font-scale));color:var(--gold-soft);"></span><small>${t("lp.video2Hint")}</small></div>
       <div class="full" style="margin-top:8px;padding-top:14px;border-top:1px solid var(--line);"><label style="display:flex;align-items:flex-start;gap:8px;color:var(--ivory)"><input type="checkbox" id="lp-video-muted" ${p.videoStartMuted?'checked':''} style="width:auto;margin-top:4px"><span>🔇 Vidéos en sourdine au départ — la cliente appuie sur 🔊 pour activer le son · الفيديو يبدأ بلا صوت والزبونة كتضغط على 🔊<br><small style="opacity:.75">Décoché = comportement actuel : son au départ si le navigateur l'autorise, sinon sourdine.</small></span></label></div>
+      <div class="full" style="margin-top:8px"><label style="display:flex;align-items:flex-start;gap:8px;color:var(--ivory)"><input type="checkbox" id="lp-video-silent" ${p.videoSilent?'checked':''} style="width:auto;margin-top:4px"><span>فيديو صامت تماماً بدون أيقونة الصوت / Vidéos muettes, sans icône son</span></label></div>
     </div></div>
     <div class="admin-card"><h3 style="margin-bottom:16px">Contenu · المحتوى — Français / العربية</h3><div class="lp-admin-grid">
       <div class="full"><label>${t("lp.titleLabel")} (FR)</label><input id="lp-title-fr" value="${escAttr(p.titleFr||'')}"></div>
@@ -16353,7 +16429,7 @@ function collectLandingForm(){
   p.gallery=[...document.querySelectorAll('[data-lpimg]')].map(x=>x.value.trim()).filter(Boolean);
   p.heroImage=p.gallery[0]||'';
   p.video=document.getElementById('lp-video')?.value.trim()||'';
-  p.videoStartMuted=!!document.getElementById('lp-video-muted')?.checked;
+  p.videoStartMuted=!!document.getElementById('lp-video-muted')?.checked;p.videoSilent=!!document.getElementById('lp-video-silent')?.checked;
   p.video2=(window.__luneaLandingVideo2Temp&&window.__luneaLandingVideo2Temp[LANDING_EDIT_ID||'__new__'])||p.video2||'';
   p.sourceProductId=document.getElementById('lp-source-product')?.value||'';
   /* A ready-made main LUXIA product never uses a subtitle; its product description is shown once below the price. */
@@ -17376,7 +17452,7 @@ function renderLandingPublic(p, isPreview){
     const lpSaveBadgeHTML=(lpOldPriceHTML && !mainIsGift && __lpSave>0) ? `<span class="lp-save-badge">${lang==='ar'?'وفّري '+__lpSave+' DH':'Économisez '+__lpSave+' DH'}</span>` : '';
     /* Vidéo(s) de la landing : affichée(s) DANS la carte produit, entre « Commander ce produit » et le bouton « Choisir taille & couleur ». */
     const lpVideoInCard = !!(p.video||p.video2) && !!p.showOrderForm && !hasX && !orderPlaced;
-    const __lpCardVid=(srcUrl,cls)=>`<div class="lunea-video-wrap"${p.videoStartMuted?' data-start-muted="1"':''}><video class="lp-video ${cls}" src="${escAttr(srcUrl)}"${p.videoStartMuted?' muted':''} autoplay loop preload="auto" playsinline disablepictureinpicture disableremoteplayback controlslist="nodownload noplaybackrate noremoteplayback"></video><button type="button" class="lunea-sound-btn" aria-label="إيقاف الصوت" title="إيقاف الصوت">🔊</button></div>`;
+    const __lpCardVid=(srcUrl,cls)=>`<div class="lunea-video-wrap"${(p.videoStartMuted||p.videoSilent)?' data-start-muted="1"':''}><video class="lp-video ${cls}" src="${escAttr(srcUrl)}"${(p.videoStartMuted||p.videoSilent)?' muted':''} autoplay loop preload="auto" playsinline disablepictureinpicture disableremoteplayback controlslist="nodownload noplaybackrate noremoteplayback"></video>${p.videoSilent?'':`<button type="button" class="lunea-sound-btn" aria-label="إيقاف الصوت" title="إيقاف الصوت">🔊</button>`}</div>`;
     const cardVideoHTML = lpVideoInCard ? `<div class="lp-card-video">${p.video2?__lpCardVid(p.video2,'lp-video2'):''}${p.video?__lpCardVid(p.video,''):''}</div>` : '';
     const mainCardHTML = orderPlaced ? `<div id="lp-main-product" class="lp-card lp-product-card lp-order-success" style="text-align:center;padding:34px 20px;margin:20px 0;">
       <div class="lp-success-icon">✓</div>
@@ -17560,7 +17636,7 @@ function renderLandingPublic(p, isPreview){
         ${p.price?`<div class="lp-price">${escHtml(p.price)}dh ${lpOldEff?`<span class="lp-old-price">${escHtml(lpOldEff)}</span>`:''}${pyDiscountBadgeHTML}</div>`:''}
       </div>
     </section>` : `<section class="lp-hero lp-hero-clean"><div class="lp-hero-content"><h1 class="lp-hero-lux-title">LUXIA</h1><p class="hero-tagline lp-hero-lux-tagline">${lang==='ar'?'مجموعة فاخرة':'Luxury Collection'}</p><p class="lp-hero-description">${lang==='ar'?'قطع ناعمة، صُممت لتُبرز أناقة كل امرأة مغربية. رقي تعيشينه كل يوم.':'Des pièces délicates, pensées pour sublimer chaque femme marocaine. L\'élégance à porter au quotidien.'}</p><a class="lp-cta" href="#lp-main-product">${lang==='ar'?'اكتشفي المجموعة':'Découvrir la collection'}</a><div class="lp-hero-scroll"><span>${lang==='ar'?'مرري للأسفل':'Défiler'}</span><div class="line"></div></div></div></section>`;
-    document.body.innerHTML=`${lpPromoBarHTML}${collectionHeaderHTML}${collectionDrawerHTML}${cartFabHTML.replace('__LP_FORM_HERE__',drawerFormHTML)}${closeBtnHTML}${langSwitchHTML}${lightboxHTML}${p2LightboxHTML}<main class="lp-preview ${isPyjama?'lp-theme-pyjama':''}" style="padding-top:${LP_PROMO_H}px;">${heroHTML}${offerBannerHTML(lang,'lp')?`<section class="lp-section lp-offer-section">${offerBannerHTML(lang,'lp')}</section>`:''}${colorShowcaseHTML}${packBannerHTML}<div class="lp-wrap">${(p.video2&&!lpVideoInCard)?`<section class="lp-section lp-video-section lp-video2-section"><div class="lunea-video-wrap"${p.videoStartMuted?' data-start-muted="1"':''}><video class="lp-video lp-video2" src="${escAttr(p.video2)}"${p.videoStartMuted?' muted':''} autoplay loop preload="auto" playsinline disablepictureinpicture disableremoteplayback controlslist="nodownload noplaybackrate noremoteplayback"></video><button type="button" class="lunea-sound-btn" aria-label="إيقاف الصوت" title="إيقاف الصوت">🔊</button></div></section>`:''}${p.showOrderForm?`<section class="lp-section" id="order">${hasX?xSectionInner:(mainCardHTML+p2CardHTML)}</section>`:''}${p.showBenefits&&benefits?`<section class="lp-section"><h2>${lang==='ar'?'المميزات':'Les avantages'}</h2><div class="lp-benefits">${benefits}</div></section>`:''}${p.showReviews&&reviews?`<section class="lp-section"><h2>${lang==='ar'?'آراء الزبناء':'Avis clientes'}</h2><div class="lp-reviews-grid">${reviews}</div></section>`:''}${p.showFaq&&faqs?`<section class="lp-section lp-faq"><h2>FAQ</h2>${faqs}</section>`:''}${(p.video&&!lpVideoInCard)?`<section class="lp-section"><div class="lunea-video-wrap"${p.videoStartMuted?' data-start-muted="1"':''}><video class="lp-video" src="${escAttr(p.video)}"${p.videoStartMuted?' muted':''} autoplay loop preload="auto" playsinline disablepictureinpicture disableremoteplayback controlslist="nodownload noplaybackrate noremoteplayback"></video><button type="button" class="lunea-sound-btn" aria-label="إيقاف الصوت" title="إيقاف الصوت">🔊</button></div></section>`:''}
+    document.body.innerHTML=`${lpPromoBarHTML}${collectionHeaderHTML}${collectionDrawerHTML}${cartFabHTML.replace('__LP_FORM_HERE__',drawerFormHTML)}${closeBtnHTML}${langSwitchHTML}${lightboxHTML}${p2LightboxHTML}<main class="lp-preview ${isPyjama?'lp-theme-pyjama':''}" style="padding-top:${LP_PROMO_H}px;">${heroHTML}${offerBannerHTML(lang,'lp')?`<section class="lp-section lp-offer-section">${offerBannerHTML(lang,'lp')}</section>`:''}${colorShowcaseHTML}${packBannerHTML}<div class="lp-wrap">${(p.video2&&!lpVideoInCard)?`<section class="lp-section lp-video-section lp-video2-section"><div class="lunea-video-wrap"${(p.videoStartMuted||p.videoSilent)?' data-start-muted="1"':''}><video class="lp-video lp-video2" src="${escAttr(p.video2)}"${(p.videoStartMuted||p.videoSilent)?' muted':''} autoplay loop preload="auto" playsinline disablepictureinpicture disableremoteplayback controlslist="nodownload noplaybackrate noremoteplayback"></video>${p.videoSilent?'':`<button type="button" class="lunea-sound-btn" aria-label="إيقاف الصوت" title="إيقاف الصوت">🔊</button>`}</div></section>`:''}${p.showOrderForm?`<section class="lp-section" id="order">${hasX?xSectionInner:(mainCardHTML+p2CardHTML)}</section>`:''}${p.showBenefits&&benefits?`<section class="lp-section"><h2>${lang==='ar'?'المميزات':'Les avantages'}</h2><div class="lp-benefits">${benefits}</div></section>`:''}${p.showReviews&&reviews?`<section class="lp-section"><h2>${lang==='ar'?'آراء الزبناء':'Avis clientes'}</h2><div class="lp-reviews-grid">${reviews}</div></section>`:''}${p.showFaq&&faqs?`<section class="lp-section lp-faq"><h2>FAQ</h2>${faqs}</section>`:''}${(p.video&&!lpVideoInCard)?`<section class="lp-section"><div class="lunea-video-wrap"${(p.videoStartMuted||p.videoSilent)?' data-start-muted="1"':''}><video class="lp-video" src="${escAttr(p.video)}"${(p.videoStartMuted||p.videoSilent)?' muted':''} autoplay loop preload="auto" playsinline disablepictureinpicture disableremoteplayback controlslist="nodownload noplaybackrate noremoteplayback"></video>${p.videoSilent?'':`<button type="button" class="lunea-sound-btn" aria-label="إيقاف الصوت" title="إيقاف الصوت">🔊</button>`}</div></section>`:''}
 <section class="lp-section lp-experience-section">
   <div class="lp-experience-kicker">${lang==='ar'?'التجربة':'L’EXPÉRIENCE'}</div>
   <h2>${lang==='ar'?'لماذا LUXIA':'Pourquoi LUXIA'}</h2>
@@ -17602,7 +17678,7 @@ ${sizesSectionHTML}
   <div><span><svg class="lx-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 6h11v10H2zM13 9h4l3 3v4h-7"/><circle cx="7" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/></svg>${lang==='ar'?'التوصيل للدار البيضاء':'Livraison à Casablanca'}</span><strong>${SITE_SHIPPING_CASA}dh · ${lang==='ar'?'خلال 24 ساعة':'24h'}</strong></div>
   <div><span><svg class="lx-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 6h11v10H2zM13 9h4l3 3v4h-7"/><circle cx="7" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/></svg>${lang==='ar'?'التوصيل خارج الدار البيضاء':'Livraison hors Casablanca'}</span><strong>${SITE_SHIPPING_OTHER}dh · ${lang==='ar'?'من 24 إلى 48 ساعة':'24h-48h'}</strong></div>
   ${SITE_FREE_SHIPPING_ENABLED?`<div><span><svg class="lx-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9h18v4H3zM5 13v8h14v-8M12 9v12M12 9c-2-4-6-3-5 0 .5 1.3 3 1 5 0zM12 9c2-4 6-3 5 0-.5 1.3-3 1-5 0z"/></svg>${lang==='ar'?'التوصيل مجاني ابتداءً من':'Livraison gratuite dès'}</span><strong>${SITE_FREE_SHIPPING_THRESHOLD}dh</strong></div>`:''}
-</div></div>${isPyjama ? `<div class="lp-sticky-pyjama"><a class="lp-cta" href="#order" id="lp-sticky-order-cta">🛍 ${escHtml(cta || (lang==='ar'?'اطلبي الآن':'Commander maintenant'))}</a></div>` : ''}<footer class="lp-site-footer" id="lp-site-footer"><div class="footer-top"><span class="mark">${escHtml((typeof SITE_BRAND_NAME!=='undefined'&&SITE_BRAND_NAME)||'LUXIA')}</span><span class="footer-tagline">${lang==='ar'?'مجموعة فاخرة':'Luxury Collection'}</span><div class="footer-badges">${p.showWhatsapp&&wa?`<a class="wa-round" href="${escAttr(wa)}" target="_blank" rel="noopener" aria-label="WhatsApp"><svg class="wa-logo" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="#fff" d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.14-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.62-.92-2.22-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.8.37-.27.3-1.04 1.02-1.04 2.48 0 1.46 1.07 2.88 1.22 3.08.15.2 2.1 3.2 5.08 4.49.71.31 1.26.49 1.69.63.71.23 1.36.2 1.87.12.57-.08 1.76-.72 2.01-1.41.25-.69.25-1.29.17-1.41-.07-.12-.27-.2-.57-.35z"/><path fill="#fff" d="M12.04 2C6.5 2 2 6.5 2 12.04c0 1.77.46 3.5 1.34 5.03L2 22l5.07-1.33a10 10 0 0 0 4.97 1.27h.01c5.54 0 10.04-4.5 10.04-10.04C22.09 6.5 17.58 2 12.04 2zm0 18.2h-.01a8.2 8.2 0 0 1-4.18-1.14l-.3-.18-3.01.79.8-2.93-.2-.31a8.17 8.17 0 0 1-1.26-4.4c0-4.53 3.69-8.22 8.23-8.22 2.2 0 4.26.86 5.81 2.41a8.15 8.15 0 0 1 2.4 5.82c0 4.54-3.69 8.23-8.28 8.16z"/></svg></a>`:''}<a class="footer-badge" href="https://www.instagram.com/luxia__shop?stkn=Y2U4Z2Z5ZnhyMTho" target="_blank" rel="noopener" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>Instagram</a><span class="footer-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M3 16V8a1 1 0 0 1 1-1h9v9H3Zm11-6h4l3 3v3h-7v-6Z"/></svg><span>${lang==='ar'?'التوصيل لجميع أنحاء المغرب':'Livraison partout au Maroc'}</span></span><span class="footer-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3" y="6" width="18" height="13" rx="2"/></svg><span>${lang==='ar'?'الدفع عند الاستلام':'Paiement à la livraison'}</span></span></div></div><div class="footer-bottom"><span>© 2026 ${escHtml((typeof SITE_BRAND_NAME!=='undefined'&&SITE_BRAND_NAME)||'LUXIA')} — ${lang==='ar'?'جميع الحقوق محفوظة':'Tous droits réservés'}</span></div></footer></main>`;
+</div></div>${isPyjama ? `<div class="lp-sticky-pyjama"><a class="lp-cta" href="#order" id="lp-sticky-order-cta">🛍 ${escHtml(cta || (lang==='ar'?'اطلبي الآن':'Commander maintenant'))}</a></div>` : ''}<footer class="lp-site-footer" id="lp-site-footer"><div class="footer-top"><span class="mark">${escHtml((typeof SITE_BRAND_NAME!=='undefined'&&SITE_BRAND_NAME)||'LUXIA')}</span><span class="footer-tagline">${lang==='ar'?'مجموعة فاخرة':'Luxury Collection'}</span><div class="footer-badges">${p.showWhatsapp&&wa?`<a class="wa-round footer-badge" href="${escAttr(wa)}" target="_blank" rel="noopener" aria-label="WhatsApp"><svg class="wa-logo" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="#fff" d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.14-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.62-.92-2.22-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.8.37-.27.3-1.04 1.02-1.04 2.48 0 1.46 1.07 2.88 1.22 3.08.15.2 2.1 3.2 5.08 4.49.71.31 1.26.49 1.69.63.71.23 1.36.2 1.87.12.57-.08 1.76-.72 2.01-1.41.25-.69.25-1.29.17-1.41-.07-.12-.27-.2-.57-.35z"/><path fill="#fff" d="M12.04 2C6.5 2 2 6.5 2 12.04c0 1.77.46 3.5 1.34 5.03L2 22l5.07-1.33a10 10 0 0 0 4.97 1.27h.01c5.54 0 10.04-4.5 10.04-10.04C22.09 6.5 17.58 2 12.04 2zm0 18.2h-.01a8.2 8.2 0 0 1-4.18-1.14l-.3-.18-3.01.79.8-2.93-.2-.31a8.17 8.17 0 0 1-1.26-4.4c0-4.53 3.69-8.22 8.23-8.22 2.2 0 4.26.86 5.81 2.41a8.15 8.15 0 0 1 2.4 5.82c0 4.54-3.69 8.23-8.28 8.16z"/></svg></a>`:''}<a class="footer-badge" href="https://www.instagram.com/luxia__shop?stkn=Y2U4Z2Z5ZnhyMTho" target="_blank" rel="noopener" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>Instagram</a><span class="footer-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M3 16V8a1 1 0 0 1 1-1h9v9H3Zm11-6h4l3 3v3h-7v-6Z"/></svg><span>${lang==='ar'?'التوصيل لجميع أنحاء المغرب':'Livraison partout au Maroc'}</span></span><span class="footer-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3" y="6" width="18" height="13" rx="2"/></svg><span>${lang==='ar'?'الدفع عند الاستلام':'Paiement à la livraison'}</span></span></div></div><div class="footer-bottom"><span>© 2026 ${escHtml((typeof SITE_BRAND_NAME!=='undefined'&&SITE_BRAND_NAME)||'LUXIA')} — ${lang==='ar'?'جميع الحقوق محفوظة':'Tous droits réservés'}</span></div></footer></main>`;
     /* Landing collection menu: uses the exact same collection source/order as the main store. */
     const lpMenu=document.getElementById('lp-collection-drawer');
     const lpMenuBtn=document.getElementById('lp-collection-menu-btn');
@@ -17614,7 +17690,7 @@ ${sizesSectionHTML}
     lpMenuClose?.addEventListener('click',closeLpMenu);
     lpMenu?.addEventListener('click',e=>{if(e.target===lpMenu)closeLpMenu();});
     if(lpCollectionList){
-      const cols=getLuxiaCollections();
+      const cols=getLuxiaCollections().filter(c=>!c.hidden);
       lpCollectionList.innerHTML=`<button type="button" data-lp-collection="all"><span>${lang==='ar'?'كل المجموعة':'Toute la collection'}</span><span>›</span></button>`+cols.map(c=>`<button type="button" data-lp-collection="${escAttr(c.id)}"><span>${lxMenuLabelHTML(c[currentLang]||c.fr)}</span><span>›</span></button>`).join('');
       lpCollectionList.querySelectorAll('[data-lp-collection]').forEach(btn=>btn.addEventListener('click',()=>{
         const id=btn.dataset.lpCollection||'all';
@@ -18322,6 +18398,13 @@ async function bootLandingRoute(){
   let cachedLanding=window.__luneaEarlyLandingCache || null;
   if(!cachedLanding){try{cachedLanding=JSON.parse(localStorage.getItem(cacheKey)||'null');}catch(e){}}
   let renderedCached=false;
+  /* Évite d'afficher l'ancienne version puis de la remplacer : on laisse 700 ms à la version fraîche (déjà en cours de chargement). */
+  if(cachedLanding && window.__luneaEarlyLandingPromise){
+    try{
+      const fresh=await Promise.race([window.__luneaEarlyLandingPromise, new Promise(function(r){ setTimeout(function(){ r('timeout'); },700); })]);
+      if(fresh && fresh!=='timeout') cachedLanding=null;
+    }catch(e){}
+  }
   if(cachedLanding){
     try{
       renderLandingPublic(cachedLanding);
@@ -19166,6 +19249,7 @@ function __renderAdminProductsRaw(){
             <div class="admin-two-col"><div class="field"><label>${t('admin.field.badgeFr')}</label><input type="text" id="pf-badge-fr-${p.id}" value="${escAttr(I18N.fr[p.badgeKey]||'')}"></div><div class="field"><label>${t('admin.field.badgeAr')}</label><input type="text" id="pf-badge-ar-${p.id}" value="${escAttr(I18N.ar[p.badgeKey]||'')}"></div></div>
             <div class="field"><label>${t('admin.field.video')}</label><input type="text" id="pf-video-${p.id}" value="${escAttr(p.video||'')}" placeholder="https://.../video.mp4" style="direction:ltr;text-align:left;"></div>
             <div class="field"><label>${t('admin.videoUploadLabel')}</label><input type="file" accept="video/*" id="pf-video-file-${p.id}"><span id="pf-video-status-${p.id}" class="admin-upload-status"></span></div>
+          <div class="field"><label style="display:flex;align-items:flex-start;gap:8px;cursor:pointer"><input type="checkbox" id="pf-video-silent-${p.id}" ${(PRODUCT_VARIANTS[p.id]||{}).videoMuted?'checked':''} style="width:auto;margin-top:4px"><span>فيديو صامت من البداية، بدون أيقونة الصوت / Vidéo muette dès le départ, sans icône son</span></label></div>
             <div class="admin-toggle-row"><label><input type="checkbox" id="pf-enabled-${p.id}" ${(enabled||v.unassigned)?'checked':''}> <span>${t('admin.field.enabled')}</span></label><div class="field admin-stock"><label>${t('admin.field.stock')}</label><input type="number" min="0" step="1" id="pf-stock-${p.id}" placeholder="${t('admin.field.stockPlaceholder')}" value="${v.stock==null?'':v.stock}"><label class="admin-soldout-toggle"><input type="checkbox" id="pf-soldout-${p.id}" ${v.stock===0?'checked':''}> <span>${currentLang==='ar'?'نفدت الكمية (Rupture de stock)':'Rupture de stock'}</span></label></div></div>
           </section>
 
@@ -19514,7 +19598,7 @@ async function __saveProductEditsInner(id){
   if(nameFr)I18N.fr[p.nameKey]=nameFr;if(nameAr)I18N.ar[p.nameKey]=nameAr;
   try{luxiaProductSlugMap();}catch(e){}
   const price=parseFloat(priceRaw);if(!Number.isNaN(price)&&price>=0)p.price=price;
-  I18N.fr[p.descKey]=descFr;I18N.ar[p.descKey]=descAr;I18N.fr[p.badgeKey]=badgeFr;I18N.ar[p.badgeKey]=badgeAr;p.video=video;p.enabled=enabled;v.stock=stock;v.collectionId=collectionId||null;v.unassigned=!collectionId;v.fabricType=fabricType||'none';
+  I18N.fr[p.descKey]=descFr;I18N.ar[p.descKey]=descAr;I18N.fr[p.badgeKey]=badgeFr;I18N.ar[p.badgeKey]=badgeAr;p.video=video;p.enabled=enabled;v.videoMuted=!!document.getElementById('pf-video-silent-'+p.id)?.checked;v.stock=stock;v.collectionId=collectionId||null;v.unassigned=!collectionId;v.fabricType=fabricType||'none';
   const __flag=s=>!!document.getElementById(`pf-${s}-${id}`)?.dataset.lxManual;
   const __lines=s=>String(document.getElementById(`pf-${s}-${id}`)?.value||'').split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
   const __smart=lxSmartContent(collectionId,v.fabricType,nameFr||I18N.fr[p.nameKey],nameAr||I18N.ar[p.nameKey],v.kind==='pack'?parseInt(val('pack-pieces'),10):0);
@@ -19878,7 +19962,7 @@ const luneaInitPromise = (async function initLunea(){
   PRODUCT_IMAGE_GALLERY = buildProductImageGallery();
   const requestedCollection = new URLSearchParams(location.search).get('collection');
   if(requestedCollection){
-    const valid = requestedCollection==='all' || getLuxiaCollections().some(c=>c.id===requestedCollection);
+    const valid = requestedCollection==='all' || getLuxiaCollections().some(c=>c.id===requestedCollection&&!c.hidden);
     if(valid) activeStoreCategory = requestedCollection;
   }
   const visitorLanguage=getSavedVisitorLanguage() || SITE_DEFAULT_LANGUAGE || "ar";
@@ -19886,6 +19970,7 @@ const luneaInitPromise = (async function initLunea(){
   updateCartBadge();
   applySiteBackground();
 })();
+luneaInitPromise.catch(function(){}).then(function(){ try{ window.lxReleaseBoot&&window.lxReleaseBoot(); }catch(e){} });
 /* Landing routes fetch/render independently; product initialization continues in parallel. */
 window.addEventListener("DOMContentLoaded",()=>{
   const path=location.pathname.replace(/\/+$/,'');
@@ -20172,8 +20257,9 @@ function highlightProductFromUrl(){
   function collectionName(id,lang=currentLang){const c=getLuxiaCollections().find(x=>x.id===id);return c?(c[lang]||c.fr||c.ar||id):id;}
   window.getLuxiaCollections=getLuxiaCollections;
   window.collectionName=collectionName;
+  window.lxIsCollectionHidden=function(id){const c=getLuxiaCollections().find(x=>x.id===id);return !!(c&&c.hidden);};
   function saveLuxiaCollections(arr){
-    const json=JSON.stringify(arr.map(c=>({id:c.id,fr:c.fr,ar:c.ar,base:!!c.base})));
+    const json=JSON.stringify(arr.map(c=>({id:c.id,fr:c.fr,ar:c.ar,base:!!c.base,hidden:!!c.hidden})));
     const content={fr:{...(SITE_CONTENT.fr||{}),__collections:json},ar:{...(SITE_CONTENT.ar||{}),__collections:json}};
     return saveSiteContent(content);
   }
@@ -20199,9 +20285,9 @@ function highlightProductFromUrl(){
   }
   window.getStoreProductCollection=getStoreProductCollectionNew;
   window.getStoreProductCategory=function(p){return getStoreProductCollectionNew(p);};
-  window.getStoreFilteredProducts=function(){const enabled=PRODUCTS.filter(p=>p.enabled!==false&&((PRODUCT_IMAGE_GALLERY[p.id]&&PRODUCT_IMAGE_GALLERY[p.id].length)||PRODUCT_IMAGES[p.id]));return activeStoreCategory==='all'?enabled:enabled.filter(p=>getStoreProductCollectionNew(p)===activeStoreCategory);};
+  window.getStoreFilteredProducts=function(){const enabled=PRODUCTS.filter(p=>p.enabled!==false&&((PRODUCT_IMAGE_GALLERY[p.id]&&PRODUCT_IMAGE_GALLERY[p.id].length)||PRODUCT_IMAGES[p.id])&&!window.lxIsCollectionHidden(getStoreProductCollectionNew(p)));return activeStoreCategory==='all'?enabled:enabled.filter(p=>getStoreProductCollectionNew(p)===activeStoreCategory);};
   window.renderStoreCategoriesUI=function(){
-    const cols=getLuxiaCollections(),pills=document.getElementById('storeCategoryPills'),menu=document.getElementById('storeMenuList');
+    const cols=getLuxiaCollections().filter(c=>!c.hidden),pills=document.getElementById('storeCategoryPills'),menu=document.getElementById('storeMenuList');
     if(pills)pills.innerHTML=`<button type="button" class="store-filter ${activeStoreCategory==='all'?'active':''}" data-category="all" role="tab" aria-selected="${activeStoreCategory==='all'}">${currentLang==='ar'?'الكل':'TOUS'}</button>`+cols.map(c=>`<button type="button" class="store-filter ${activeStoreCategory===c.id?'active':''}" data-category="${escAttr(c.id)}" role="tab" aria-selected="${activeStoreCategory===c.id}">${escHtml(c[currentLang]||c.fr)}</button>`).join('');
     if(menu)menu.innerHTML=`<button type="button" data-menu-category="all"><span>${currentLang==='ar'?'كل المجموعة':'Toute la collection'}</span><span>›</span></button>`+cols.map(c=>`<button type="button" data-menu-category="${escAttr(c.id)}"><span>${lxMenuLabelHTML(c[currentLang]||c.fr)}</span><span>›</span></button>`).join('');
     document.querySelectorAll('.store-filter').forEach(btn=>btn.addEventListener('click',()=>setStoreCategory(btn.dataset.category)));
@@ -20234,8 +20320,9 @@ function highlightProductFromUrl(){
     html+=`<div class="admin-collections-list"><div class="admin-collections-order-head"><div><h3>${t('admin.collectionDefault')}</h3><p>${currentLang==='ar'?'رتّب المجموعات كما تريد أن تظهر في الواجهة الرئيسية.':'Définissez l’ordre d’affichage des collections sur la page d’accueil.'}</p></div><span class="admin-order-hint">↑ ↓</span></div>`+
       cols.map((c,i)=>`<div class="admin-collection-row admin-collection-sort-row" data-collection-row="${escAttr(c.id)}">
         <span class="admin-collection-position">${i+1}</span>
-        <div class="admin-collection-name"><b>${escHtml(c.fr)}</b><small>${escHtml(c.ar)}</small></div>
+        <div class="admin-collection-name"><b>${escHtml(c.fr)}</b><small>${escHtml(c.ar)}${c.hidden?' · مخفية / masquée':''}</small></div>
         <div class="admin-collection-sort-actions">
+          <button type="button" class="btn btn-ghost" data-hide-collection="${escAttr(c.id)}">${c.hidden?'إظهار / Afficher':'إخفاء / Masquer'}</button>
           <button type="button" class="btn btn-ghost admin-collection-move" data-collection-move="up" data-collection-index="${i}" ${i===0?'disabled':''} aria-label="Monter">↑</button>
           <button type="button" class="btn btn-ghost admin-collection-move" data-collection-move="down" data-collection-index="${i}" ${i===cols.length-1?'disabled':''} aria-label="Descendre">↓</button>
           ${c.base?'':`<button type="button" class="btn btn-ghost" data-del-collection="${escAttr(c.id)}">${t('admin.delete')}</button>`}
@@ -20250,6 +20337,7 @@ function highlightProductFromUrl(){
       try{await saveLuxiaCollections(arr);renderStoreCategoriesUI();renderProducts();renderAdminCollections();showToast(currentLang==='ar'?'تم تغيير ترتيب المجموعات':'Ordre des collections mis à jour');}
       catch(e){console.error(e);showToast(e?.message||t('admin.backendWriteError'));}
     }));
+    document.querySelectorAll('[data-hide-collection]').forEach(btn=>btn.addEventListener('click',async()=>{const id=btn.dataset.hideCollection,arr=getLuxiaCollections(),c=arr.find(x=>x.id===id);if(!c)return;c.hidden=!c.hidden;try{await saveLuxiaCollections(arr);renderStoreCategoriesUI();renderProducts();renderAdminCollections();showToast(c.hidden?'Collection masquée':'Collection affichée');}catch(e){console.error(e);showToast(e?.message||t('admin.backendWriteError'));}}));
     document.querySelectorAll('[data-del-collection]').forEach(btn=>btn.addEventListener('click',async()=>{const id=btn.dataset.delCollection;if(!confirm(t('admin.collectionDeleteConfirm')))return;const arr=getLuxiaCollections().filter(c=>c.id!==id);try{await saveLuxiaCollections(arr);PRODUCTS.forEach(p=>{if(PRODUCT_VARIANTS[p.id]?.collectionId===id)PRODUCT_VARIANTS[p.id].collectionId=null;});saveProductVariants(PRODUCT_VARIANTS);renderStoreCategoriesUI();renderProducts();showToast(t('admin.collectionDeleted'));renderAdminCollections();}catch(e){console.error(e);showToast(e?.message||t('admin.backendWriteError'));}}));
   };
 
@@ -26487,5 +26575,76 @@ addEventListener('resize',q); addEventListener('load',q); q();
     }catch(e){ console.warn(e); }
     return _spe.apply(this,arguments);
   };
+})();
+</script>
+
+<style id="lx-extras-css">
+/* En-tête « La boutique » centré */
+html:root:root body.luxia-store-home .store-heading{text-align:center !important}
+html:root:root body.luxia-store-home .store-heading h2,
+html:root:root body.luxia-store-home .store-heading p{text-align:center !important}
+html:root:root body.luxia-store-home .store-heading .store-meta{justify-content:center !important}
+html:root:root body.luxia-store-home .store-heading .store-drop-badge{margin-left:auto !important;margin-right:auto !important}
+/* WhatsApp du footer : même thème que les pastilles voisines (couleurs héritées de .footer-badge) */
+html:root:root body .wa-round.footer-badge{display:inline-flex !important;align-items:center;justify-content:center;width:46px !important;height:46px !important;min-width:0 !important;padding:0 !important;border-radius:50% !important;font-size:0 !important;line-height:0;text-decoration:none;transition:transform .15s ease}
+html:root:root body .wa-round.footer-badge:active{transform:scale(.94)}
+html:root:root body .wa-round.footer-badge .wa-logo{width:24px !important;height:24px !important;display:block}
+html:root:root body .wa-round.footer-badge .wa-logo path{fill:currentColor !important}
+/* Carte produit : image collée au cadre, sans double bordure ni cadre intérieur */
+html:root:root:root:root body.luxia-store-home .product-grid .product-card.product-card:not(.gp-card){overflow:hidden !important;padding-top:0 !important}
+html:root:root:root:root body.luxia-store-home .product-grid .product-card.product-card:not(.gp-card)::before,
+html:root:root:root:root body.luxia-store-home .product-grid .product-card.product-card:not(.gp-card)::after{display:none !important;content:none !important}
+html:root:root:root:root body.luxia-store-home .product-grid .product-card.product-card:not(.gp-card) .product-visual,
+html:root:root:root:root body.luxia-store-home .product-grid .product-card.product-card:not(.gp-card) .product-title-price-head + .product-visual{border:0 !important;border-radius:0 !important;margin:0 !important;box-shadow:none !important;outline:0 !important}
+/* Langue unique : sélecteur masqué (hors admin) */
+html.lx-lang-locked:root:root:root:root body .lang-switch:not(.admin-lang-switch),
+html.lx-lang-locked:root:root:root:root body .lp-collection-langswitch{display:none !important}
+/* WhatsApp flottant, semi-transparent */
+.lx-wa-float{position:fixed;right:14px;left:auto;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:900;width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(37,211,102,.62);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.35);box-shadow:0 4px 14px rgba(0,0,0,.18);opacity:.92;text-decoration:none;transition:opacity .2s,transform .15s}
+.lx-wa-float:active{transform:scale(.94);opacity:1}
+.lx-wa-float{color:#fff}
+.lx-wa-float svg{display:block}
+.lx-wa-float svg path{fill:currentColor !important}
+body.lp-pyjama-active .lx-wa-float{bottom:calc(84px + env(safe-area-inset-bottom,0px))}
+</style>
+<script id="lx-site-extras">
+(function(){
+  function flag(k){ var c=(typeof SITE_CONTENT!=='undefined'&&SITE_CONTENT)||{}; var v=(c.fr&&c.fr[k]!==undefined)?c.fr[k]:(c.ar?c.ar[k]:undefined); return v==='1'||v===1||v===true; }
+  window.lxLangLocked=function(){ return flag('__lang_lock'); };
+  var WA_SVG='<svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="#fff" d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.14-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.62-.92-2.22-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.8.37-.27.3-1.04 1.02-1.04 2.48 0 1.46 1.07 2.88 1.22 3.08.15.2 2.1 3.2 5.08 4.49.71.31 1.26.49 1.69.63.71.23 1.36.2 1.87.12.57-.08 1.76-.72 2.01-1.41.25-.69.25-1.29.17-1.41-.07-.12-.27-.2-.57-.35z"/><path fill="#fff" d="M12.04 2C6.5 2 2 6.5 2 12.04c0 1.77.46 3.5 1.34 5.03L2 22l5.07-1.33a10 10 0 0 0 4.97 1.27h.01c5.54 0 10.04-4.5 10.04-10.04C22.09 6.5 17.58 2 12.04 2zm0 18.2h-.01a8.2 8.2 0 0 1-4.18-1.14l-.3-.18-3.01.79.8-2.93-.2-.31a8.17 8.17 0 0 1-1.26-4.4c0-4.53 3.69-8.22 8.23-8.22 2.2 0 4.26.86 5.81 2.41a8.15 8.15 0 0 1 2.4 5.82c0 4.54-3.69 8.23-8.28 8.16z"/></svg>';
+  function waNumber(){
+    var a=document.querySelector('.lp-preview a[href*="wa.me/"], a.lp-wa-float[href*="wa.me/"]');
+    var m=a&&/wa\.me\/(\d+)/.exec(a.getAttribute('href')||'');
+    return m?m[1]:(typeof SITE_WHATSAPP_NUMBER!=='undefined'?SITE_WHATSAPP_NUMBER:'');
+  }
+  function rgb(s){ var m=/rgba?\(([^)]+)\)/.exec(s||''); if(!m) return null; var p=m[1].split(/[ ,\/]+/).filter(Boolean).map(Number); return {r:p[0],g:p[1],b:p[2],a:p.length>3?p[3]:1}; }
+  function css(c,a){ return 'rgba('+c.r+','+c.g+','+c.b+','+(a===undefined?c.a:a)+')'; }
+  /* Reprend les couleurs réelles des pastilles voisines du footer (Instagram...) : même thème sur le site et les landing pages */
+  function syncTheme(el){
+    var ref=document.querySelector('.lp-site-footer .footer-badge:not(.wa-round), #footer .footer-badge:not(.wa-round)')||document.querySelector('.footer-badge:not(.wa-round)');
+    if(!ref) return;
+    var cs=getComputedStyle(ref), txt=rgb(cs.color), bor=rgb(cs.borderTopColor), svg=ref.querySelector('svg'), ic=svg?rgb(getComputedStyle(svg).color):null;
+    var main=ic||txt; if(!main) return;
+    var darkTheme=txt&&((0.299*txt.r+0.587*txt.g+0.114*txt.b)/255>0.55);
+    el.style.setProperty('background',darkTheme?'rgba(10,8,7,.60)':'rgba(255,253,248,.70)','important');
+    el.style.setProperty('border','1px solid '+(bor?css(bor,Math.max(bor.a,.45)):css(main,.5)),'important');
+    el.style.setProperty('color',css(main,1),'important');
+  }
+  function ensureWa(){
+    var el=document.getElementById('lxWaFloat');
+    var on=flag('__wa_float')&&!/admin/i.test(location.hash||''), num=on?waNumber():'';
+    if(!on||!num){ if(el) el.remove(); return; }
+    var href='https://wa.me/'+num;
+    if(!el){ el=document.createElement('a'); el.id='lxWaFloat'; el.className='lx-wa-float'; el.target='_blank'; el.rel='noopener'; el.setAttribute('aria-label','WhatsApp'); el.innerHTML=WA_SVG; document.body.appendChild(el); }
+    if(el.getAttribute('href')!==href) el.setAttribute('href',href);
+    syncTheme(el);
+  }
+  window.lxApplySiteExtras=function(){ document.documentElement.classList.toggle('lx-lang-locked',flag('__lang_lock')); ensureWa(); };
+  new MutationObserver(ensureWa).observe(document.body,{childList:true});
+  window.addEventListener('hashchange',ensureWa);
+  window.addEventListener('load',function(){ ensureWa(); setTimeout(ensureWa,800); });
+  new MutationObserver(ensureWa).observe(document.documentElement,{attributes:true,attributeFilter:['data-lx-theme','data-lx-lp-theme','dir']});
+  new MutationObserver(ensureWa).observe(document.body,{attributes:true,attributeFilter:['class']});
+  window.lxApplySiteExtras();
 })();
 </script>
