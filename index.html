@@ -26729,7 +26729,7 @@ body.lp-pyjama-active .lx-wa-float{bottom:calc(84px + env(safe-area-inset-bottom
   }
   function ensureWa(){
     var el=document.getElementById('lxWaFloat');
-    var lpOn=!!window.__lxLpWaFloat&&!!document.querySelector('.lp-preview'), on=(flag('__wa_float')||lpOn)&&!/admin/i.test(location.hash||''), num=on?waNumber():'';
+    var lpOn=!!window.__lxLpWaFloat&&!!document.querySelector('.lp-preview'), adminOpen=!!document.querySelector('#adminOverlay.open'), on=(flag('__wa_float')||lpOn)&&!adminOpen, num=on?waNumber():'';
     if(!on||!num){ if(el) el.remove(); return; }
     var href='https://wa.me/'+num;
     if(!el){ el=document.createElement('a'); el.id='lxWaFloat'; el.className='lx-wa-float'; el.target='_blank'; el.rel='noopener'; el.setAttribute('aria-label','WhatsApp'); el.innerHTML=WA_SVG; document.body.appendChild(el); }
@@ -26739,6 +26739,8 @@ body.lp-pyjama-active .lx-wa-float{bottom:calc(84px + env(safe-area-inset-bottom
   window.lxApplySiteExtras=function(){ document.documentElement.classList.toggle('lx-lang-locked',flag('__lang_lock')); ensureWa(); };
   new MutationObserver(ensureWa).observe(document.body,{childList:true});
   window.addEventListener('hashchange',ensureWa);
+  /* Le bouton ne se cache plus à cause du #admin dans l'URL : seulement quand le panneau admin est ouvert */
+  try{ var __ao=document.getElementById('adminOverlay'); if(__ao) new MutationObserver(ensureWa).observe(__ao,{attributes:true,attributeFilter:['class']}); }catch(_e){}
   window.addEventListener('load',function(){ ensureWa(); setTimeout(ensureWa,800); });
   new MutationObserver(ensureWa).observe(document.documentElement,{attributes:true,attributeFilter:['data-lx-theme','data-lx-lp-theme','dir']});
   new MutationObserver(ensureWa).observe(document.body,{attributes:true,attributeFilter:['class']});
