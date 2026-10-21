@@ -26342,6 +26342,22 @@ var t=null,q=function(){ if(t) return; t=setTimeout(function(){t=null;run();},60
 new MutationObserver(q).observe(document.body,{childList:true,subtree:true});
 addEventListener('resize',q); addEventListener('load',q); q();
 })();</script>
+<style id="lx-flicker-fix">
+/* Anti-tremblement : bandeau « Le détail » + sélecteurs quantité / taille / couleur (fenêtre produit et landing) */
+html:root body .lx-det-strip{isolation:isolate;transform:translateZ(0);-webkit-backface-visibility:hidden;backface-visibility:hidden;contain:paint}
+html:root body .lx-det-track{transform:translate3d(0,0,0);-webkit-backface-visibility:hidden;backface-visibility:hidden;will-change:transform;animation-name:lxDetScroll3d !important}
+@keyframes lxDetScroll3d{from{transform:translate3d(0,0,0)}to{transform:translate3d(-50%,0,0)}}
+/* le filtre drop-shadow posé sur TOUS les <button> fait clignoter les choix sur mobile quand un bandeau s'anime à côté */
+html:root body .product-detail-variant-picker button,
+html:root body .product-detail-variant-group button,
+html:root body #lxOrderCard button:not(.product-detail-add),
+html:root body .lx-order-card button:not(.product-detail-add):not(.lp-cta):not(.lp-submit),
+html:root body .lx-dd-btn{
+  filter:none !important;
+  -webkit-backface-visibility:hidden;backface-visibility:hidden;
+  transition:background-color .2s ease,border-color .2s ease,color .2s ease,box-shadow .2s ease !important;
+}
+</style>
 </body>
 
 
@@ -26748,6 +26764,24 @@ html.lx-lang-locked:root:root:root:root body .lp-collection-langswitch{display:n
 .lx-wa-float svg{display:block}
 .lx-wa-float svg path{fill:currentColor !important}
 body.lp-pyjama-active .lx-wa-float{bottom:calc(84px + env(safe-area-inset-bottom,0px))}
+
+/* === Thème dark — bouton « Ajouter au panier » allégé (cartes fermées de la collection) === */
+html[data-lx-theme="dark"]:root body.luxia-store-home .product-grid .product-card.product-card.product-card.product-card.product-card:not(.gp-card) .product-info .btn-order.btn-order.btn-order.btn-order.btn-order:not(:disabled):not(.admin-overlay *):not(.admin-overlay){
+  background:transparent none !important;background-color:transparent !important;background-image:none !important;
+  color:#e3c785 !important;-webkit-text-fill-color:#e3c785 !important;
+  border:1px solid #e3c785 !important;
+  box-shadow:none !important;text-shadow:none !important;filter:none !important;
+  min-height:38px !important;height:38px !important;padding:0 14px !important;
+  font-size:13px !important;font-weight:500 !important;letter-spacing:.04em !important;
+  border-radius:10px !important;
+}
+html[data-lx-theme="dark"]:root body.luxia-store-home .product-grid .product-card.product-card.product-card.product-card.product-card:not(.gp-card) .product-info .btn-order.btn-order.btn-order.btn-order.btn-order:not(:disabled):not(.admin-overlay *):not(.admin-overlay):hover,
+html[data-lx-theme="dark"]:root body.luxia-store-home .product-grid .product-card.product-card.product-card.product-card.product-card:not(.gp-card) .product-info .btn-order.btn-order.btn-order.btn-order.btn-order:not(:disabled):not(.admin-overlay *):not(.admin-overlay):active{
+  background:linear-gradient(135deg,#e6c878,#b88a2f) !important;
+  color:#1a1208 !important;-webkit-text-fill-color:#1a1208 !important;border-color:#c9a24f !important;
+}
+html[data-lx-theme="dark"]:root body.luxia-store-home .product-grid .product-card.product-card.product-card .lx-old-price{opacity:.5 !important;font-size:.72em !important}
+html[data-lx-theme="dark"]:root body.luxia-store-home .product-grid .product-card.product-card.product-card.product-card:not(.gp-card){border-width:1px !important;border-color:rgba(201,162,79,.28) !important}
 </style>
 <script id="lx-site-extras">
 (function(){
