@@ -26757,13 +26757,19 @@ html:root:root:root:root body.luxia-store-home .product-grid .product-card.produ
 /* Langue unique : sélecteur masqué (hors admin) */
 html.lx-lang-locked:root:root:root:root body .lang-switch:not(.admin-lang-switch),
 html.lx-lang-locked:root:root:root:root body .lp-collection-langswitch{display:none !important}
-/* WhatsApp flottant, semi-transparent */
-.lx-wa-float{position:fixed;right:14px;left:auto;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:900;width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(37,211,102,.62);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.35);box-shadow:0 4px 14px rgba(0,0,0,.18);opacity:.92;text-decoration:none;transition:opacity .2s,transform .15s}
-.lx-wa-float:active{transform:scale(.94);opacity:1}
-.lx-wa-float{color:#fff}
-.lx-wa-float svg{display:block}
-.lx-wa-float svg path{fill:currentColor !important}
+/* WhatsApp flottant : couleur d'origine, identique en thème original et dark */
+.lx-wa-float,html[data-lx-theme="dark"] .lx-wa-float,html[data-lx-lp-theme="dark"] .lx-wa-float{position:fixed;right:14px;left:auto;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:900;width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#25D366 !important;border:0 !important;color:#fff !important;box-shadow:0 6px 16px rgba(0,0,0,.28);opacity:1 !important;-webkit-backdrop-filter:none;backdrop-filter:none;text-decoration:none;transition:transform .15s}
+.lx-wa-float:active{transform:scale(.94)}
+.lx-wa-float svg{display:block;width:30px;height:30px}
+.lx-wa-float svg path{fill:#fff !important}
 body.lp-pyjama-active .lx-wa-float{bottom:calc(84px + env(safe-area-inset-bottom,0px))}
+/* Visible aussi au-dessus de la fenêtre produit */
+body:has(#productDetailOverlay.open) .lx-wa-float{z-index:10060 !important;bottom:calc(86px + env(safe-area-inset-bottom,0px))}
+/* Pulsation douce et discrète (le bouton grossit et rétrécit doucement (2,4 s)) */
+@keyframes lxWaPulse{0%,100%{transform:scale(1);box-shadow:0 6px 16px rgba(0,0,0,.28),0 0 0 0 rgba(37,211,102,.4)}50%{transform:scale(1.12);box-shadow:0 8px 20px rgba(0,0,0,.3),0 0 0 10px rgba(37,211,102,0)}}
+.lx-wa-float{animation:lxWaPulse 2.4s ease-in-out infinite}
+.lx-wa-float:active{animation:none}
+@media (prefers-reduced-motion:reduce){.lx-wa-float{animation:none}}
 
 /* === Thème dark — bouton « Ajouter au panier » allégé (cartes fermées de la collection) === */
 html[data-lx-theme="dark"]:root body.luxia-store-home .product-grid .product-card.product-card.product-card.product-card.product-card:not(.gp-card) .product-info .btn-order.btn-order.btn-order.btn-order.btn-order:not(:disabled):not(.admin-overlay *):not(.admin-overlay){
@@ -26814,7 +26820,7 @@ html[data-lx-theme="dark"]:root body.luxia-store-home .product-grid .product-car
     var href='https://wa.me/'+num;
     if(!el){ el=document.createElement('a'); el.id='lxWaFloat'; el.className='lx-wa-float'; el.target='_blank'; el.rel='noopener'; el.setAttribute('aria-label','WhatsApp'); el.innerHTML=WA_SVG; document.body.appendChild(el); }
     if(el.getAttribute('href')!==href) el.setAttribute('href',href);
-    syncTheme(el);
+    ['background','border','color'].forEach(function(k){ el.style.removeProperty(k); });
   }
   window.lxApplySiteExtras=function(){ document.documentElement.classList.toggle('lx-lang-locked',flag('__lang_lock')); ensureWa(); };
   new MutationObserver(ensureWa).observe(document.body,{childList:true});
@@ -26932,13 +26938,19 @@ html[data-lx-theme="dark"]:root body.luxia-store-home .product-grid .product-car
 <script id="lx-landing-fixes">(function(){
   /* Le <body> est remplacé au rendu d'une landing : ces règles doivent vivre dans le <head> pour s'appliquer aussi aux landing pages. */
   var s=document.createElement('style'); s.id='lx-landing-fixes-css';
-  s.textContent=`/* WhatsApp flottant (landing) */
-.lx-wa-float{position:fixed;right:14px;left:auto;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:900;width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(37,211,102,.62);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.35);box-shadow:0 4px 14px rgba(0,0,0,.18);opacity:.92;text-decoration:none;transition:opacity .2s,transform .15s}
-.lx-wa-float:active{transform:scale(.94);opacity:1}
-.lx-wa-float{color:#fff}
-.lx-wa-float svg{display:block}
-.lx-wa-float svg path{fill:currentColor !important}
+  s.textContent=`/* WhatsApp flottant : couleur d'origine, identique en thème original et dark */
+.lx-wa-float,html[data-lx-theme="dark"] .lx-wa-float,html[data-lx-lp-theme="dark"] .lx-wa-float{position:fixed;right:14px;left:auto;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:900;width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#25D366 !important;border:0 !important;color:#fff !important;box-shadow:0 6px 16px rgba(0,0,0,.28);opacity:1 !important;-webkit-backdrop-filter:none;backdrop-filter:none;text-decoration:none;transition:transform .15s}
+.lx-wa-float:active{transform:scale(.94)}
+.lx-wa-float svg{display:block;width:30px;height:30px}
+.lx-wa-float svg path{fill:#fff !important}
 body.lp-pyjama-active .lx-wa-float{bottom:calc(84px + env(safe-area-inset-bottom,0px))}
+/* Visible aussi au-dessus de la fenêtre produit */
+body:has(#productDetailOverlay.open) .lx-wa-float{z-index:10060 !important;bottom:calc(86px + env(safe-area-inset-bottom,0px))}
+/* Pulsation douce et discrète (le bouton grossit et rétrécit doucement (2,4 s)) */
+@keyframes lxWaPulse{0%,100%{transform:scale(1);box-shadow:0 6px 16px rgba(0,0,0,.28),0 0 0 0 rgba(37,211,102,.4)}50%{transform:scale(1.12);box-shadow:0 8px 20px rgba(0,0,0,.3),0 0 0 10px rgba(37,211,102,0)}}
+.lx-wa-float{animation:lxWaPulse 2.4s ease-in-out infinite}
+.lx-wa-float:active{animation:none}
+@media (prefers-reduced-motion:reduce){.lx-wa-float{animation:none}}
 /* 2) Titre produit complet (landing) */
 html:root:root:root body main.lp-preview .lp-product-title-price-frame,
 html:root:root:root body main.lp-preview .lp-product-title-price-frame.lp-product-head-top{height:auto!important;min-height:82px!important;max-height:none!important;overflow:visible!important;padding-top:14px!important;padding-bottom:14px!important}
