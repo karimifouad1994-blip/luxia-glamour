@@ -12248,6 +12248,11 @@ function lxPromoMarqueeItems(lang){
   var freeAt=(typeof SITE_FREE_SHIPPING_THRESHOLD!=='undefined')?SITE_FREE_SHIPPING_THRESHOLD:500;
   var items=[];
   var P=function(n){return '<b dir="ltr">'+n+' DH</b>';};
+  if(typeof SITE_SHIPPING_MODE!=='undefined'&&SITE_SHIPPING_MODE==='free'){
+    if(ar){ items.push('<b>توصيل مجاني</b> لجميع مدن المغرب'); items.push('الدفع عند الاستلام'); }
+    else { items.push('<b>Livraison gratuite</b> partout au Maroc'); items.push('Paiement à la livraison'); }
+    return items;
+  }
   if(ar){
     items.push('التوصيل إلى الدار البيضاء '+P(casa)+' · خلال 24 ساعة');
     items.push('التوصيل خارج الدار البيضاء '+P(other)+' · خلال 24–48 ساعة');
@@ -12639,10 +12644,14 @@ let SITE_SHIPPING_CASA = SHIPPING_CASA_DEFAULT;
 let SITE_SHIPPING_OTHER = SHIPPING_OTHER_DEFAULT;
 let SITE_FREE_SHIPPING_ENABLED = false;
 let SITE_FREE_SHIPPING_THRESHOLD = 500;
+/* Mode de livraison choisi dans l'admin : 'city' (selon la ville = logique d'origine) ou 'free' (livraison gratuite partout au Maroc). */
+let SITE_SHIPPING_MODE = 'city';
+function lxShipIsFree(){ return SITE_SHIPPING_MODE==='free'; }
 /* Central shipping-fee logic used by both the main store and the landing
    pages. cityType is '' | 'casa' | 'other'; cartAmount is the products
    subtotal (before delivery). Returns 0 while no city is chosen yet. */
 function getShippingFee(cityType, cartAmount){
+  if(SITE_SHIPPING_MODE==='free') return 0;
   if(cityType!=='casa' && cityType!=='other') return 0;
   if(SITE_FREE_SHIPPING_ENABLED && Number(cartAmount)>=Number(SITE_FREE_SHIPPING_THRESHOLD)) return 0;
   return cityType==='casa' ? SITE_SHIPPING_CASA : SITE_SHIPPING_OTHER;
@@ -12651,6 +12660,7 @@ function getShippingFee(cityType, cartAmount){
 /* Bloc d'information livraison (style luxe) : tarifs réels du site, ligne de la ville choisie mise en valeur. */
 function lxShipLuxHTML(type,amount,lang){
   const ar=(lang||currentLang)==='ar', fee=k=>{ const f=getShippingFee(k,amount); return f?f+' DH':(ar?'مجاني':'Offerte'); };
+  if(lxShipIsFree()) return `<div class="lx-ship-lux" role="note"><div class="lx-ship-head"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 6h11v10H2zM13 9h4l3 3v4h-7"/><circle cx="7" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/></svg><span>${ar?'التوصيل':'Livraison'}</span></div><div class="lx-ship-row is-on"><span>${ar?'توصيل مجاني لجميع مدن المغرب':'Livraison gratuite partout au Maroc'}</span><strong dir="ltr">${ar?'مجاني':'Gratuite'}</strong></div><p>${ar?'الأداء عند الاستلام، بدون أي مصاريف توصيل إضافية.':'Paiement à la réception · aucun frais de livraison ajouté.'}</p></div>`;
   const row=(k,name,time)=>`<div class="lx-ship-row${type===k?' is-on':''}"><span>${name}</span><em>${time}</em><strong dir="ltr">${fee(k)}</strong></div>`;
   return `<div class="lx-ship-lux" role="note"><div class="lx-ship-head"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 6h11v10H2zM13 9h4l3 3v4h-7"/><circle cx="7" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/></svg><span>${ar?'التوصيل':'Livraison'}</span></div>`
     +row('casa',ar?'الدار البيضاء':'Casablanca',ar?'خلال 24 ساعة':'sous 24h')
@@ -13442,6 +13452,7 @@ async function loadSiteSettings(){
         SITE_SHIPPING_OTHER = (shipOtherRaw!==undefined && shipOtherRaw!=='' && !isNaN(Number(shipOtherRaw))) ? Number(shipOtherRaw) : SHIPPING_OTHER_DEFAULT;
         SITE_FREE_SHIPPING_ENABLED = (freeEnabledRaw==='1' || freeEnabledRaw===1 || freeEnabledRaw===true);
         SITE_FREE_SHIPPING_THRESHOLD = (freeThresholdRaw!==undefined && freeThresholdRaw!=='' && !isNaN(Number(freeThresholdRaw))) ? Number(freeThresholdRaw) : 500;
+        SITE_SHIPPING_MODE = (((SITE_CONTENT.fr&&SITE_CONTENT.fr.__shipping_mode)||(SITE_CONTENT.ar&&SITE_CONTENT.ar.__shipping_mode))==='free')?'free':'city';
       }
       Object.keys(SITE_THEME_VARS).forEach(k=>{
         const key="__theme_"+k;
@@ -13502,6 +13513,7 @@ async function saveSiteContent(content, onDiag){
     SITE_SHIPPING_OTHER = (shipOtherRaw!==undefined && shipOtherRaw!=='' && !isNaN(Number(shipOtherRaw))) ? Number(shipOtherRaw) : SHIPPING_OTHER_DEFAULT;
     SITE_FREE_SHIPPING_ENABLED = (freeEnabledRaw==='1' || freeEnabledRaw===1 || freeEnabledRaw===true);
     SITE_FREE_SHIPPING_THRESHOLD = (freeThresholdRaw!==undefined && freeThresholdRaw!=='' && !isNaN(Number(freeThresholdRaw))) ? Number(freeThresholdRaw) : 500;
+    SITE_SHIPPING_MODE = (((SITE_CONTENT.fr&&SITE_CONTENT.fr.__shipping_mode)||(SITE_CONTENT.ar&&SITE_CONTENT.ar.__shipping_mode))==='free')?'free':'city';
   }
   Object.keys(SITE_THEME_VARS).forEach(k=>{
     const key="__theme_"+k;
@@ -14839,12 +14851,15 @@ function renderCart(){
     <div class="cart-list">${items}</div>
     <div class="order-summary">
       ${luxiaGiftSummaryRows()}
-      <div class="luxia-shipping-info">
+      ${lxShipIsFree()?`<div class="luxia-shipping-info">
+  <div><span>🚚 ${currentLang==='ar'?'توصيل مجاني لجميع مدن المغرب':'Livraison gratuite partout au Maroc'}</span><strong>${currentLang==='ar'?'مجاني':'Gratuite'}</strong></div>
+  <p>${currentLang==='ar'?'لا تُضاف أي مصاريف توصيل: تؤدين فقط ثمن المنتوج.':'Aucun frais de livraison n\'est ajouté : vous payez uniquement le prix du produit.'}</p>
+</div>`:`<div class="luxia-shipping-info">
   <div><span>🚚 ${currentLang==='ar'?'التوصيل إلى الدار البيضاء':'Livraison à Casablanca'}</span><strong>${SITE_SHIPPING_CASA} ${t("unit.dh")} · ${currentLang==='ar'?'خلال 24 ساعة':'dans 24h'}</strong></div>
   <div><span>🚚 ${currentLang==='ar'?'التوصيل خارج الدار البيضاء':'Livraison hors Casablanca'}</span><strong>${SITE_SHIPPING_OTHER} ${t("unit.dh")} · ${currentLang==='ar'?'خلال 24–48 ساعة':'24–48h'}</strong></div>
   ${SITE_FREE_SHIPPING_ENABLED?`<div><span>🎁 ${currentLang==='ar'?'التوصيل مجاني ابتداءً من':'Livraison gratuite dès'}</span><strong>${SITE_FREE_SHIPPING_THRESHOLD} ${t("unit.dh")}</strong></div>`:''}
   <p>${currentLang==='ar'?'تُحتسب مصاريف التوصيل حسب المدينة التي تختارينها في مرحلة الطلب، وتُضاف إلى المجموع الفرعي ليظهر لك المجموع النهائي بوضوح.':'Les frais de livraison dépendent de la ville choisie et sont ajoutés au sous-total pour afficher clairement le total final.'}</p>
-</div>
+</div>`}
     </div>`;
 
   document.getElementById("cartBody").querySelectorAll(".cart-item").forEach(row=>{
@@ -14949,9 +14964,10 @@ function cartSummaryHTML(withTotalOnly){
   const productsTotal=cartTotal(), delivery=getCheckoutDeliveryFee();
   const deliveryLabel=checkoutDeliveryType==='casa'?(currentLang==='ar'?'التوصيل إلى الدار البيضاء':'Livraison à Casablanca'):checkoutDeliveryType==='other'?(currentLang==='ar'?'التوصيل خارج الدار البيضاء':'Livraison hors Casablanca'):(currentLang==='ar'?'التوصيل':'Livraison');
   const deliveryTime=checkoutDeliveryType==='casa'?(currentLang==='ar'?'خلال 24 ساعة':'dans 24h'):checkoutDeliveryType==='other'?(currentLang==='ar'?'24–48 ساعة':'24–48h'):'';
+  const _free=lxShipIsFree();
   const deliveryFreeNote=(checkoutDeliveryType && delivery===0)?(currentLang==='ar'?' · مجاني':' · gratuit'):'';
   const productNames=cart.map(i=>{const _c=(typeof itemColorText==='function'?itemColorText(i):'');return `${escHtml(t(i.nameKey))}${i.mode==='pack'?' · '+lxPackTag(i.productId,i.packPieces,i.price):''}${(_c&&_c!=='—')?` — ${escHtml(_c)}`:''}${i.size?` / ${escHtml(i.size)}`:''} ×${i.qty}`;}).join('<br>');
-  return `<div class="row checkout-products-name"><span>${productNames}</span><span>${productsTotal} ${t("unit.dh")}</span></div><div class="row"><span>${deliveryLabel}${deliveryTime?` · ${deliveryTime}`:''}${deliveryFreeNote}</span><span>${delivery?delivery+' '+t("unit.dh"):(checkoutDeliveryType?(currentLang==='ar'?'مجاني':'gratuit'):'—')}</span></div><div class="row total"><span>${currentLang==='ar'?'المجموع النهائي':'Sous-total'}</span><span>${productsTotal+delivery} ${t("unit.dh")}</span></div>${(document.getElementById("stepCheckoutForm")?.parentNode?.id==="lxDetailOrder")?lxShipLuxHTML(checkoutDeliveryType,productsTotal,currentLang):''}`;
+  return `<div class="row checkout-products-name"><span>${productNames}</span><span>${productsTotal} ${t("unit.dh")}</span></div><div class="row"><span>${_free?(currentLang==='ar'?'توصيل مجاني':'Livraison gratuite'):`${deliveryLabel}${deliveryTime?` · ${deliveryTime}`:''}${deliveryFreeNote}`}</span><span>${delivery?delivery+' '+t("unit.dh"):((checkoutDeliveryType||_free)?(currentLang==='ar'?'مجاني':'gratuit'):'—')}</span></div><div class="row total"><span>${currentLang==='ar'?'المجموع النهائي':'Sous-total'}</span><span>${productsTotal+delivery} ${t("unit.dh")}</span></div>${(document.getElementById("stepCheckoutForm")?.parentNode?.id==="lxDetailOrder")?lxShipLuxHTML(checkoutDeliveryType,productsTotal,currentLang):''}`;
 }
 function updateCheckoutSummary(){
   /* Parcours unique : la ligne en cours de sélection (fiche produit) est comptée dans le résumé avant d'être validée. */
@@ -15758,7 +15774,12 @@ async function renderAdminSettings(){
       <button class="btn btn-primary" id="saveSiteLangLockBtn" style="margin-top:12px;">حفظ / Enregistrer</button>
     </div>
     <div style="height:1px; background:var(--line); margin:30px 0;"></div>
-    <h3 style="font-family:var(--font-display); font-size:calc(24px * var(--font-scale)); margin-bottom:10px;">مصاريف التوصيل</h3>
+    <h3 style="font-family:var(--font-display); font-size:calc(24px * var(--font-scale)); margin-bottom:10px;">إعدادات التوصيل / Paramètres de livraison</h3>
+    <div class="field" style="max-width:700px; display:grid; gap:10px; margin-bottom:16px;">
+      <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;padding:12px 14px;border:1px solid var(--line);border-radius:12px;"><input type="radio" name="shippingMode" id="shippingModeCity" value="city" ${SITE_SHIPPING_MODE!=='free'?'checked':''} style="width:18px;height:18px;margin-top:2px;"><span><b>الخيار 1: التوصيل حسب المدينة</b><br><small style="color:var(--ivory-dim);">Livraison selon la ville — الأسعار تظهر في أعلى الموقع وفي بطاقة الشراء</small></span></label>
+      <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;padding:12px 14px;border:1px solid var(--line);border-radius:12px;"><input type="radio" name="shippingMode" id="shippingModeFree" value="free" ${SITE_SHIPPING_MODE==='free'?'checked':''} style="width:18px;height:18px;margin-top:2px;"><span><b>الخيار 2: توصيل مجاني لجميع مدن المغرب</b><br><small style="color:var(--ivory-dim);">Livraison gratuite partout au Maroc — تظهر "توصيل مجاني" في أعلى الموقع وفي بطاقة الشراء، ولا يُحسب أي شيء غير ثمن المنتوج</small></span></label>
+    </div>
+    <div id="shippingCityFields" style="${SITE_SHIPPING_MODE==='free'?'display:none;':''}">
     <p style="color:var(--ivory-dim); font-size:calc(12px * var(--font-scale)); margin-bottom:14px;">حددي سعر التوصيل إلى الدار البيضاء وسعر التوصيل لباقي المدن. سيظهر هذا التغيير مباشرة في الموقع وفي صفحات الهبوط.</p>
     <div class="field" style="max-width:700px; display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:16px;">
       <div><label>سعر التوصيل — الدار البيضاء (درهم)</label><input type="number" min="0" step="1" id="shippingCasaInput" value="${escAttr(SITE_SHIPPING_CASA)}" style="width:100%; padding:12px 14px; border-radius:12px; background:#ffffff10; border:1px solid var(--line); color:var(--ivory);"></div>
@@ -15773,9 +15794,10 @@ async function renderAdminSettings(){
       <p style="color:var(--ivory-dim); font-size:calc(12px * var(--font-scale)); margin:8px 0 10px;">إذا كانت هذه الخاصية مفعّلة، فعندما يصل مجموع السلة (دون التوصيل) إلى المبلغ الذي ستحدده، ستُلغى مصاريف التوصيل تلقائياً. وإذا تركتَها غير مفعّلة، يعمل الموقع بالطريقة نفسها الحالية (مصاريف توصيل ثابتة).</p>
       <label>المبلغ الأدنى للتوصيل المجاني (درهم)</label>
       <input type="number" min="0" step="1" id="freeShippingThresholdInput" value="${escAttr(SITE_FREE_SHIPPING_THRESHOLD)}" style="width:100%; max-width:260px; padding:12px 14px; border-radius:12px; background:#ffffff10; border:1px solid var(--line); color:var(--ivory);">
-      <div style="margin-top:12px;">
-        <button class="btn btn-primary" id="saveShippingSettingsBtn">حفظ إعدادات التوصيل</button>
-      </div>
+    </div>
+    </div>
+    <div style="margin-top:12px; max-width:700px;">
+      <button class="btn btn-primary" id="saveShippingSettingsBtn">حفظ إعدادات التوصيل</button>
     </div>
     <div style="height:1px; background:var(--line); margin:30px 0;"></div>
     <h3 style="font-family:var(--font-display); font-size:calc(24px * var(--font-scale)); margin-bottom:16px;">${t("admin.frontTexts")}</h3>
@@ -15969,24 +15991,35 @@ async function renderAdminSettings(){
       finally{ b.disabled=false; }
     });
   });
+  document.querySelectorAll('input[name="shippingMode"]').forEach(r=>r.addEventListener("change",()=>{
+    const box=document.getElementById("shippingCityFields");
+    if(box) box.style.display=document.getElementById("shippingModeFree")?.checked?'none':'';
+  }));
   const shippingBtn=document.getElementById("saveShippingSettingsBtn");
   if(shippingBtn) shippingBtn.addEventListener("click",async()=>{
+    const shipMode=document.getElementById("shippingModeFree")?.checked?'free':'city';
     const casaVal=document.getElementById("shippingCasaInput").value;
     const otherVal=document.getElementById("shippingOtherInput").value;
     const freeEnabled=document.getElementById("freeShippingEnabledInput").checked;
     const thresholdVal=document.getElementById("freeShippingThresholdInput").value;
-    if(casaVal===""||isNaN(Number(casaVal))||Number(casaVal)<0){ adminSaveResult(shippingBtn,false,"أدخل سعراً صحيحاً للتوصيل إلى الدار البيضاء"); return; }
-    if(otherVal===""||isNaN(Number(otherVal))||Number(otherVal)<0){ adminSaveResult(shippingBtn,false,"أدخل سعراً صحيحاً للتوصيل لباقي المدن"); return; }
-    if(freeEnabled && (thresholdVal===""||isNaN(Number(thresholdVal))||Number(thresholdVal)<0)){ adminSaveResult(shippingBtn,false,"أدخل مبلغاً صحيحاً للتوصيل المجاني"); return; }
+    if(shipMode==='city' && (casaVal===""||isNaN(Number(casaVal))||Number(casaVal)<0)){ adminSaveResult(shippingBtn,false,"أدخل سعراً صحيحاً للتوصيل إلى الدار البيضاء"); return; }
+    if(shipMode==='city' && (otherVal===""||isNaN(Number(otherVal))||Number(otherVal)<0)){ adminSaveResult(shippingBtn,false,"أدخل سعراً صحيحاً للتوصيل لباقي المدن"); return; }
+    if(shipMode==='city' && freeEnabled && (thresholdVal===""||isNaN(Number(thresholdVal))||Number(thresholdVal)<0)){ adminSaveResult(shippingBtn,false,"أدخل مبلغاً صحيحاً للتوصيل المجاني"); return; }
     diagClear();
     diagAppend("saveShippingSettingsBtn click received — starting saveSiteContent()");
     shippingBtn.disabled=true;
     try{
       const content={fr:{...(SITE_CONTENT.fr||{})},ar:{...(SITE_CONTENT.ar||{})}};
-      content.fr.__shipping_casa=String(Number(casaVal)); content.ar.__shipping_casa=String(Number(casaVal));
-      content.fr.__shipping_other=String(Number(otherVal)); content.ar.__shipping_other=String(Number(otherVal));
+      /* En mode « gratuit », les tarifs par ville sont conservés tels quels (si un champ est invalide, on garde la valeur actuelle). */
+      const okNum=v=>(v!==""&&!isNaN(Number(v))&&Number(v)>=0);
+      const casaSave=okNum(casaVal)?Number(casaVal):SITE_SHIPPING_CASA;
+      const otherSave=okNum(otherVal)?Number(otherVal):SITE_SHIPPING_OTHER;
+      const thresholdSave=okNum(thresholdVal)?Number(thresholdVal):SITE_FREE_SHIPPING_THRESHOLD;
+      content.fr.__shipping_mode=shipMode; content.ar.__shipping_mode=shipMode;
+      content.fr.__shipping_casa=String(casaSave); content.ar.__shipping_casa=String(casaSave);
+      content.fr.__shipping_other=String(otherSave); content.ar.__shipping_other=String(otherSave);
       content.fr.__free_shipping_enabled=freeEnabled?'1':'0'; content.ar.__free_shipping_enabled=freeEnabled?'1':'0';
-      content.fr.__free_shipping_threshold=String(Number(thresholdVal||500)); content.ar.__free_shipping_threshold=String(Number(thresholdVal||500));
+      content.fr.__free_shipping_threshold=String(thresholdSave); content.ar.__free_shipping_threshold=String(thresholdSave);
       await saveSiteContent(content, diagAppend);
       diagAppend("DONE: saved successfully");
       adminSaveResult(shippingBtn,true,t("admin.settingsSaved"));
@@ -17442,12 +17475,14 @@ function renderLandingPublic(p, isPreview){
     const p2VariantReady=!p2HasVariants || isReady(p2HasColors,p2EffectivePackNow,p2HasSizes,p2State);
     const mainCartTotal=mainCartItems.reduce((sum,item)=>sum+item.price*item.qty,0);
     const total=mainCartTotal+xCartTotal()+(p2Added?p2UnitPrice():0);
-    const lpDeliveryLabel = lpDeliveryType==='casa'
+    const lpDeliveryLabel = lxShipIsFree()
+      ? (lang==='ar'?'توصيل مجاني':'Livraison gratuite')
+      : lpDeliveryType==='casa'
       ? (lang==='ar'?'التوصيل إلى الدار البيضاء':'Livraison à Casablanca')
       : lpDeliveryType==='other'
         ? (lang==='ar'?'التوصيل':'Livraison')
         : (lang==='ar'?'التوصيل حسب المدينة':'Livraison selon la ville');
-    const lpDeliveryValue = lpDeliveryFee ? `+${lpDeliveryFee} DH` : (lpDeliveryType?(lang==='ar'?'مجاني':'gratuit'):'—');
+    const lpDeliveryValue = lpDeliveryFee ? `+${lpDeliveryFee} DH` : ((lpDeliveryType||lxShipIsFree())?(lang==='ar'?'مجاني':'gratuit'):'—');
     const lpFinalTotal = total + lpDeliveryFee;
     const mainAdded=mainCartItems.length>0;
     const mainGiftCurrentPrice = mainPrice + (mainIsGift && mainGiftState.wrap ? mainGiftWrapPrice : 0);
@@ -17724,9 +17759,9 @@ ${sizesSectionHTML}
 </div>
 
 <div class="lp-shipping-info" style="max-width:420px;margin:24px auto 0;text-align:${dir==='rtl'?'right':'left'};">
-  <div><span><svg class="lx-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 6h11v10H2zM13 9h4l3 3v4h-7"/><circle cx="7" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/></svg>${lang==='ar'?'التوصيل للدار البيضاء':'Livraison à Casablanca'}</span><strong>${SITE_SHIPPING_CASA}dh · ${lang==='ar'?'خلال 24 ساعة':'24h'}</strong></div>
+${lxShipIsFree()?`<div><span><svg class="lx-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 6h11v10H2zM13 9h4l3 3v4h-7"/><circle cx="7" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/></svg>${lang==='ar'?'توصيل مجاني لجميع مدن المغرب':'Livraison gratuite partout au Maroc'}</span><strong>${lang==='ar'?'مجاني':'Gratuite'}</strong></div>`:`  <div><span><svg class="lx-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 6h11v10H2zM13 9h4l3 3v4h-7"/><circle cx="7" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/></svg>${lang==='ar'?'التوصيل للدار البيضاء':'Livraison à Casablanca'}</span><strong>${SITE_SHIPPING_CASA}dh · ${lang==='ar'?'خلال 24 ساعة':'24h'}</strong></div>
   <div><span><svg class="lx-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 6h11v10H2zM13 9h4l3 3v4h-7"/><circle cx="7" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/></svg>${lang==='ar'?'التوصيل خارج الدار البيضاء':'Livraison hors Casablanca'}</span><strong>${SITE_SHIPPING_OTHER}dh · ${lang==='ar'?'من 24 إلى 48 ساعة':'24h-48h'}</strong></div>
-  ${SITE_FREE_SHIPPING_ENABLED?`<div><span><svg class="lx-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9h18v4H3zM5 13v8h14v-8M12 9v12M12 9c-2-4-6-3-5 0 .5 1.3 3 1 5 0zM12 9c2-4 6-3 5 0-.5 1.3-3 1-5 0z"/></svg>${lang==='ar'?'التوصيل مجاني ابتداءً من':'Livraison gratuite dès'}</span><strong>${SITE_FREE_SHIPPING_THRESHOLD}dh</strong></div>`:''}
+  ${SITE_FREE_SHIPPING_ENABLED?`<div><span><svg class="lx-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9h18v4H3zM5 13v8h14v-8M12 9v12M12 9c-2-4-6-3-5 0 .5 1.3 3 1 5 0zM12 9c2-4 6-3 5 0-.5 1.3-3 1-5 0z"/></svg>${lang==='ar'?'التوصيل مجاني ابتداءً من':'Livraison gratuite dès'}</span><strong>${SITE_FREE_SHIPPING_THRESHOLD}dh</strong></div>`:''}`}
 </div></div>${isPyjama ? `<div class="lp-sticky-pyjama"><a class="lp-cta" href="#order" id="lp-sticky-order-cta">🛍 ${escHtml(cta || (lang==='ar'?'اطلبي الآن':'Commander maintenant'))}</a></div>` : ''}<footer class="lp-site-footer" id="lp-site-footer"><div class="footer-top"><span class="mark">${escHtml((typeof SITE_BRAND_NAME!=='undefined'&&SITE_BRAND_NAME)||'LUXIA')}</span><span class="footer-tagline">${lang==='ar'?'مجموعة فاخرة':'Luxury Collection'}</span><div class="footer-badges">${p.showWhatsapp&&wa?`<a class="wa-round footer-badge" href="${escAttr(wa)}" target="_blank" rel="noopener" aria-label="WhatsApp"><svg class="wa-logo" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="#fff" d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.14-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.62-.92-2.22-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.8.37-.27.3-1.04 1.02-1.04 2.48 0 1.46 1.07 2.88 1.22 3.08.15.2 2.1 3.2 5.08 4.49.71.31 1.26.49 1.69.63.71.23 1.36.2 1.87.12.57-.08 1.76-.72 2.01-1.41.25-.69.25-1.29.17-1.41-.07-.12-.27-.2-.57-.35z"/><path fill="#fff" d="M12.04 2C6.5 2 2 6.5 2 12.04c0 1.77.46 3.5 1.34 5.03L2 22l5.07-1.33a10 10 0 0 0 4.97 1.27h.01c5.54 0 10.04-4.5 10.04-10.04C22.09 6.5 17.58 2 12.04 2zm0 18.2h-.01a8.2 8.2 0 0 1-4.18-1.14l-.3-.18-3.01.79.8-2.93-.2-.31a8.17 8.17 0 0 1-1.26-4.4c0-4.53 3.69-8.22 8.23-8.22 2.2 0 4.26.86 5.81 2.41a8.15 8.15 0 0 1 2.4 5.82c0 4.54-3.69 8.23-8.28 8.16z"/></svg></a>`:''}<a class="footer-badge" href="https://www.instagram.com/luxia__shop?stkn=Y2U4Z2Z5ZnhyMTho" target="_blank" rel="noopener" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>Instagram</a><span class="footer-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M3 16V8a1 1 0 0 1 1-1h9v9H3Zm11-6h4l3 3v3h-7v-6Z"/></svg><span>${lang==='ar'?'التوصيل لجميع أنحاء المغرب':'Livraison partout au Maroc'}</span></span><span class="footer-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3" y="6" width="18" height="13" rx="2"/></svg><span>${lang==='ar'?'الدفع عند الاستلام':'Paiement à la livraison'}</span></span></div></div><div class="footer-bottom"><span>© 2026 ${escHtml((typeof SITE_BRAND_NAME!=='undefined'&&SITE_BRAND_NAME)||'LUXIA')} — ${lang==='ar'?'جميع الحقوق محفوظة':'Tous droits réservés'}</span></div></footer></main>`;
     /* Landing collection menu: uses the exact same collection source/order as the main store. */
     const lpMenu=document.getElementById('lp-collection-drawer');
@@ -17857,14 +17892,16 @@ ${sizesSectionHTML}
       { const fh=document.getElementById('lp-cart-form-host'); if(fh) fh.style.display=items.length?'':'none'; }
       if(live)live.innerHTML=items.join('')||`<div class="lp-cart-empty">${lang==='ar'?'السلة فارغة':'Votre panier est vide'}</div>`;
       if(live&&items.length){
-        const cartDeliveryLabel = lpDeliveryType==='casa'
+        const cartDeliveryLabel = lxShipIsFree()
+          ? (lang==='ar'?'توصيل مجاني':'Livraison gratuite')
+          : lpDeliveryType==='casa'
           ? (lang==='ar'?'التوصيل إلى الدار البيضاء':'Livraison à Casablanca')
           : lpDeliveryType==='other'
             ? (lang==='ar'?'التوصيل':'Livraison')
             : (lang==='ar'?'التوصيل حسب المدينة':'Livraison selon la ville');
-        const cartDeliveryValue = lpDeliveryFee ? `+${lpDeliveryFee} DH` : (lpDeliveryType?(lang==='ar'?'مجاني':'gratuit'):'—');
+        const cartDeliveryValue = lpDeliveryFee ? `+${lpDeliveryFee} DH` : ((lpDeliveryType||lxShipIsFree())?(lang==='ar'?'مجاني':'gratuit'):'—');
         const cartFinalTotal = cartTotalNow + lpDeliveryFee;
-        const cartDeliveryRowHTML = lpDeliveryType
+        const cartDeliveryRowHTML = (lpDeliveryType||lxShipIsFree())
           ? `<div class="row" style="display:flex;justify-content:space-between;gap:12px;padding:8px 4px;"><span>${cartDeliveryLabel}</span><strong>${cartDeliveryValue}</strong></div>`
           : `<div class="lp-shipping-info" style="margin:8px 4px 0;">
               <div><span><svg class="lx-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 6h11v10H2zM13 9h4l3 3v4h-7"/><circle cx="7" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/></svg>${lang==='ar'?'التوصيل إلى الدار البيضاء':'Livraison à Casablanca'}</span><strong>${SITE_SHIPPING_CASA} DH · ${lang==='ar'?'خلال 24 ساعة':'dans 24h'}</strong></div>
@@ -17875,7 +17912,7 @@ ${sizesSectionHTML}
         live.innerHTML+=`<div class="lp-cart-total" style="border-top:1px solid #e4ded5;padding-top:12px;margin-top:14px;"><span>Total de la commande</span><strong>${cartTotalNow} DH</strong></div>
           ${cartDeliveryRowHTML}
           <div class="lp-cart-total" style="margin-top:4px;"><span>Sous-total</span><strong>${cartFinalTotal} DH</strong></div>
-          ${lpDeliveryType?`<p style="margin:8px 0 0;color:#7a736b;font-size:10.5px;line-height:1.45;">${lang==='ar'?'مصاريف التوصيل محسوبة حسب المدينة المختارة.':'Les frais de livraison sont calculés selon la ville choisie.'}</p>`:''}`;
+          ${(lpDeliveryType&&!lxShipIsFree())?`<p style="margin:8px 0 0;color:#7a736b;font-size:10.5px;line-height:1.45;">${lang==='ar'?'مصاريف التوصيل محسوبة حسب المدينة المختارة.':'Les frais de livraison sont calculés selon la ville choisie.'}</p>`:''}`;
       }
       const lpLiveCount=mainCartItems.length+xCartCount()+(p2Added?1:0);
       if(count)count.textContent=String(lpLiveCount);
@@ -18275,8 +18312,8 @@ document.getElementById('lp-cart-drawer')?.addEventListener('click',e=>{if(e.tar
         const deliveryLabel=box.querySelector('#lp-summary-delivery-label');
         const deliveryFee=box.querySelector('#lp-summary-delivery-fee');
         const finalTotal=box.querySelector('#lp-summary-final-total');
-        if(deliveryLabel) deliveryLabel.textContent=lpDeliveryType==='casa'?(lang==='ar'?'التوصيل إلى الدار البيضاء':'Livraison à Casablanca'):(lang==='ar'?'التوصيل':'Livraison');
-        if(deliveryFee) deliveryFee.textContent=lpDeliveryFee?`+${lpDeliveryFee} DH`:(lpDeliveryType?(lang==='ar'?'مجاني':'gratuit'):'—');
+        if(deliveryLabel) deliveryLabel.textContent=lxShipIsFree()?(lang==='ar'?'توصيل مجاني':'Livraison gratuite'):lpDeliveryType==='casa'?(lang==='ar'?'التوصيل إلى الدار البيضاء':'Livraison à Casablanca'):(lang==='ar'?'التوصيل':'Livraison');
+        if(deliveryFee) deliveryFee.textContent=lpDeliveryFee?`+${lpDeliveryFee} DH`:((lpDeliveryType||lxShipIsFree())?(lang==='ar'?'مجاني':'gratuit'):'—');
         if(finalTotal) finalTotal.textContent=(total+lpDeliveryFee)+' DH';
       }
       if(document.getElementById('lp-cart-drawer')?.classList.contains('open')) refreshCartUI();
@@ -18288,7 +18325,7 @@ document.getElementById('lp-cart-drawer')?.addEventListener('click',e=>{if(e.tar
         const deliveryLabel=box.querySelector('#lp-summary-delivery-label');
         const deliveryFee=box.querySelector('#lp-summary-delivery-fee');
         const finalTotal=box.querySelector('#lp-summary-final-total');
-        if(deliveryLabel) deliveryLabel.textContent=lang==='ar'?'التوصيل':'Livraison';
+        if(deliveryLabel) deliveryLabel.textContent=lxShipIsFree()?(lang==='ar'?'توصيل مجاني':'Livraison gratuite'):(lang==='ar'?'التوصيل':'Livraison');
         if(deliveryFee) deliveryFee.textContent=lpDeliveryFee?`+${lpDeliveryFee} DH`:(lang==='ar'?'مجاني':'gratuit');
         if(finalTotal) finalTotal.textContent=(total+lpDeliveryFee)+' DH';
       }
@@ -18311,8 +18348,8 @@ document.getElementById('lp-cart-drawer')?.addEventListener('click',e=>{if(e.tar
       const q=pd.qtyOk?Math.min(lpQty(ns),mx):1; if(pd.qtyOk) window.__lpQty[ns]=q;
       const inCart=lpCartTotalNow(), sub=inCart+pd.unit*q;
       const fee=lpDeliveryType?getShippingFee(lpDeliveryType,sub):0;
-      const dLabel=lpDeliveryType==='casa'?(ar?'التوصيل إلى الدار البيضاء':'Livraison à Casablanca'):(lpDeliveryType==='other'?(ar?'التوصيل':'Livraison'):(ar?'التوصيل حسب المدينة':'Livraison selon la ville'));
-      const dVal=lpDeliveryType?(fee?`+${fee} DH`:(ar?'مجاني':'gratuit')):'—';
+      const dLabel=lxShipIsFree()?(ar?'توصيل مجاني':'Livraison gratuite'):lpDeliveryType==='casa'?(ar?'التوصيل إلى الدار البيضاء':'Livraison à Casablanca'):(lpDeliveryType==='other'?(ar?'التوصيل':'Livraison'):(ar?'التوصيل حسب المدينة':'Livraison selon la ville'));
+      const dVal=(lpDeliveryType||lxShipIsFree())?(fee?`+${fee} DH`:(ar?'مجاني':'gratuit')):'—';
       const packTxt=pd.pack?((pd.packLabel||('Pack'+(pd.packPieces?' · '+pd.packPieces+' '+(ar?'قطع':'pièces'):'')))+(q>1?' ×'+q:'')):'';
       const det=pd.det?escHtml(pd.det):[pd.pack?packTxt:(q+' '+(ar?'قطعة':'pièce')),pd.colorText,pd.size].filter(Boolean).map(escHtml).join(' · ');
       const qtyHTML=pd.qtyOk?`<div class="lp-q-row"><span>${ar?'الكمية':'Quantité'}</span><div class="lp-q-ctl" dir="ltr"><button type="button" data-lp-q="-1" data-lp-ns="${ns}" aria-label="-">−</button><b>${q}</b><button type="button" data-lp-q="1" data-lp-ns="${ns}" aria-label="+">+</button></div></div>`:'';
